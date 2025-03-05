@@ -1,6 +1,6 @@
-# take_a_bite
+# Take-a-Bite
 
-A new Flutter project.
+A Cookbook Android app made with Flutter using php as a backend.
 
 ## Getting Started
 
