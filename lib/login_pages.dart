@@ -245,7 +245,7 @@ class _CreateUserPassState extends State<CreateUserPass> {
                         onPressed: () => {
                           if (formKey.currentState!.validate()) {
                             // TODO: Traverse to main app if account creation is successful
-                            // Navigator.pushNamed(context, '/CreateUserPass')
+                            Navigator.pushNamed(context, '/Nav')
                           }
                         },
                         child: const Text("Sign up"),
@@ -262,6 +262,7 @@ class _CreateUserPassState extends State<CreateUserPass> {
   }
 }
 
+// Page for logging into existing account
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -361,7 +362,7 @@ class _LoginPageState extends State<LoginPage> {
                     onPressed: () => {
                       if (formKey.currentState!.validate()) {
                         // TODO: Traverse to main app if account login is successful
-                        // Navigator.pushNamed(context, '/CreateUserPass')
+                        Navigator.pushNamed(context, '/Nav')
                       }
                     },
                     child: const Text("Sign in"),
