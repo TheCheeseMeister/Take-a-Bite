@@ -18,89 +18,92 @@ class _CreateAccountState extends State<CreateAccount> {
       key: formKey,
       child: Scaffold(
         body: Center(
-          child: Column(
-            children: [
-              const Padding(
-                padding: EdgeInsets.fromLTRB(0, 160, 0, 0),
-                child: Text(
-                  "Take-a-Bite",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 42),
+          child: ListView(children: [
+            Column(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(0, 160, 0, 0),
+                  child: Text(
+                    "Take-a-Bite",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 42),
+                  ),
                 ),
-              ),
-              const Padding(
-                padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
-                child: Text(
-                  "Create an Account",
-                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
+                  child: Text(
+                    "Create an Account",
+                    style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+                  ),
                 ),
-              ),
-              const Padding(
-                padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
-                child: Text(
-                  "Enter your email to sign up for this app",
-                  style: TextStyle(fontSize: 14),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
+                  child: Text(
+                    "Enter your email to sign up for this app",
+                    style: TextStyle(fontSize: 14),
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 24, 0, 0),
-                child: SizedBox(
-                  width: 300,
-                  child: TextFormField(
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: "Email Address",
-                      labelStyle: TextStyle(fontSize: 14),
-                      contentPadding: EdgeInsets.fromLTRB(16, 0, 16, 0),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 24, 0, 0),
+                  child: SizedBox(
+                    width: 300,
+                    child: TextFormField(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: "Email Address",
+                        labelStyle: TextStyle(fontSize: 14),
+                        contentPadding: EdgeInsets.fromLTRB(16, 0, 16, 0),
+                      ),
+                      validator: (value) {
+                        // TODO: Email validator
+                        return (value == null || value.isEmpty)
+                            ? "Field can't be empty"
+                            : null;
+                      },
                     ),
-                    validator: (value) {
-                      // TODO: Email validator
-                      return (value == null || value.isEmpty)
-                          ? "Field can't be empty"
-                          : null;
-                    },
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
-                child: Container(
-                  width: 300,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(0),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
+                  child: Container(
+                    width: 300,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(0),
+                    ),
+                    child: TextButton(
+                      style: const ButtonStyle(
+                        foregroundColor: WidgetStatePropertyAll(
+                            Color.fromARGB(255, 255, 255, 255)),
+                        backgroundColor: WidgetStatePropertyAll(
+                            Color.fromARGB(255, 0, 0, 0)),
+                        shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(8)))),
+                      ),
+                      onPressed: () => {
+                        if (formKey.currentState!.validate())
+                          {Navigator.pushNamed(context, '/CreateUserPass')}
+                      },
+                      child: const Text("Continue"),
+                    ),
                   ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 0, 225, 0),
                   child: TextButton(
-                    style: const ButtonStyle(
-                      foregroundColor: WidgetStatePropertyAll(
-                          Color.fromARGB(255, 255, 255, 255)),
-                      backgroundColor:
-                          WidgetStatePropertyAll(Color.fromARGB(255, 0, 0, 0)),
-                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(8)))),
-                    ),
-                    onPressed: () => {
-                      if (formKey.currentState!.validate())
-                        {Navigator.pushNamed(context, '/CreateUserPass')}
-                    },
-                    child: const Text("Continue"),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 225, 0),
-                child: TextButton(
-                  onPressed: () => {Navigator.pushNamed(context, '/Login')},
-                  child: const Text(
-                    "Signing in?",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontStyle: FontStyle.italic,
-                      color: Color.fromRGBO(33, 148, 255, 1),
+                    onPressed: () => {Navigator.pushNamed(context, '/Login')},
+                    child: const Text(
+                      "Signing in?",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontStyle: FontStyle.italic,
+                        color: Color.fromRGBO(33, 148, 255, 1),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ]),
         ),
       ),
     );
@@ -126,18 +129,16 @@ class _CreateUserPassState extends State<CreateUserPass> {
     return Form(
       key: formKey,
       child: Scaffold(
-        body: Center(
-          child: Stack(
-            children: [
+        body: ListView(children: [
+          Center(
+            child: Stack(children: [
               Positioned(
                 top: 36,
                 left: 0,
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back),
                   iconSize: 42,
-                  onPressed: () => {
-                    Navigator.pushNamed(context, '/')
-                  },
+                  onPressed: () => {Navigator.pushNamed(context, '/')},
                 ),
               ),
               Column(
@@ -146,14 +147,16 @@ class _CreateUserPassState extends State<CreateUserPass> {
                     padding: EdgeInsets.fromLTRB(0, 160, 0, 0),
                     child: Text(
                       "Take-a-Bite",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 42),
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 42),
                     ),
                   ),
                   const Padding(
                     padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
                     child: Text(
                       "Create a Username and Password",
-                      style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+                      style:
+                          TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
                     ),
                   ),
                   const Padding(
@@ -243,10 +246,11 @@ class _CreateUserPassState extends State<CreateUserPass> {
                                   BorderRadius.all(Radius.circular(8)))),
                         ),
                         onPressed: () => {
-                          if (formKey.currentState!.validate()) {
-                            // TODO: Traverse to main app if account creation is successful
-                            Navigator.pushNamed(context, '/Nav')
-                          }
+                          if (formKey.currentState!.validate())
+                            {
+                              // TODO: Traverse to main app if account creation is successful
+                              Navigator.pushNamed(context, '/Nav')
+                            }
                         },
                         child: const Text("Sign up"),
                       ),
@@ -254,9 +258,9 @@ class _CreateUserPassState extends State<CreateUserPass> {
                   ),
                 ],
               ),
-            ]
+            ]),
           ),
-        ),
+        ]),
       ),
     );
   }
@@ -280,111 +284,115 @@ class _LoginPageState extends State<LoginPage> {
       key: formKey,
       child: Scaffold(
         body: Center(
-          child: Column(
-            children: [
-              const Padding(
-                padding: EdgeInsets.fromLTRB(0, 160, 0, 0),
-                child: Text(
-                  "Take-a-Bite",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 42),
+          child: ListView(children: [
+            Column(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(0, 160, 0, 0),
+                  child: Text(
+                    "Take-a-Bite",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 42),
+                  ),
                 ),
-              ),
-              const Padding(
-                padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
-                child: Text(
-                  "Sign in",
-                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
+                  child: Text(
+                    "Sign in",
+                    style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+                  ),
                 ),
-              ),
-              const Padding(
-                padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
-                child: Text(
-                  "Enter a Username and Password to login",
-                  style: TextStyle(fontSize: 14),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
+                  child: Text(
+                    "Enter a Username and Password to login",
+                    style: TextStyle(fontSize: 14),
+                  ),
                 ),
-              ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(0, 24, 0, 0),
-                child: SizedBox(
-                  width: 300,
-                  child: TextFormField(
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: "Username",
-                      labelStyle: TextStyle(fontSize: 14),
-                      contentPadding: EdgeInsets.fromLTRB(16, 0, 16, 0),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(0, 24, 0, 0),
+                  child: SizedBox(
+                    width: 300,
+                    child: TextFormField(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: "Username",
+                        labelStyle: TextStyle(fontSize: 14),
+                        contentPadding: EdgeInsets.fromLTRB(16, 0, 16, 0),
+                      ),
+                      validator: (value) {
+                        // TODO: Username conditions for validating
+                        return (value == null || value.isEmpty)
+                            ? "Passwords must match"
+                            : null;
+                      },
                     ),
-                    validator:(value) {
-                      // TODO: Username conditions for validating
-                      return (value == null || value.isEmpty)
-                        ? "Passwords must match"
-                        : null;
-                    },
                   ),
                 ),
-              ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(0, 12, 0, 0),
-                child: SizedBox(
-                  width: 300,
-                  child: TextFormField(
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: "Password",
-                      labelStyle: TextStyle(fontSize: 14),
-                      contentPadding: EdgeInsets.fromLTRB(16, 0, 16, 0),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(0, 12, 0, 0),
+                  child: SizedBox(
+                    width: 300,
+                    child: TextFormField(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: "Password",
+                        labelStyle: TextStyle(fontSize: 14),
+                        contentPadding: EdgeInsets.fromLTRB(16, 0, 16, 0),
+                      ),
+                      validator: (value) {
+                        // TODO: Password conditions for validating
+                        return (value == null || value.isEmpty)
+                            ? "Passwords must match"
+                            : null;
+                      },
                     ),
-                    validator:(value) {
-                      // TODO: Password conditions for validating
-                      return (value == null || value.isEmpty)
-                        ? "Passwords must match"
-                        : null;
-                    },
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
-                child: Container(
-                  width: 300,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(0),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
+                  child: Container(
+                    width: 300,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(0),
+                    ),
+                    child: TextButton(
+                      style: const ButtonStyle(
+                        foregroundColor: WidgetStatePropertyAll(
+                            Color.fromARGB(255, 255, 255, 255)),
+                        backgroundColor: WidgetStatePropertyAll(
+                            Color.fromARGB(255, 0, 0, 0)),
+                        shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(8)))),
+                      ),
+                      onPressed: () => {
+                        if (formKey.currentState!.validate())
+                          {
+                            // TODO: Traverse to main app if account login is successful
+                            Navigator.pushNamed(context, '/Nav')
+                          }
+                      },
+                      child: const Text("Sign in"),
+                    ),
                   ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 0, 150, 0),
                   child: TextButton(
-                    style: const ButtonStyle(
-                      foregroundColor: WidgetStatePropertyAll(
-                          Color.fromARGB(255, 255, 255, 255)),
-                      backgroundColor:
-                          WidgetStatePropertyAll(Color.fromARGB(255, 0, 0, 0)),
-                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(8)))),
-                    ),
-                    onPressed: () => {
-                      if (formKey.currentState!.validate()) {
-                        // TODO: Traverse to main app if account login is successful
-                        Navigator.pushNamed(context, '/Nav')
-                      }
-                    },
-                    child: const Text("Sign in"),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 150, 0),
-                child: TextButton(
-                  onPressed: () => {Navigator.pushNamed(context, '/')},
-                  child: const Text(
-                    "Don't have an account?",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontStyle: FontStyle.italic,
-                      color: Color.fromRGBO(33, 148, 255, 1),
+                    onPressed: () => {Navigator.pushNamed(context, '/')},
+                    child: const Text(
+                      "Don't have an account?",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontStyle: FontStyle.italic,
+                        color: Color.fromRGBO(33, 148, 255, 1),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ]),
         ),
       ),
     );
