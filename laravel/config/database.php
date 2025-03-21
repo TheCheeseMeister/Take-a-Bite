@@ -45,8 +45,9 @@ return [
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),
-            'host' => env('DB_HOST', '3.93.61.3'),
-            'port' => env('DB_PORT', '80'),
+            //'host' => env('DB_HOST', '127.0.0.1'),
+            'host' => '127.0.0.1',
+            'port' => env('DB_PORT', '3306'),
             'database' => env('DB_DATABASE', 'Senior_Project'),
             'username' => env('DB_USERNAME', 'root'),
             'password' => env('DB_PASSWORD', 'seniorprojectspring2025'),
@@ -100,7 +101,7 @@ return [
         'sqlsrv' => [
             'driver' => 'sqlsrv',
             'url' => env('DB_URL'),
-            'host' => env('DB_HOST', 'localhost'),
+            'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '1433'),
             'database' => env('DB_DATABASE', 'laravel'),
             'username' => env('DB_USERNAME', 'root'),
