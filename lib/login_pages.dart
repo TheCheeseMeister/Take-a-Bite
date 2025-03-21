@@ -81,7 +81,7 @@ class _CreateAccountState extends State<CreateAccount> {
                       ),
                       onPressed: () => {
                         if (formKey.currentState!.validate())
-                          {Navigator.pushNamed(context, '/CreateUserPass')}
+                        {Navigator.pushNamed(context, '/CreateUserPass')}
                       },
                       child: const Text("Continue"),
                     ),
@@ -138,7 +138,8 @@ class _CreateUserPassState extends State<CreateUserPass> {
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back),
                   iconSize: 42,
-                  onPressed: () => {Navigator.pushNamed(context, '/')},
+                  onPressed: () =>
+                      {Navigator.pushNamed(context, '/')},
                 ),
               ),
               Column(
