@@ -13,7 +13,10 @@ class Profile extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(0, 56, 0, 0),
               child: ProfileHead(),
             ),
-            ProfileDescription(),
+            Padding(
+              padding: EdgeInsets.fromLTRB(0, 16, 0, 0),
+              child: ProfileDescription(),
+            ),
           ],
         ),
       ),
@@ -81,8 +84,12 @@ class ProfileDescription extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Text(
-      "Hello\nMyName"
+    return Container(
+      constraints: const BoxConstraints(minWidth: 250, maxWidth: 250),
+      child: const Text(
+        "Cooking Legend.\nSeeking cheese recipes night and day.\n#CheeseLovers25",
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
     );
   }
 }

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
+import './recipe.dart';
 
+// TODO: make StatefulWidget to allow setting of values
 class Search extends StatelessWidget {
   const Search({super.key});
 
@@ -27,9 +28,12 @@ class Search extends StatelessWidget {
 class RecipeCard extends StatelessWidget {
   const RecipeCard({super.key});
 
-  // Both normally not hard-coded, but for sake of placeholder
+  // Normally loaded from database, but for sake of placeholder
   final String title = "How to make a pizza in 10 minutes";
   final Image image = const Image(image: AssetImage('lib/imgs/pizza.jpg'));
+  final int prepTime = 10;
+  final int cookTime = 10;
+  final String servingSize = "4 - 5 people";
 
   @override
   Widget build(BuildContext context) {
@@ -39,14 +43,14 @@ class RecipeCard extends StatelessWidget {
         onTap: () => PersistentNavBarNavigator.pushNewScreenWithRouteSettings(
           context,
           settings: const RouteSettings(),
-          screen: RecipePage(image: image, title: title),
+          screen: RecipePage(image: image, title: title, prepTime: prepTime, cookTime: cookTime, servingSize: servingSize),
           withNavBar: true,
           pageTransitionAnimation: PageTransitionAnimation.fade,
         ),
-        child: const Card(
+        child: Card(
           child: Column(
             children: [
-              ClipRRect(
+              const ClipRRect(
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(8.0),
                     topRight: Radius.circular(8.0),
@@ -55,41 +59,24 @@ class RecipeCard extends StatelessWidget {
                       tag: 'recipe-image',
                       child: Image(image: AssetImage('lib/imgs/pizza.jpg')))),
               ListTile(
-                title: Hero(
+                title: const Hero(
                   tag: 'recipe-title',
                   child: Material(
                     type: MaterialType.transparency,
-                    child: Text("How to make a pizza in 10 minutes")
+                    child: Text(
+                      "How to make a pizza in 10 minutes",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      )
+                    )
                   ),
                 ),
-                subtitle: Text("15 mins | 4 - 5 people"),
+                subtitle: Text("$cookTime mins | $servingSize") //Text("15 mins | 4 - 5 people"),
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class RecipePage extends StatelessWidget {
-  const RecipePage({super.key, required this.image, required this.title});
-
-  final Image image;
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    timeDilation = 0.5;
-    return Scaffold(
-      body: Column(
-        children: [
-          Hero(
-            tag: 'recipe-image',
-            child: image,
-          ),
-          Text(title),
-        ],
       ),
     );
   }
