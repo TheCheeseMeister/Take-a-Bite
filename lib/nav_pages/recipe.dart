@@ -9,6 +9,7 @@ class RecipePage extends StatelessWidget {
     required this.prepTime,
     required this.cookTime,
     required this.servingSize,
+    required this.index,
   });
 
   // Info passed from Recipe Card
@@ -17,6 +18,7 @@ class RecipePage extends StatelessWidget {
   final int prepTime;
   final int cookTime;
   final String servingSize;
+  final int index; // For hero
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +27,7 @@ class RecipePage extends StatelessWidget {
       body: Column(
         children: [
           Hero(
-            tag: 'recipe-image',
+            tag: 'recipe-$index',
             child: image,
           ),
           Padding(

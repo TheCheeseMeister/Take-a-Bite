@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
+import 'package:take_a_bite/nav_pages/recipe.dart';
 
 class Profile extends StatelessWidget {
   const Profile({super.key});
@@ -138,19 +140,17 @@ class _RecipeListState extends State<RecipeList> {
             ],
           ),
           SizedBox(
-            height: 363, // Maybe find some way to be dynamic? Can't not have set height or TabBarView doesn't display.
+            height:
+                363, // Maybe find some way to be dynamic? Can't not have set height or TabBarView doesn't display.
             child: TabBarView(
               children: [
                 // First tab: Created Recipes
                 GridView.count(
+                  childAspectRatio: 1,
                   shrinkWrap: true,
                   crossAxisCount: 3,
                   children: List.generate(200, (index) {
-                    return Center(
-                      child: Text(
-                        'Item $index',
-                      ),
-                    );
+                    return ProfileRecipe(index: index);
                   }),
                 ),
                 // Second tab: Saved Recipes
@@ -169,6 +169,72 @@ class _RecipeListState extends State<RecipeList> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// Created/Saved Recipes
+class ProfileRecipe extends StatelessWidget {
+  const ProfileRecipe({super.key, required this.index});
+
+  // Contains same info as Recipe Cards from Search Page (will have description and recipe creator)
+  final String title = "How to make a pizza in 10 minutes";
+  final Image image = const Image(image: AssetImage('lib/imgs/pizza.jpg'));
+  final int prepTime = 10;
+  final int cookTime = 10;
+  final String servingSize = "4 - 5 people";
+  final index;
+
+  @override
+  Widget build(BuildContext context) {
+    return FractionallySizedBox(
+      widthFactor: 0.9,
+      child: InkWell(
+        onTap: () => PersistentNavBarNavigator.pushNewScreenWithRouteSettings(
+          context,
+          settings: const RouteSettings(),
+          screen: RecipePage(
+              image: image,
+              title: title,
+              prepTime: prepTime,
+              cookTime: cookTime,
+              servingSize: servingSize,
+              index: index),
+          withNavBar: true,
+          pageTransitionAnimation: PageTransitionAnimation.fade,
+        ),
+        child: Column(
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(8.0),
+                topRight: Radius.circular(8.0),
+                bottomLeft: Radius.circular(8.0),
+                bottomRight: Radius.circular(8.0),
+              ),
+              // Might have to change depending on picture used for recipe, but works for now.
+              child: Hero(
+                tag: "recipe-$index",
+                child: image,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0,4,0,0),
+              child: FractionallySizedBox(
+                widthFactor: 0.95,
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 11,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

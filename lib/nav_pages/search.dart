@@ -35,6 +35,7 @@ class RecipeCard extends StatelessWidget {
   final int prepTime = 10;
   final int cookTime = 10;
   final String servingSize = "4 - 5 people";
+  final int index = 0; // Eventually will be put in a list, this will be its position
 
   @override
   Widget build(BuildContext context) {
@@ -44,37 +45,39 @@ class RecipeCard extends StatelessWidget {
         onTap: () => PersistentNavBarNavigator.pushNewScreenWithRouteSettings(
           context,
           settings: const RouteSettings(),
-          screen: RecipePage(image: image, title: title, prepTime: prepTime, cookTime: cookTime, servingSize: servingSize),
+          screen: RecipePage(
+              image: image,
+              title: title,
+              prepTime: prepTime,
+              cookTime: cookTime,
+              servingSize: servingSize,
+              index: index),
           withNavBar: true,
           pageTransitionAnimation: PageTransitionAnimation.fade,
         ),
         child: Card(
           child: Column(
             children: [
-              const ClipRRect(
-                  borderRadius: BorderRadius.only(
+              ClipRRect(
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(8.0),
                     topRight: Radius.circular(8.0),
                   ),
-                  child: Hero(
-                      tag: 'recipe-image',
-                      child: Image(image: AssetImage('lib/imgs/pizza.jpg')))),
+                  child: Hero(tag: 'recipe-$index', child: image)),
               ListTile(
-                title: const Hero(
-                  tag: 'recipe-title',
-                  child: Material(
-                    type: MaterialType.transparency,
-                    child: Text(
-                      "How to make a pizza in 10 minutes",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                      )
-                    )
+                  title: const Hero(
+                    tag: 'recipe-title',
+                    child: Material(
+                        type: MaterialType.transparency,
+                        child: Text("How to make a pizza in 10 minutes",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                            ))),
                   ),
-                ),
-                subtitle: Text("$cookTime mins | $servingSize") //Text("15 mins | 4 - 5 people"),
-              ),
+                  subtitle: Text(
+                      "$cookTime mins | $servingSize") //Text("15 mins | 4 - 5 people"),
+                  ),
             ],
           ),
         ),
