@@ -72,7 +72,11 @@ class RecipePage extends StatelessWidget {
               ),
             ),
           ),
+          // This is where ingredients list goes
           RecipeStats(prepTime: prepTime, cookTime: cookTime, servingSize: servingSize),
+          // Description / instructions
+          // Poster's profile (i.e. Made by CheeseMaster) / Likes? Or maybe Likes higher
+          // Comments (can go to poster's profile from comment)
         ],
       ),
     );

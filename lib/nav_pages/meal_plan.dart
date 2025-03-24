@@ -5,8 +5,35 @@ class MealPlan extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text("Meal Plan Page")),
+    return
+        //body: Center(child: Text("Meal Plan Page")),
+        DefaultTabController(
+      length: 2,
+      initialIndex: 0,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const TabBar( // bottom moves it lower
+            tabs: [
+              // Represents week planner
+              Padding(
+                padding: EdgeInsets.fromLTRB(0, 16, 0, 16),
+                child: Icon(Icons.shopping_cart),
+              ),
+              // Represents ingredient list
+              Padding(
+                padding: EdgeInsets.fromLTRB(0, 16, 0, 16),
+                child: Icon(Icons.egg),
+              ),
+            ],
+          ),
+        ),
+        body: const TabBarView(
+          children: [
+            Text("Shopping List"),
+            Text("Ingredients List"),
+          ],
+        ),
+      ),
     );
   }
 }

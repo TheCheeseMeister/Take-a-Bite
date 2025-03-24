@@ -14,9 +14,10 @@ class Search extends StatelessWidget {
           children: [
             Padding(
               padding: EdgeInsets.fromLTRB(0, 48, 0, 0),
+              // Would-be search bar
               child: Text("Search/Home Page (this would be search bar)"),
             ),
-            RecipeCard(),
+            RecipeCard(), // Should be list of RecipeCards that match result (0 or more)
           ],
         ),
       ),
