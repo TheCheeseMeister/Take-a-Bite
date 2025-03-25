@@ -12,7 +12,7 @@ class MealPlan extends StatelessWidget {
       initialIndex: 0,
       child: Scaffold(
         appBar: AppBar(
-          title: const TabBar( // bottom moves it lower
+          bottom: const TabBar( // title moves it higher, bottom looks neater
             tabs: [
               // Represents week planner
               Padding(
