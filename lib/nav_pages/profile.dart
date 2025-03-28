@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
+import 'package:take_a_bite/nav_pages/fake_instruct.dart';
 import 'package:take_a_bite/nav_pages/recipe.dart';
 
 class Profile extends StatelessWidget {
@@ -176,7 +177,7 @@ class _RecipeListState extends State<RecipeList> {
 
 // Created/Saved Recipes
 class ProfileRecipe extends StatelessWidget {
-  const ProfileRecipe({super.key, required this.index});
+  ProfileRecipe({super.key, required this.index});
 
   // Contains same info as Recipe Cards from Search Page (will have description and recipe creator)
   final String title = "How to make a pizza in 10 minutes";
@@ -184,7 +185,8 @@ class ProfileRecipe extends StatelessWidget {
   final int prepTime = 10;
   final int cookTime = 10;
   final String servingSize = "4 - 5 people";
-  final index;
+  final int index;
+  String description = fakeInstructions();
 
   @override
   Widget build(BuildContext context) {
@@ -200,6 +202,7 @@ class ProfileRecipe extends StatelessWidget {
               prepTime: prepTime,
               cookTime: cookTime,
               servingSize: servingSize,
+              instructions: description,
               index: index),
           withNavBar: true,
           pageTransitionAnimation: PageTransitionAnimation.fade,
