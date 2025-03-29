@@ -41,7 +41,6 @@ class Connector
         ];
 
         try {
-            print($dsn);
             return $this->createPdoConnection(
                 $dsn, $username, $password, $options
             );
