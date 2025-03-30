@@ -22,7 +22,8 @@ class AuthenticationController extends Controller
         ];
 
         $user = User::create($userData);
-        $user->createToken('Senior_Project')->plainTextToken;
+        $tokenResult = $user->createToken('TakeABite');
+        $token = $tokenResult->accessToken;
 
         return response([
             'user' => $user,
@@ -35,11 +36,19 @@ class AuthenticationController extends Controller
 
         $user = User::whereUsername($request->username)->first();
 
-        if(!$user || Hash::check($request->password, $user->password)){
+        if(!$user || !Hash::check($request->password, $user->password)){
             return response([
                 'message' => 'Invalid credentials'
             ], 422);
         }
+        
+        $tokenResult = $user->createToken('TakeABite');
+        $token = $tokenResult->accessToken;
 
+
+        return response([
+            'user' => $user,
+            'token' => $token
+        ], 200);
     }
 }
