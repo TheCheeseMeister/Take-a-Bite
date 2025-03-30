@@ -17,16 +17,32 @@ class NavBar extends StatefulWidget {
 class _NavBarState extends State<NavBar> {
   final PersistentTabController _controller = PersistentTabController(initialIndex: 0);
 
+  // Your profile info - passes your parameters to Profile
+  final String profileImage = "lib/imgs/cheeseprofile.PNG";
+  final String displayName = "CheeseLover";
+  final String username = "@CheeseBros";
+  final int followers = 0;
+  final int recipes = 0;
+  final String bio = "Cooking Legend.\nSeeking cheese recipes night and day.\n#CheeseLovers25";
+
+
   @override
   Widget build(BuildContext context) {
     return PersistentTabView(
       context,
       controller: _controller,
-      screens: const [
-        Search(),
-        MealPlan(),
-        Profile(),
-        Settings(),
+      screens: [
+        const Search(),
+        const MealPlan(),
+        Profile(
+          profileImage: profileImage,
+          displayName: displayName,
+          username: username,
+          followers: followers,
+          recipes: recipes,
+          bio: bio,
+        ),
+        const Settings(),
       ],
       items: [
         PersistentBottomNavBarItem(

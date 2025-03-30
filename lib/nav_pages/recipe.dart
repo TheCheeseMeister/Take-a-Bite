@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
+import 'package:take_a_bite/nav_pages/profile.dart';
 
 class RecipePage extends StatelessWidget {
   const RecipePage({
     super.key,
     required this.image,
     required this.title,
+    required this.ingredients,
     required this.prepTime,
     required this.cookTime,
     required this.servingSize,
@@ -16,6 +19,7 @@ class RecipePage extends StatelessWidget {
   // Info passed from Recipe Card
   final Image image;
   final String title;
+  final List<String> ingredients;
   final int prepTime;
   final int cookTime;
   final String servingSize;
@@ -78,11 +82,41 @@ class RecipePage extends StatelessWidget {
               ),
             ),
             // This is where ingredients list goes
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 24),
+              child: FractionallySizedBox(
+                widthFactor: 0.8,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black, width: 2),
+                  ),
+                  child: Column(
+                    children: ingredients.map((str) {
+                      return Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
+                        child: Text(
+                          str,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w400,
+                            fontSize: 14,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+            ),
             // Prep Time, Cook Time, Serving Size
-            RecipeStats(prepTime: prepTime, cookTime: cookTime, servingSize: servingSize),
+            RecipeStats(
+                prepTime: prepTime,
+                cookTime: cookTime,
+                servingSize: servingSize),
             // Description / instructions
             const Padding(
-              padding: EdgeInsets.fromLTRB(0,24,0,0),
+              padding: EdgeInsets.fromLTRB(0, 24, 0, 0),
               child: Divider(
                 height: 2,
                 indent: 40,
@@ -92,7 +126,7 @@ class RecipePage extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(0,24,0,0),
+              padding: const EdgeInsets.fromLTRB(0, 24, 0, 0),
               child: FractionallySizedBox(
                 widthFactor: 0.9,
                 child: Text(
@@ -105,7 +139,7 @@ class RecipePage extends StatelessWidget {
               ),
             ),
             const Padding(
-              padding: EdgeInsets.fromLTRB(0,24,0,24),
+              padding: EdgeInsets.fromLTRB(0, 24, 0, 24),
               child: Divider(
                 height: 2,
                 indent: 20,
@@ -115,11 +149,123 @@ class RecipePage extends StatelessWidget {
               ),
             ),
             // Poster's profile (i.e. Made by CheeseMaster) / Likes? Or maybe Likes higher
-            Text("Insert creator profile here"),
+            //Text("Insert creator profile here"),
+            const RecipeCreator(),
             // Comments (can go to poster's profile from comment)
+            const Padding(
+              padding: EdgeInsets.fromLTRB(0, 48, 0, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(20,0,0,0),
+                    child: Text(
+                      "Comments",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(0, 0, 0, 24),
+                    child: Divider(
+                      height: 2,
+                      indent: 20,
+                      endIndent: 20,
+                      thickness: 1,
+                      color: Color.fromARGB(255, 168, 168, 168),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
+    );
+  }
+}
+
+// Displays Recipe Creator and info, option to go to profile
+class RecipeCreator extends StatelessWidget {
+  const RecipeCreator({super.key});
+
+  final String profileImage = "lib/imgs/cheeseprofile.PNG";
+  final String displayName = "CheeseHater";
+  final String username = "@NoCheesers";
+  final int followers = 0;
+  final int recipes = 0;
+  final String bio = "Fake Cooker.\nSeeking cheese destruction all over.\n#CheeseHaters25";
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0, 0, 24, 0),
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                    blurRadius: 2,
+                    color: Color.fromARGB(255, 107, 107, 107),
+                    spreadRadius: 1)
+              ],
+            ),
+            child: InkWell(
+              onTap: () => PersistentNavBarNavigator.pushNewScreenWithRouteSettings(
+                context,
+                settings: const RouteSettings(),
+                screen: Profile(
+                  profileImage: profileImage,
+                  displayName: displayName,
+                  username: username,
+                  followers: followers,
+                  recipes: recipes,
+                  bio: bio,
+                ),
+                withNavBar: true,
+                pageTransitionAnimation: PageTransitionAnimation.fade,
+              ),
+              child: const Hero(
+                tag: 'profile-image',
+                child: CircleAvatar(
+                  radius: 40,
+                  backgroundImage: AssetImage('lib/imgs/cheeseprofile.PNG'),
+                ),
+              ),
+            ),
+          ),
+        ),
+        const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(
+            "Written by",
+            style: TextStyle(
+              fontWeight: FontWeight.w200,
+              fontSize: 12,
+            ),
+          ),
+          Text(
+            "CheeseLover",
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 20,
+            ),
+          ),
+          Text(
+            "@CheeseBros",
+            style: TextStyle(
+              fontWeight: FontWeight.w400,
+              fontSize: 14,
+            ),
+          ),
+        ]),
+      ],
     );
   }
 }

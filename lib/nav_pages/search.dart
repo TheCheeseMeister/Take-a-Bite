@@ -33,6 +33,7 @@ class RecipeCard extends StatelessWidget {
   // Normally loaded from database, but for sake of placeholder
   final String title = "How to make a pizza in 10 minutes";
   final Image image = const Image(image: AssetImage('lib/imgs/pizza.jpg'));
+  final List<String> ingredients = fakeIngredients();
   final int prepTime = 10;
   final int cookTime = 10;
   final String servingSize = "4 - 5 people";
@@ -50,6 +51,7 @@ class RecipeCard extends StatelessWidget {
           screen: RecipePage(
               image: image,
               title: title,
+              ingredients: ingredients,
               prepTime: prepTime,
               cookTime: cookTime,
               servingSize: servingSize,

@@ -4,23 +4,46 @@ import 'package:take_a_bite/nav_pages/fake_instruct.dart';
 import 'package:take_a_bite/nav_pages/recipe.dart';
 
 class Profile extends StatelessWidget {
-  const Profile({super.key});
+  const Profile({
+    super.key,
+    required this.profileImage,
+    required this.displayName,
+    required this.username,
+    required this.followers,
+    required this.recipes,
+    required this.bio,
+  });
+  
+  final String profileImage;
+  final String displayName;
+  final String username;
+  final int followers;
+  final int recipes;
+  final String bio;
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Center(
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.fromLTRB(0, 56, 0, 0),
-              child: ProfileHead(),
+              padding: const EdgeInsets.fromLTRB(0, 56, 0, 0),
+              child: ProfileHead(
+                profileImage: profileImage,
+                displayName: displayName,
+                username: username,
+                followers: followers,
+                recipes: recipes,
+              ),
             ),
             Padding(
-              padding: EdgeInsets.fromLTRB(0, 16, 0, 0),
-              child: ProfileDescription(),
+              padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
+              child: ProfileDescription(
+                bio: bio,
+              ),
             ),
-            Padding(
+            const Padding(
               padding: EdgeInsets.fromLTRB(0, 16, 0, 0),
               child: RecipeList(),
             ),
@@ -33,7 +56,20 @@ class Profile extends StatelessWidget {
 
 // Includes Profile Picture, Display Name, Username, Followers and Created Recipes
 class ProfileHead extends StatelessWidget {
-  const ProfileHead({super.key});
+  const ProfileHead({
+    super.key,
+    required this.profileImage,
+    required this.displayName,
+    required this.username,
+    required this.followers,
+    required this.recipes,
+  });
+  
+  final String profileImage;
+  final String displayName;
+  final String username;
+  final int followers;
+  final int recipes;
 
   @override
   Widget build(BuildContext context) {
@@ -51,30 +87,41 @@ class ProfileHead extends StatelessWidget {
                   spreadRadius: 1)
             ],
           ),
-          child: const CircleAvatar(
-            radius: 50,
-            backgroundImage: AssetImage('lib/imgs/cheeseprofile.PNG'),
+          child: Hero(
+            tag: 'profile-image',
+            child: CircleAvatar(
+              radius: 50,
+              //backgroundImage: AssetImage('lib/imgs/cheeseprofile.PNG'),
+              backgroundImage: AssetImage(profileImage),
+            ),
           ),
         ),
         const SizedBox(
           width: 20,
         ),
-        const Column(
+        Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("CheeseLover",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                )),
-            Text("@CheeseBros",
-                style: TextStyle(
-                  fontWeight: FontWeight.w300,
-                  fontSize: 14,
-                )),
             Text(
-              "0 Followers  0 Recipes",
-              style: TextStyle(
+              //"CheeseLover",
+              displayName,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              )
+            ),
+            Text(
+              //"@CheeseBros",
+              username,
+              style: const TextStyle(
+                fontWeight: FontWeight.w300,
+                fontSize: 14,
+              )
+            ),
+            Text(
+              //"0 Followers  0 Recipes",
+              "$followers Followers  $recipes Recipes",
+              style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
               ),
@@ -88,15 +135,21 @@ class ProfileHead extends StatelessWidget {
 
 // Description for profile
 class ProfileDescription extends StatelessWidget {
-  const ProfileDescription({super.key});
+  const ProfileDescription({
+    super.key,
+    required this.bio,
+  });
+
+  final String bio;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       constraints: const BoxConstraints(minWidth: 250, maxWidth: 250),
-      child: const Text(
-        "Cooking Legend.\nSeeking cheese recipes night and day.\n#CheeseLovers25",
-        style: TextStyle(fontWeight: FontWeight.bold),
+      child: Text(
+        //"Cooking Legend.\nSeeking cheese recipes night and day.\n#CheeseLovers25",
+        bio,
+        style: const TextStyle(fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -151,7 +204,7 @@ class _RecipeListState extends State<RecipeList> {
                   shrinkWrap: true,
                   crossAxisCount: 3,
                   children: List.generate(200, (index) {
-                    return ProfileRecipe(index: index);
+                    return ProfileRecipe(index: index+1); // index+1 so it doesn't play hero when going from recipe to profile
                   }),
                 ),
                 // Second tab: Saved Recipes
@@ -182,6 +235,7 @@ class ProfileRecipe extends StatelessWidget {
   // Contains same info as Recipe Cards from Search Page (will have description and recipe creator)
   final String title = "How to make a pizza in 10 minutes";
   final Image image = const Image(image: AssetImage('lib/imgs/pizza.jpg'));
+  final List<String> ingredients = fakeIngredients();
   final int prepTime = 10;
   final int cookTime = 10;
   final String servingSize = "4 - 5 people";
@@ -199,6 +253,7 @@ class ProfileRecipe extends StatelessWidget {
           screen: RecipePage(
               image: image,
               title: title,
+              ingredients: ingredients,
               prepTime: prepTime,
               cookTime: cookTime,
               servingSize: servingSize,

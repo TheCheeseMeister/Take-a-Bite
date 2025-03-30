@@ -11,3 +11,16 @@ String fakeInstructions() {
           Has it been long enough? Check on your pizza and see how it's doing. Doing this stuff at the time I said, like 2am, would be hectic at my house, only cuz I would wake all the cats and they start getting active. Idk at nighttime they like crowding me, like some follow the leader. It's cute and chill, except for it's 5 of them. So you can imagine 5 of them wanting to hang around either seeking food, walking in my way, or trying to get into things either left out on the counter, or just on the counter in general, or things I'm using currently. Oh and the garage too, they love to get lost in the garage. -_-' Case in point they are annoyingly awesome. Until you try to sleep.
           And that should be it! One nice nighttime pizza ready to go. It didn't take that long right? Hopefully it tastes as good as mine does 'cause oh boy do I smell it right now. Actually y'know what? I think I'll take it to bed with me. Yup, snug right next to me. Me and my pizza and me. Not weird I swear.''';
 }
+
+List<String> fakeIngredients() {
+  List<String> temp = [];
+
+  temp.add("\u2022 1 1/2 cups (355 ml) warm water (105-115 F)");
+  temp.add("\u2022 1 package (2 1/4 teaspoons) active dry yeast");
+  temp.add("\u2022 3 3/4 cups (490g) bread flour");
+  temp.add("\u2022 2 tablespoons extra virgin olive oil (omit if cooking pizza in a wood-fired pizza oven)");
+  temp.add("\u2022 2 teaspoons kosher salt");
+  temp.add("\u2022 1 teaspoon sugar");
+
+  return temp;
+}
