@@ -23,7 +23,7 @@ class AuthenticationController extends Controller
 
         $user = User::create($userData);
         $tokenResult = $user->createToken('TakeABite');
-        $token = $tokenResult->accessToken;
+        $token = $tokenResult->plainTextToken;
 
         return response([
             'user' => $user,
@@ -43,7 +43,7 @@ class AuthenticationController extends Controller
         }
         
         $tokenResult = $user->createToken('TakeABite');
-        $token = $tokenResult->accessToken;
+        $token = $tokenResult->plainTextToken;
 
 
         return response([
