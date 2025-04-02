@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:take_a_bite/nav_pages/create_recipe.dart';
 import 'package:take_a_bite/nav_pages/search.dart';
 import 'package:take_a_bite/nav_pages/meal_plan.dart';
 import 'package:take_a_bite/nav_pages/profile.dart';
@@ -34,6 +35,7 @@ class _NavBarState extends State<NavBar> {
       screens: [
         const Search(),
         const MealPlan(),
+        const CreateRecipe(),
         Profile(
           profileImage: profileImage,
           displayName: displayName,
@@ -55,6 +57,13 @@ class _NavBarState extends State<NavBar> {
         PersistentBottomNavBarItem(
           icon: const Icon(Icons.event_note),
           title: "Meal Plan",
+          routeAndNavigatorSettings: const RouteAndNavigatorSettings(
+            initialRoute: "/",
+          ),
+        ),
+        PersistentBottomNavBarItem(
+          icon: const Icon(Icons.add),
+          title: "Create Recipe",
           routeAndNavigatorSettings: const RouteAndNavigatorSettings(
             initialRoute: "/",
           ),

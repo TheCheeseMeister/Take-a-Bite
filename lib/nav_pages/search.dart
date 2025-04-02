@@ -16,7 +16,8 @@ class Search extends StatelessWidget {
             const Padding(
               padding: EdgeInsets.fromLTRB(0, 48, 0, 0),
               // Would-be search bar
-              child: Text("Search/Home Page (this would be search bar)"),
+              child: Text("Search bar not finished"),
+              //child: RecipeSearch(),
             ),
             RecipeCard(), // Should be list of RecipeCards that match result (0 or more)
           ],
@@ -25,6 +26,58 @@ class Search extends StatelessWidget {
     );
   }
 }
+
+// Search Bar
+/*class RecipeSearch extends StatefulWidget {
+  const RecipeSearch({super.key});
+
+  @override
+  State<RecipeSearch> createState() => _RecipeSearchState();
+}
+
+class _RecipeSearchState extends State<RecipeSearch> {
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        FocusScope.of(context).unfocus();
+      },
+      child: SearchAnchor(
+        /*viewOnChanged: (value) {
+          FocusScope.of(context).unfocus();
+        },*/
+        isFullScreen: false,
+        builder: (BuildContext context, SearchController controller) {
+          return SearchBar(
+            controller: controller,
+            onTap: () {
+              controller.openView();
+            },
+            onChanged: (_) {
+              controller.openView();
+            },
+            leading: const Icon(Icons.search),
+          );
+        },
+        suggestionsBuilder: (BuildContext context, SearchController controller) {
+          return List<ListTile>.generate(5, (int index) {
+            final String item = 'item $index';
+            return ListTile(
+              title: Text(item),
+              onTap: () {
+                setState(() {
+                  controller.closeView(item);
+                  //FocusManager.instance.primaryFocus?.unfocus();
+                  FocusScope.of(context).unfocus();
+                });
+              }
+            );
+          });
+        },
+      ),
+    );
+  }
+}*/
 
 // Recipe displayed on Search Page
 class RecipeCard extends StatelessWidget {
