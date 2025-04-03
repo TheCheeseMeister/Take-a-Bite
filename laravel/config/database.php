@@ -51,7 +51,7 @@ return [
             //'host' => '127.0.0.1',
             //'port' => env('DB_PORT', '22'),
             'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'Senior_Project'),
+            'database' => env('DB_DATABASE', 'laravel_test'),
             'username' => env('DB_USERNAME', 'root'),
             'password' => env('DB_PASSWORD', 'seniorprojectspring2025'),
             'unix_socket' => env('DB_SOCKET', ''),
