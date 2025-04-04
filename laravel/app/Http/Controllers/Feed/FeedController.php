@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\PostRequest;
 use App\Models\Feed;
 use App\Models\Like;
+use App\Models\Comment;
 
 class FeedController extends Controller
 {
@@ -64,25 +65,39 @@ class FeedController extends Controller
                 ],200);
             }
         
-
-        /*
-        if($feed->user_id == auth()->user()->id){
-            Like::where('id', '=',$feed_id)->delete();
-            return response([
-                'message'=> 'UnLiked'
-                ],200);
-        }
-        else{
-            Like::create([
-                'user_id' => auth()->id,
-                'feed_id' => $feed_id,
-            ]);
-            return response([
-                'message'=> 'Liked',
-                ],200);
-
-        }
-*/
+        
+       
     }
+
+    public function comment(Request $request, $feed_id)
+    {
+
+        $request->validate([
+            'body' => 'required'
+        ]);
+
+        $comment = Comment::create([
+            'user_id'=> auth()->id(),
+            'feed_id' => $feed_id,
+            'body' => $request->body
+        ]);
+
+        return response([
+
+            'message'=> 'success'
+            ],201);
+
+    }
+
+    public function getComments($feed_id)
+    {
+       # $comments = Comment::whereFeedID($feed_id)->latest()->get();
+        $comments = Comment::with('feed')->with('user')->where('id', "=", $feed_id)->latest()->get();
+
+        return response([
+            'comments' => $comments
+        ]);
+    }
+
 
 }

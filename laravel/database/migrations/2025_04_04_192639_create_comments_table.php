@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('feeds', function (Blueprint $table) {
+        Schema::create('comments', function (Blueprint $table) {
             $table->BigIncrements('id');
             $table->foreignId('user_id')->references('id')->on('users');
-            $table->text('content');    
+            $table->foreignId('feed_id')->references('id')->on('feeds');
+            $table->text(('body'));
             $table->timestamps();
         });
     }
@@ -24,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('feeds');
+        Schema::dropIfExists('comments');
     }
 };
