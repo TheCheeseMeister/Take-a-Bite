@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 // First page/Create Account
 class CreateAccount extends StatefulWidget {
   const CreateAccount({super.key});
@@ -81,7 +80,7 @@ class _CreateAccountState extends State<CreateAccount> {
                       ),
                       onPressed: () => {
                         if (formKey.currentState!.validate())
-                        {Navigator.pushNamed(context, '/CreateUserPass')}
+                          {Navigator.pushNamed(context, '/CreateUserPass')}
                       },
                       child: const Text("Continue"),
                     ),
@@ -138,8 +137,7 @@ class _CreateUserPassState extends State<CreateUserPass> {
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back),
                   iconSize: 42,
-                  onPressed: () =>
-                      {Navigator.pushNamed(context, '/')},
+                  onPressed: () => {Navigator.pushNamed(context, '/')},
                 ),
               ),
               Column(
@@ -323,7 +321,7 @@ class _LoginPageState extends State<LoginPage> {
                       validator: (value) {
                         // TODO: Username conditions for validating
                         return (value == null || value.isEmpty)
-                            ? "Passwords must match"
+                            ? "Username field can't be empty."
                             : null;
                       },
                     ),
@@ -343,7 +341,7 @@ class _LoginPageState extends State<LoginPage> {
                       validator: (value) {
                         // TODO: Password conditions for validating
                         return (value == null || value.isEmpty)
-                            ? "Passwords must match"
+                            ? "Password field can't be empty"
                             : null;
                       },
                     ),
@@ -381,8 +379,33 @@ class _LoginPageState extends State<LoginPage> {
                   padding: const EdgeInsets.fromLTRB(0, 0, 150, 0),
                   child: TextButton(
                     onPressed: () => {Navigator.pushNamed(context, '/')},
+                    style: TextButton.styleFrom(
+                      minimumSize: Size.zero,
+                      padding: EdgeInsets.fromLTRB(0, 8, 0, 8),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
                     child: const Text(
                       "Don't have an account?",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontStyle: FontStyle.italic,
+                        color: Color.fromRGBO(33, 148, 255, 1),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 0, 150, 0),
+                  child: TextButton(
+                    onPressed: () =>
+                        {Navigator.pushNamed(context, '/ResetEmail')},
+                    style: TextButton.styleFrom(
+                      minimumSize: Size.zero,
+                      padding: EdgeInsets.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: const Text(
+                      "Forgot your password?",
                       style: TextStyle(
                         fontSize: 14,
                         fontStyle: FontStyle.italic,
@@ -394,6 +417,227 @@ class _LoginPageState extends State<LoginPage> {
               ],
             ),
           ]),
+        ),
+      ),
+    );
+  }
+}
+
+class ResetEmail extends StatefulWidget {
+  const ResetEmail({super.key});
+
+  @override
+  State<ResetEmail> createState() => _ResetEmailState();
+}
+
+class _ResetEmailState extends State<ResetEmail> {
+  final formKey =
+      GlobalKey<FormState>(); // Keeps track of form state for validation
+
+  final resetEmailController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: formKey,
+      child: Scaffold(
+        body: Center(
+          child: ListView(
+            children: [
+              Column(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(0, 160, 0, 0),
+                    child: Text(
+                      "Password Reset",
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 42),
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
+                    child: Text(
+                      "Enter Email of an Existing Account",
+                      style:
+                          TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
+                    child: Text(
+                      "We will email a validation code to authenticate",
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 24, 0, 0),
+                    child: SizedBox(
+                      width: 300,
+                      child: TextFormField(
+                        controller: resetEmailController,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: "Email",
+                          labelStyle: TextStyle(fontSize: 14),
+                          contentPadding: EdgeInsets.fromLTRB(16, 0, 16, 0),
+                        ),
+                        validator: (value) {
+                          // TODO: Username conditions for validating
+                          return (value == null || value.isEmpty)
+                              ? "Email field can't be empty"
+                              : null;
+                        },
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
+                    child: Container(
+                      width: 300,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(0),
+                      ),
+                      child: TextButton(
+                        style: const ButtonStyle(
+                          foregroundColor: WidgetStatePropertyAll(
+                              Color.fromARGB(255, 255, 255, 255)),
+                          backgroundColor: WidgetStatePropertyAll(
+                              Color.fromARGB(255, 0, 0, 0)),
+                          shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(8)))),
+                        ),
+                        onPressed: () => {
+                          if (formKey.currentState!.validate())
+                            {
+                              // TODO: Traverse to main app if account login is successful
+                              Navigator.pushNamed(context, '/ResetValidate',
+                                  arguments: {
+                                    'email': resetEmailController.text
+                                  })
+                            }
+                        },
+                        child: const Text("Send Validation Code"),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ResetValidate extends StatefulWidget {
+  const ResetValidate({super.key});
+
+  @override
+  State<ResetValidate> createState() => _ResetValidateState();
+}
+
+class _ResetValidateState extends State<ResetValidate> {
+  final formKey =
+      GlobalKey<FormState>(); // Keeps track of form state for validation
+
+  final code = "103476"; // Would be generated, but for now.
+
+  void sendEmail() async {
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final arguments = (ModalRoute.of(context)?.settings.arguments ??
+        <String, dynamic>{}) as Map;
+    final email = arguments["email"];
+
+    return Form(
+      key: formKey,
+      child: Scaffold(
+        body: Center(
+          child: ListView(
+            children: [
+              Column(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(0, 160, 0, 0),
+                    child: Text(
+                      "Authentication",
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 42),
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
+                    child: Text(
+                      "Enter Validation Code",
+                      style:
+                          TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
+                    child: Text(
+                      "The validation code will be found in your email",
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
+                  Text("Also email: $email"),
+                  Text("Validation code?: $code"),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 24, 0, 0),
+                    child: SizedBox(
+                      width: 300,
+                      child: TextFormField(
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: "Validation Code",
+                          labelStyle: TextStyle(fontSize: 14),
+                          contentPadding: EdgeInsets.fromLTRB(16, 0, 16, 0),
+                        ),
+                        validator: (value) {
+                          // TODO: Username conditions for validating
+                          return (value == null || value.isEmpty)
+                              ? "Validation Code field can't be empty"
+                              : null;
+                        },
+                      ),
+                    ),
+                  ),
+                  /*Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
+                    child: Container(
+                      width: 300,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(0),
+                      ),
+                      child: TextButton(
+                        style: const ButtonStyle(
+                          foregroundColor: WidgetStatePropertyAll(
+                              Color.fromARGB(255, 255, 255, 255)),
+                          backgroundColor: WidgetStatePropertyAll(
+                              Color.fromARGB(255, 0, 0, 0)),
+                          shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(8)))),
+                        ),
+                        onPressed: () => {
+                          if (formKey.currentState!.validate())
+                            {
+                              // TODO: Traverse to main app if account login is successful
+                              Navigator.pushNamed(context, '/ResetValidate', arguments: {'email': resetEmailController})
+                            }
+                        },
+                        child: const Text("Send Validation Code"),
+                      ),
+                    ),
+                  ),*/
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

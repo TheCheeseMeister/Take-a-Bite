@@ -24,6 +24,8 @@ class MyApp extends StatelessWidget {
         '/Login': (context) =>
             const LoginPage(), // Log in with existing Username and Password
         '/Nav': (context) => const NavBar(), // Nav Bar, representing main app
+        '/ResetEmail': (context) => const ResetEmail(), // Choosing the reset password option, enter Email for account
+        '/ResetValidate': (context) => const ResetValidate(), // Choosing the reset password option, enter Email for account
       },
       initialRoute: '/',
     );
