@@ -3,6 +3,8 @@ import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:take_a_bite/nav_pages/fake_instruct.dart';
 import './recipe.dart';
 
+import 'package:dropdown_search/dropdown_search.dart';
+
 // TODO: make StatefulWidget to allow setting of values
 class Search extends StatelessWidget {
   const Search({super.key});
@@ -16,8 +18,8 @@ class Search extends StatelessWidget {
             const Padding(
               padding: EdgeInsets.fromLTRB(0, 48, 0, 0),
               // Would-be search bar
-              child: Text("Search bar not finished"),
-              //child: RecipeSearch(),
+              //child: Text("Search bar not finished"),
+              child: SearchBar(),
             ),
             RecipeCard(), // Should be list of RecipeCards that match result (0 or more)
           ],
@@ -27,57 +29,40 @@ class Search extends StatelessWidget {
   }
 }
 
-// Search Bar
-/*class RecipeSearch extends StatefulWidget {
-  const RecipeSearch({super.key});
+// Search Bar (uses Dropdown_Search package)
+class SearchBar extends StatefulWidget {
+  const SearchBar({super.key});
 
   @override
-  State<RecipeSearch> createState() => _RecipeSearchState();
+  State<SearchBar> createState() => _SearchBarState();
 }
 
-class _RecipeSearchState extends State<RecipeSearch> {
+class _SearchBarState extends State<SearchBar> {
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      onPopInvokedWithResult: (didPop, result) {
-        FocusScope.of(context).unfocus();
-      },
-      child: SearchAnchor(
-        /*viewOnChanged: (value) {
-          FocusScope.of(context).unfocus();
-        },*/
-        isFullScreen: false,
-        builder: (BuildContext context, SearchController controller) {
-          return SearchBar(
-            controller: controller,
-            onTap: () {
-              controller.openView();
-            },
-            onChanged: (_) {
-              controller.openView();
-            },
-            leading: const Icon(Icons.search),
-          );
+    return FractionallySizedBox(
+      widthFactor: 0.9,
+      child: DropdownSearch<String>.multiSelection(
+        items: (filter, s) => ["a", "b", "c", "d", "e", "f", "g", "h", "i"],
+        compareFn: (i, s) => i == s,
+        onChanged: (List<String> selectedItems) {
+          // TODO: add httprequest to search for recipes with selected items
         },
-        suggestionsBuilder: (BuildContext context, SearchController controller) {
-          return List<ListTile>.generate(5, (int index) {
-            final String item = 'item $index';
-            return ListTile(
-              title: Text(item),
-              onTap: () {
-                setState(() {
-                  controller.closeView(item);
-                  //FocusManager.instance.primaryFocus?.unfocus();
-                  FocusScope.of(context).unfocus();
-                });
-              }
+        popupProps: PopupPropsMultiSelection.menu(
+          menuProps: const MenuProps(backgroundColor: Color.fromARGB(255, 255, 255, 255)),
+          showSearchBox: true,
+          constraints: const BoxConstraints(maxWidth: 500, maxHeight: 400),
+          itemBuilder: (context, item, isDisabled, isSelected) {
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(8.0,0,0,0),
+              child: Text(item.toString()),
             );
-          });
-        },
+          },
+        ),
       ),
     );
   }
-}*/
+}
 
 // Recipe displayed on Search Page
 class RecipeCard extends StatelessWidget {

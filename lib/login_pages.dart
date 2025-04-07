@@ -13,14 +13,16 @@ class _CreateAccountState extends State<CreateAccount> {
   final formKey =
       GlobalKey<FormState>(); // Keeps track of form state for validation
   
-  int responseStatus = -1000;
-  String responseMessage = "";
-  
-  Future<http.Response> testConnection() async {
-    var url = Uri.http('3.93.61.3', '/api/test');
-    var response = await http.get(url);
+  //int responseStatus = -1000;
+
+  /*Future<http.Response> testConnection() async {
+    //var url = Uri.http('3.93.61.3', '/api/test');
+    //var response = await http.get(url);
+    var url = Uri.http('3.93.61.3', '/api/register');
+    //var response = await http.post(url, body: {'name': 'Meilz', 'username': 'CheesyMeilz', 'email': 'miles9659@gmail.com', 'password': 'khameleon'});
+    var response = await http.post(url, body: {'name': 'CheeseHater', 'username': 'SecretCheeseLover', 'email': 'somewheresomehow@gmail.com', 'password': 'applepeach09'});
     return response;
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -38,9 +40,9 @@ class _CreateAccountState extends State<CreateAccount> {
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 42),
                   ),
                 ),
-                responseStatus == -1000
+                /*responseStatus == -1000
                   ? Text("Status Code: Pinging Route...")
-                  : Text("Message: $responseMessage\nStatus Code: $responseStatus"),
+                  : Text("Status Code: $responseStatus"),*/
                 const Padding(
                   padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
                   child: Text(
@@ -68,6 +70,7 @@ class _CreateAccountState extends State<CreateAccount> {
                       ),
                       validator: (value) {
                         // TODO: Email validator
+                        // Should add validator to check if email has been used or not
                         return (value == null || value.isEmpty)
                             ? "Field can't be empty"
                             : null;
@@ -93,11 +96,10 @@ class _CreateAccountState extends State<CreateAccount> {
                                 BorderRadius.all(Radius.circular(8)))),
                       ),
                       onPressed: () async {
-                        /*if (formKey.currentState!.validate())
-                          {Navigator.pushNamed(context, '/CreateUserPass')}*/
-                        http.Response response = await testConnection();
-                        setState(() {responseStatus = response.statusCode;});
-                        setState(() {responseMessage = response.body;});
+                        if (formKey.currentState!.validate())
+                          {Navigator.pushNamed(context, '/CreateUserPass'/*, arguments: {'email': createEmailController}*/);}
+                        /*http.Response response = await testConnection();
+                        setState(() {responseStatus = response.statusCode;});*/
                       },
                       child: const Text("Continue"),
                     ),
@@ -294,6 +296,17 @@ class _LoginPageState extends State<LoginPage> {
   final formKey =
       GlobalKey<FormState>(); // Keeps track of form state for validation
 
+  final loginUsernameController = TextEditingController();
+  final loginPasswordController = TextEditingController();
+
+  int loginStatus = -1000;
+
+  Future<http.Response> checkLogin(String username, String password) async {
+    var url = Uri.http('3.93.61.3', '/api/login');
+    var response = await http.post(url, body: {'username': username, 'password': password});
+    return response;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -310,6 +323,10 @@ class _LoginPageState extends State<LoginPage> {
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 42),
                   ),
                 ),
+                // Debug display for httprequest response
+                /*loginStatus == -1000
+                ? Text("HTTP Status code: Still checking login")
+                : Text("HTTP Status code: $loginStatus"),*/
                 const Padding(
                   padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
                   child: Text(
@@ -329,6 +346,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: SizedBox(
                     width: 300,
                     child: TextFormField(
+                      controller: loginUsernameController,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         labelText: "Username",
@@ -349,6 +367,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: SizedBox(
                     width: 300,
                     child: TextFormField(
+                      controller: loginPasswordController,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         labelText: "Password",
@@ -359,6 +378,8 @@ class _LoginPageState extends State<LoginPage> {
                         // TODO: Password conditions for validating
                         return (value == null || value.isEmpty)
                             ? "Password field can't be empty"
+                            : loginStatus != 200
+                            ? "Username or Password is incorrect"
                             : null;
                       },
                     ),
@@ -381,11 +402,13 @@ class _LoginPageState extends State<LoginPage> {
                             borderRadius:
                                 BorderRadius.all(Radius.circular(8)))),
                       ),
-                      onPressed: () => {
-                        if (formKey.currentState!.validate())
+                      onPressed: () async {
+                        http.Response response = await checkLogin(loginUsernameController.text, loginPasswordController.text);
+                        setState(() {loginStatus = response.statusCode;});
+
+                        if (formKey.currentState!.validate() && loginStatus == 200)
                           {
-                            // TODO: Traverse to main app if account login is successful
-                            Navigator.pushNamed(context, '/Nav')
+                            Navigator.pushNamed(context, '/Nav');
                           }
                       },
                       child: const Text("Sign in"),
