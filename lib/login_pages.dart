@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
 // First page/Create Account
 class CreateAccount extends StatefulWidget {
   const CreateAccount({super.key});
@@ -10,6 +12,15 @@ class CreateAccount extends StatefulWidget {
 class _CreateAccountState extends State<CreateAccount> {
   final formKey =
       GlobalKey<FormState>(); // Keeps track of form state for validation
+  
+  int responseStatus = -1000;
+  String responseMessage = "";
+  
+  Future<http.Response> testConnection() async {
+    var url = Uri.http('3.93.61.3', '/api/test');
+    var response = await http.get(url);
+    return response;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +38,9 @@ class _CreateAccountState extends State<CreateAccount> {
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 42),
                   ),
                 ),
+                responseStatus == -1000
+                  ? Text("Status Code: Pinging Route...")
+                  : Text("Message: $responseMessage\nStatus Code: $responseStatus"),
                 const Padding(
                   padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
                   child: Text(
@@ -78,9 +92,12 @@ class _CreateAccountState extends State<CreateAccount> {
                             borderRadius:
                                 BorderRadius.all(Radius.circular(8)))),
                       ),
-                      onPressed: () => {
-                        if (formKey.currentState!.validate())
-                          {Navigator.pushNamed(context, '/CreateUserPass')}
+                      onPressed: () async {
+                        /*if (formKey.currentState!.validate())
+                          {Navigator.pushNamed(context, '/CreateUserPass')}*/
+                        http.Response response = await testConnection();
+                        setState(() {responseStatus = response.statusCode;});
+                        setState(() {responseMessage = response.body;});
                       },
                       child: const Text("Continue"),
                     ),
