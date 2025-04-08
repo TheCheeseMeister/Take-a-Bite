@@ -302,8 +302,12 @@ class _LoginPageState extends State<LoginPage> {
   int loginStatus = -1000;
 
   Future<http.Response> checkLogin(String username, String password) async {
+    // Login
     var url = Uri.http('3.93.61.3', '/api/login');
-    var response = await http.post(url, body: {'username': username, 'password': password});
+    var response = await http.post(url, headers: {"Accept": "application/json"}, body: {'username': username, 'password': password});
+    // Temporary Register, will be moved to Create Page
+    /*var url = Uri.http('3.93.61.3', '/api/register');
+    var response = await http.post(url, headers: {"Accept": "application/json"}, body: {'username': 'CheesyMeilz', 'email': 'miles9659@gmail.com', 'password': 'khameleon'});*/
     return response;
   }
 
@@ -324,9 +328,9 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 // Debug display for httprequest response
-                /*loginStatus == -1000
+                loginStatus == -1000
                 ? Text("HTTP Status code: Still checking login")
-                : Text("HTTP Status code: $loginStatus"),*/
+                : Text("HTTP Status code: $loginStatus"),
                 const Padding(
                   padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
                   child: Text(
@@ -408,7 +412,7 @@ class _LoginPageState extends State<LoginPage> {
 
                         if (formKey.currentState!.validate() && loginStatus == 200)
                           {
-                            Navigator.pushNamed(context, '/Nav');
+                            //Navigator.pushNamed(context, '/Nav');
                           }
                       },
                       child: const Text("Sign in"),
