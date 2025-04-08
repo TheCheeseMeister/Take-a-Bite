@@ -6,18 +6,21 @@ use App\Http\Controllers\Controller;
 use App\Models\Ingredients;
 use Illuminate\Http\Request;
 use App\Http\Requests\PostRequest;
-use App\Models\Feed;
+use App\Models\Recipe;
 use App\Models\Like;
 use App\Models\Comment;
 
-class FeedController extends Controller
+class RecipeController extends Controller
 {
+
+    protected $table = 'TAB_recipes';
+    protected $primaryKey = 'recipe_id';
 
     public function index(Request $request)
     {
-        $feeds = Feed::with('user')->latest()->get();
+        $feeds = Recipe::with('user')->latest()->get();
         return response([
-            'feeds' => $feeds
+            'recipe' => $feeds
 
         ], 200);
     }
@@ -27,7 +30,15 @@ class FeedController extends Controller
         $request->validated();
 
         auth()->user()->feeds()->create([
-            'content' => $request->content,
+            'recipe_name' => $request->recipe_name,
+            'cook_time' => $request->cook_time,
+            'prep_time' => $request->prep_time,
+            'recipe_description' => $request->recipe_description,
+            'recipe_category' => $request->recipe_category,
+            'recipe_servings' => $request->recipe_servings,
+            'recipe_yield' => $request->recipe_yield,
+            'recipe_directions' => $request->recipe_directions,
+            'user_user_id' => auth()->id(),
         ]);
 
         return response([
@@ -35,9 +46,18 @@ class FeedController extends Controller
         ],201);
     }
 
+    public function getRecipe($feed_id)
+    {
+        $recipe_name = Recipe::with('user')->where('recipe_id', "=", $feed_id)->latest()->get();
+
+        return response([
+            'recipe_name' => $recipe_name,
+        ],200);
+    }
+
     public function likePost($feed_id)
     {
-        $feed = Feed::where('id', '=', $feed_id)->first();
+        $feed = Recipe::where('id', '=', $feed_id)->first();
 
         
         if(!$feed){
