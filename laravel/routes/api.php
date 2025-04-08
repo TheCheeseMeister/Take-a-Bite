@@ -18,6 +18,7 @@ Route::post('/feed/comment/{feed_id}', [FeedController::class,'comment'])->middl
 
 Route::get('/feed/comments/{feed_id}', [FeedController::class,'getComments'])->middleware('auth:sanctum');
 
+Route::get('/feed/ingredients/{ingredient_id}', [FeedController::class,'getIngredients'])->middleware('auth:sanctum');
 
 
 /*

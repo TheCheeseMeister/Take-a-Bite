@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Feed;
 
 use App\Http\Controllers\Controller;
+use App\Models\Ingredients;
 use Illuminate\Http\Request;
 use App\Http\Requests\PostRequest;
 use App\Models\Feed;
@@ -96,6 +97,16 @@ class FeedController extends Controller
 
         return response([
             'comments' => $comments
+        ]);
+    }
+    
+    public function getIngredients($ingredient_id)
+    {
+       # $comments = Comment::whereFeedID($feed_id)->latest()->get();
+        $ingredient = Ingredients::with('$TAB_ingredients')->where('ingredient_id', "=", $ingredient_id)->latest()->get();
+
+        return response([
+            'ingredient' => $ingredient
         ]);
     }
 

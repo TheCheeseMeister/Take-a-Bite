@@ -16,16 +16,18 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasApiTokens;
 
+    protected $table = 'TAB_user';
+    protected $primaryKey = 'user_id';
+
     /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'username',
-        'email',
-        'password',
+        'user_username',
+        'user_email',
+        'user_password',
     ];
 
     /**
@@ -34,7 +36,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $hidden = [
-        'password',
+        'user_password',
         'remember_token',
     ];
 
@@ -47,7 +49,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'user_password' => 'hashed',
         ];
     }
 
@@ -62,4 +64,7 @@ class User extends Authenticatable
     {
         return $this->hasMany( Comment::class);
     }
+
+
+
 }
