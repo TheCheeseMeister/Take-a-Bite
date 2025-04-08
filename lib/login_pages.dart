@@ -208,6 +208,8 @@ class _CreateUserPassState extends State<CreateUserPass> {
                           // TODO: Username conditions for validating
                           return (value == null || value.isEmpty)
                               ? "Field can't be empty"
+                              : value.length < 4
+                              ? "Username must be minimum 4 characters long"
                               : null;
                         },
                       ),
@@ -229,6 +231,8 @@ class _CreateUserPassState extends State<CreateUserPass> {
                           // TODO: Password conditions for validating
                           return (value == null || value.isEmpty)
                               ? "Field can't be empty"
+                              : value.length < 6
+                              ? "Password must be minimum 6 characters long"
                               : null;
                         },
                       ),
