@@ -55,7 +55,7 @@ class User extends Authenticatable
 
     public function feeds(): HasMany
     {
-        return $this->hasMany( Feed::class);
+        return $this->hasMany( Recipe::class);
     }
 
 

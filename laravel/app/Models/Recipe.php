@@ -7,19 +7,42 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Feed extends Model
+class Recipe extends Model
 {
+
     use HasFactory;
 
+    protected $table = 'TAB_recipes';
+    protected $primaryKey = 'recipe_id';
+
+
     protected $fillable = [
-        'user_id',
-        'content'
+        'recipe_name',
+        'cook_time',
+        'prep_time',
+        'recipe_description',
+        'recipe_category',
+        'recipe_servings',
+        'recipe_yield',
+        'recipe_directions',
     ];
 
     protected $appends = ['liked'];
 
     public function user(): BelongsTo{
         return $this->belongsTo(User::class);
+    }
+
+       /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'created_at' => 'datetime'
+        ];
     }
 
     public function likes(): HasMany
@@ -35,7 +58,7 @@ class Feed extends Model
 
     public function getLikedAttribute(): bool
     {
-        return (bool) $this->likes()->where('feed_id', $this->id)->where('user_id', $this->user_id)->exists();
+        return (bool) $this->likes()->where('recipe_id', $this->id)->where('user_id', $this->user_id)->exists();
     }
 
 }
