@@ -12,17 +12,10 @@ class CreateAccount extends StatefulWidget {
 class _CreateAccountState extends State<CreateAccount> {
   final formKey =
       GlobalKey<FormState>(); // Keeps track of form state for validation
-  
-  //int responseStatus = -1000;
 
-  /*Future<http.Response> testConnection() async {
-    //var url = Uri.http('3.93.61.3', '/api/test');
-    //var response = await http.get(url);
-    var url = Uri.http('3.93.61.3', '/api/register');
-    //var response = await http.post(url, body: {'name': 'Meilz', 'username': 'CheesyMeilz', 'email': 'miles9659@gmail.com', 'password': 'khameleon'});
-    var response = await http.post(url, body: {'name': 'CheeseHater', 'username': 'SecretCheeseLover', 'email': 'somewheresomehow@gmail.com', 'password': 'applepeach09'});
-    return response;
-  }*/
+  final createEmailController = TextEditingController();
+
+  // Add http request for validation of email (already registered)
 
   @override
   Widget build(BuildContext context) {
@@ -62,6 +55,7 @@ class _CreateAccountState extends State<CreateAccount> {
                   child: SizedBox(
                     width: 300,
                     child: TextFormField(
+                      controller: createEmailController,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         labelText: "Email Address",
@@ -96,8 +90,9 @@ class _CreateAccountState extends State<CreateAccount> {
                                 BorderRadius.all(Radius.circular(8)))),
                       ),
                       onPressed: () async {
+                        // Need extra email validation, but for now
                         if (formKey.currentState!.validate())
-                          {Navigator.pushNamed(context, '/CreateUserPass'/*, arguments: {'email': createEmailController}*/);}
+                          {Navigator.pushNamed(context, '/CreateUserPass', arguments: {'email': createEmailController.text});}
                         /*http.Response response = await testConnection();
                         setState(() {responseStatus = response.statusCode;});*/
                       },
@@ -139,11 +134,24 @@ class CreateUserPass extends StatefulWidget {
 class _CreateUserPassState extends State<CreateUserPass> {
   final formKey =
       GlobalKey<FormState>(); // Keeps track of form state for validation
+
   final usernameController = TextEditingController(); // Track username value
   final passwordController = TextEditingController(); // Track password value
 
   @override
   Widget build(BuildContext context) {
+    final arguments = (ModalRoute.of(context)?.settings.arguments ?? <String, dynamic>{}) as Map;
+    final email = arguments['email'];
+
+    int registerStatus = -1000;
+
+    Future<http.Response> checkRegister(String username, String password) async {
+      // Register
+      var url = Uri.http('3.93.61.3', '/api/register');
+      var response = await http.post(url, headers: {"Accept": "application/json"}, body: {'username': username, 'email': email, 'password': password});
+      return response;
+    }
+
     return Form(
       key: formKey,
       child: Scaffold(
@@ -263,11 +271,13 @@ class _CreateUserPassState extends State<CreateUserPass> {
                               borderRadius:
                                   BorderRadius.all(Radius.circular(8)))),
                         ),
-                        onPressed: () => {
-                          if (formKey.currentState!.validate())
+                        onPressed: () async {
+                          http.Response response = await checkRegister(usernameController.text, passwordController.text);
+                          setState(() {registerStatus = response.statusCode;});
+                          if (formKey.currentState!.validate() && registerStatus == 201)
                             {
                               // TODO: Traverse to main app if account creation is successful
-                              Navigator.pushNamed(context, '/Nav')
+                              Navigator.pushNamed(context, '/Nav');
                             }
                         },
                         child: const Text("Sign up"),
@@ -305,9 +315,6 @@ class _LoginPageState extends State<LoginPage> {
     // Login
     var url = Uri.http('3.93.61.3', '/api/login');
     var response = await http.post(url, headers: {"Accept": "application/json"}, body: {'username': username, 'password': password});
-    // Temporary Register, will be moved to Create Page
-    /*var url = Uri.http('3.93.61.3', '/api/register');
-    var response = await http.post(url, headers: {"Accept": "application/json"}, body: {'username': 'CheesyMeilz', 'email': 'miles9659@gmail.com', 'password': 'khameleon'});*/
     return response;
   }
 
@@ -327,10 +334,6 @@ class _LoginPageState extends State<LoginPage> {
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 42),
                   ),
                 ),
-                // Debug display for httprequest response
-                loginStatus == -1000
-                ? Text("HTTP Status code: Still checking login")
-                : Text("HTTP Status code: $loginStatus"),
                 const Padding(
                   padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
                   child: Text(
@@ -412,7 +415,7 @@ class _LoginPageState extends State<LoginPage> {
 
                         if (formKey.currentState!.validate() && loginStatus == 200)
                           {
-                            //Navigator.pushNamed(context, '/Nav');
+                            Navigator.pushNamed(context, '/Nav');
                           }
                       },
                       child: const Text("Sign in"),
