@@ -10,6 +10,10 @@ class Ingredients extends Model
 {
     
     use HasFactory;
+
+    protected $table = 'TAB_ingredients';
+    public $timestamps = false;
+
     protected $fillable = [
         'ingredient_name',
         'ingredient_allergen'

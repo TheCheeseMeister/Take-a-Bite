@@ -123,11 +123,11 @@ class RecipeController extends Controller
     public function getIngredients($ingredient_id)
     {
        # $comments = Comment::whereFeedID($feed_id)->latest()->get();
-        $ingredient = Ingredients::with('$TAB_ingredients')->where('ingredient_id', "=", $ingredient_id)->latest()->get();
+        $ingredient = Ingredients::with('feed')->where('ingredient_id', "=", $ingredient_id)->get();
 
         return response([
             'ingredient' => $ingredient
-        ]);
+        ], 212);
     }
 
 

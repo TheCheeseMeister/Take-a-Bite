@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -16,6 +18,23 @@ class _CreateAccountState extends State<CreateAccount> {
   final createEmailController = TextEditingController();
 
   // Add http request for validation of email (already registered)
+  int ingredientsStatus = -1000;
+
+  String userToken = "";
+
+  Future<http.Response> setToken() async {
+    var url = Uri.http('3.93.61.3', '/api/login');
+    var response = await http.post(url, headers: {"Accept": "application/json"}, body: {'username': "CheesyMeilz", 'password': "khameleon"});
+    return response;
+  }
+
+  Future<http.Response> checkIngredients() async {
+    // Register
+    var url = Uri.http('3.93.61.3', '/api/feed/ingredients/1');
+    //var url = Uri.http('3.93.61.3', '/api/login');
+    var response = await http.get(url, headers: {"Authorization": 'Bearer $userToken', "Accept": "application/json"});
+    return response;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +52,9 @@ class _CreateAccountState extends State<CreateAccount> {
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 42),
                   ),
                 ),
-                /*responseStatus == -1000
+                ingredientsStatus == -1000
                   ? Text("Status Code: Pinging Route...")
-                  : Text("Status Code: $responseStatus"),*/
+                  : Text("Status Code: $ingredientsStatus"),
                 const Padding(
                   padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
                   child: Text(
@@ -91,8 +110,28 @@ class _CreateAccountState extends State<CreateAccount> {
                       ),
                       onPressed: () async {
                         // Need extra email validation, but for now
-                        if (formKey.currentState!.validate())
-                          {Navigator.pushNamed(context, '/CreateUserPass', arguments: {'email': createEmailController.text});}
+                        if (userToken == "") {
+                          http.Response response = await setToken();
+                          final data = jsonDecode(response.body);
+                          final token = data['token'];
+                          setState(() {userToken = token;});
+                          setState(() {ingredientsStatus = response.statusCode;});
+                          print(userToken);
+                        } else {
+                          http.Response response = await checkIngredients();
+                          setState(() {ingredientsStatus = response.statusCode;});
+                          final data = jsonDecode(response.body);
+                          final ingredient = data['ingredient'];
+                          print(ingredient);
+                        }
+                        //http.Response response = await checkIngredients();
+                        //final data = jsonDecode(response.body);
+                        //final token = data['token'];
+                        //setState(() {userToken = token;});
+                        //setState(() {ingredientsStatus = response.statusCode;});
+                        //print(userToken);
+                        /*if (formKey.currentState!.validate())
+                          {Navigator.pushNamed(context, '/CreateUserPass', arguments: {'email': createEmailController.text});}*/
                         /*http.Response response = await testConnection();
                         setState(() {responseStatus = response.statusCode;});*/
                       },
