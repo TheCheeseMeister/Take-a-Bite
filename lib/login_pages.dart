@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import 'globals.dart' as globals;
+
 // First page/Create Account
 class CreateAccount extends StatefulWidget {
   const CreateAccount({super.key});
@@ -18,23 +20,6 @@ class _CreateAccountState extends State<CreateAccount> {
   final createEmailController = TextEditingController();
 
   // Add http request for validation of email (already registered)
-  int ingredientsStatus = -1000;
-
-  String userToken = "";
-
-  Future<http.Response> setToken() async {
-    var url = Uri.http('3.93.61.3', '/api/login');
-    var response = await http.post(url, headers: {"Accept": "application/json"}, body: {'username': "CheesyMeilz", 'password': "khameleon"});
-    return response;
-  }
-
-  Future<http.Response> checkIngredients() async {
-    // Register
-    var url = Uri.http('3.93.61.3', '/api/feed/ingredients/1');
-    //var url = Uri.http('3.93.61.3', '/api/login');
-    var response = await http.get(url, headers: {"Authorization": 'Bearer $userToken', "Accept": "application/json"});
-    return response;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,9 +37,9 @@ class _CreateAccountState extends State<CreateAccount> {
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 42),
                   ),
                 ),
-                ingredientsStatus == -1000
+                /*ingredientsStatus == -1000
                   ? Text("Status Code: Pinging Route...")
-                  : Text("Status Code: $ingredientsStatus"),
+                  : Text("Status Code: $ingredientsStatus"),*/
                 const Padding(
                   padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
                   child: Text(
@@ -110,10 +95,11 @@ class _CreateAccountState extends State<CreateAccount> {
                       ),
                       onPressed: () async {
                         // Need extra email validation, but for now
-                        if (userToken == "") {
+                        /*if (userToken == "") {
                           http.Response response = await setToken();
                           final data = jsonDecode(response.body);
                           final token = data['token'];
+                          // globals.token (global token saved for future use)
                           setState(() {userToken = token;});
                           setState(() {ingredientsStatus = response.statusCode;});
                           print(userToken);
@@ -121,17 +107,17 @@ class _CreateAccountState extends State<CreateAccount> {
                           http.Response response = await checkIngredients();
                           setState(() {ingredientsStatus = response.statusCode;});
                           final data = jsonDecode(response.body);
-                          final ingredient = data['ingredient'];
+                          final ingredient = data['ingredients'][1157];
                           print(ingredient);
-                        }
+                        }*/
                         //http.Response response = await checkIngredients();
                         //final data = jsonDecode(response.body);
                         //final token = data['token'];
                         //setState(() {userToken = token;});
                         //setState(() {ingredientsStatus = response.statusCode;});
                         //print(userToken);
-                        /*if (formKey.currentState!.validate())
-                          {Navigator.pushNamed(context, '/CreateUserPass', arguments: {'email': createEmailController.text});}*/
+                        if (formKey.currentState!.validate())
+                          {Navigator.pushNamed(context, '/CreateUserPass', arguments: {'email': createEmailController.text});}
                         /*http.Response response = await testConnection();
                         setState(() {responseStatus = response.statusCode;});*/
                       },
@@ -317,6 +303,7 @@ class _CreateUserPassState extends State<CreateUserPass> {
                         onPressed: () async {
                           http.Response response = await checkRegister(usernameController.text, passwordController.text);
                           setState(() {registerStatus = response.statusCode;});
+                          // TODO: Add token and ingredients
                           if (formKey.currentState!.validate() && registerStatus == 201)
                             {
                               // TODO: Traverse to main app if account creation is successful
@@ -353,11 +340,17 @@ class _LoginPageState extends State<LoginPage> {
   final loginPasswordController = TextEditingController();
 
   int loginStatus = -1000;
+  int ingredientsStatus = -1000;
 
   Future<http.Response> checkLogin(String username, String password) async {
-    // Login
     var url = Uri.http('3.93.61.3', '/api/login');
     var response = await http.post(url, headers: {"Accept": "application/json"}, body: {'username': username, 'password': password});
+    return response;
+  }
+
+  Future<http.Response> checkIngredients() async {
+    var url = Uri.http('3.93.61.3', '/api/feed/ingredients/1');
+    var response = await http.get(url, headers: {"Authorization": 'Bearer ${globals.token}', "Accept": "application/json"});
     return response;
   }
 
@@ -453,11 +446,23 @@ class _LoginPageState extends State<LoginPage> {
                                 BorderRadius.all(Radius.circular(8)))),
                       ),
                       onPressed: () async {
-                        http.Response response = await checkLogin(loginUsernameController.text, loginPasswordController.text);
-                        setState(() {loginStatus = response.statusCode;});
+                        http.Response loginResponse = await checkLogin(loginUsernameController.text, loginPasswordController.text);
+                        setState(() {loginStatus = loginResponse.statusCode;});
 
                         if (formKey.currentState!.validate() && loginStatus == 200)
                           {
+                            final loginData = jsonDecode(loginResponse.body);
+                            setState(() {globals.token = loginData['token'];});
+
+                            http.Response ingredientsResponse = await checkIngredients();
+                            setState(() {ingredientsStatus = ingredientsResponse.statusCode;});
+                            final ingredientsData = jsonDecode(ingredientsResponse.body);
+                            globals.ingredientsList = ingredientsData['ingredients'];
+
+                            print('Login Status: $loginStatus');
+                            print('Ingredients Status: $ingredientsStatus');
+                            print('Ingredient test: ${globals.ingredientsList}');
+
                             Navigator.pushNamed(context, '/Nav');
                           }
                       },

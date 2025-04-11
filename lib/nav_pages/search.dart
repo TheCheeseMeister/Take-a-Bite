@@ -5,6 +5,8 @@ import './recipe.dart';
 
 import 'package:dropdown_search/dropdown_search.dart';
 
+import 'package:take_a_bite/globals.dart' as globals;
+
 // TODO: make StatefulWidget to allow setting of values
 class Search extends StatelessWidget {
   const Search({super.key});
@@ -43,7 +45,8 @@ class _SearchBarState extends State<SearchBar> {
     return FractionallySizedBox(
       widthFactor: 0.9,
       child: DropdownSearch<String>.multiSelection(
-        items: (filter, s) => ["a", "b", "c", "d", "e", "f", "g", "h", "i"],
+        //items: (filter, s) => ["a", "b", "c", "d", "e", "f", "g", "h", "i"],
+        items: (filter, s) => globals.ingredientsList.map<String>((ingredient) => ingredient['ingredient_name']).toList(),
         compareFn: (i, s) => i == s,
         onChanged: (List<String> selectedItems) {
           // TODO: add httprequest to search for recipes with selected items
