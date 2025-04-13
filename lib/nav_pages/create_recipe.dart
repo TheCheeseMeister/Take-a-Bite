@@ -1,4 +1,6 @@
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:take_a_bite/globals.dart' as globals;
 
 class CreateRecipe extends StatefulWidget {
   const CreateRecipe({super.key});
@@ -17,6 +19,9 @@ class _CreateRecipeState extends State<CreateRecipe> {
   final prepController = TextEditingController();
   final cookController = TextEditingController();
   final servingSizeController = TextEditingController();
+
+  Map<String, dynamic> tempIngredient = {};
+  List<Map<String, dynamic>> ingredients = [];
 
   // Image selector somewhere??
   @override
@@ -54,7 +59,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
             Padding(
               padding: const EdgeInsets.fromLTRB(0,16,0,16),
               child: FractionallySizedBox(
-                widthFactor: 0.5,
+                widthFactor: 0.8,
                 child: TextFormField(
                     controller: titleController,
                     textCapitalization: TextCapitalization.sentences,
@@ -63,9 +68,11 @@ class _CreateRecipeState extends State<CreateRecipe> {
                       border: OutlineInputBorder(),
                     ),
                     validator: (String? value) {
-                      return (value != null && value != "")
-                          ? null
-                          : "A title is required.";
+                      return (value == null || value.isEmpty)
+                          ? "Required"
+                          : value.length < 2
+                          ? "Recipe title should min 2 characters."
+                          : null;
                     }),
               ),
             ),
@@ -80,17 +87,113 @@ class _CreateRecipeState extends State<CreateRecipe> {
                     minLines: 1,
                     maxLines: 5,
                     decoration: const InputDecoration(
-                      labelText: "Subtitle *",
+                      labelText: "Subtitle",
                       border: OutlineInputBorder(),
                     ),
                     validator: (String? value) {
-                      return (value != null && value != "")
-                          ? null
-                          : "A subtitle is required.";
+                      return null;
                     }),
               ),
             ),
-            // Ingredients (proportions too)
+            // Ingredients display (proportions too)
+            ingredients.isEmpty
+            ? Text("No Ingredients")
+            : ListView(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              children: ingredients.map((ingredient) {
+                return FractionallySizedBox(
+                  widthFactor: 0.8,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(0,0,0,8),
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(ingredient["ingredient_name"]),
+                            Text("Temp portion display"),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            // Ingredient input
+            FractionallySizedBox(
+              widthFactor: 0.8,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(0,0,0,0),
+                child: DropdownSearch<String>(
+                  items: (filter, s) => globals.ingredientsList.map<String>((ingredient) => ingredient['ingredient_name']).toList(),
+                  compareFn: (i, s) => i == s,
+                  onChanged: (String? item) {
+                    // TODO: add httprequest to search for recipes with selected items
+                    if (item != null) {
+                      var ingredientInfo = globals.ingredientsList.firstWhere((ingredient) => ingredient['ingredient_name'] == item);
+                      setState(() {tempIngredient = ingredientInfo;});
+                      print(tempIngredient);
+                    }
+                  },
+                  popupProps: PopupProps.menu(
+                    menuProps: const MenuProps(backgroundColor: Color.fromARGB(255, 255, 255, 255)),
+                    showSearchBox: true,
+                    constraints: const BoxConstraints(maxWidth: 500, maxHeight: 200),
+                    itemBuilder: (context, item, isDisabled, isSelected) {
+                      return Padding(
+                        padding: const EdgeInsets.fromLTRB(8.0,0,0,0),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(item.toString()),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0,8,8,8),
+                  child: TextButton(
+                    onPressed: () {
+                      if (tempIngredient.isNotEmpty) setState((){ingredients.add(tempIngredient);});
+                    },
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 129, 214, 131),
+                    ),
+                    child: const Text(
+                      "Add Ingredient",
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 0, 0, 0),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0,8,0,8),
+                  child: TextButton(
+                    onPressed: () {
+                      setState((){ingredients = [];});
+                    },
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 255, 106, 106),
+                    ),
+                    child: const Text(
+                      "Clear Ingredients",
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 0, 0, 0),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
             // Prep Time
             Padding(
               padding: const EdgeInsets.fromLTRB(0,0,0,16),
@@ -110,9 +213,11 @@ class _CreateRecipeState extends State<CreateRecipe> {
                       //fontSize: 16,
                       ),
                   validator: (String? value) {
-                    return (value != null && value != "")
-                        ? null
-                        : "Prep Time must be specified.";
+                    return (value == null || value.isEmpty)
+                        ? "Required."
+                        : value.length < 2
+                        ? "why?"
+                        : null;
                   }
                 ),
               ),
@@ -133,9 +238,11 @@ class _CreateRecipeState extends State<CreateRecipe> {
                     ),
                   ),
                   validator: (String? value) {
-                    return (value != null && value != "")
-                        ? null
-                        : "Cook Time must be specified.";
+                    return (value == null || value.isEmpty)
+                        ? "Required."
+                        : value.length < 2
+                        ? "why?"
+                        : null;
                   }
                 ),
               ),
@@ -156,9 +263,11 @@ class _CreateRecipeState extends State<CreateRecipe> {
                     ),
                   ),
                   validator: (String? value) {
-                    return (value != null && value != "")
-                        ? null
-                        : "Serving Size must be specified.";
+                    return (value == null || value.isEmpty)
+                        ? "Required."
+                        : value.length < 2
+                        ? "why?"
+                        : null;
                   }
                 ),
               ),
