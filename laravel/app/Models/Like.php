@@ -17,7 +17,7 @@ class Like extends Model
 
     public function feed(): BelongsTo
     {
-        return $this->belongsTo(Feed::class);
+        return $this->belongsTo(Recipe::class);
     }
 
 

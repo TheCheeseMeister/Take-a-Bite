@@ -120,11 +120,19 @@ class RecipeController extends Controller
         ]);
     }
     
-    public function getIngredients($ingredient_id)
+    public function getIngredients()
     {
-       # $comments = Comment::whereFeedID($feed_id)->latest()->get();
-       # $ingredient = Ingredients::with('feed')->where('ingredient_id', "=", $ingredient_id)->get();
+
        $ingredients = Ingredients::with('feed')->get();
+
+        return response([
+            'ingredients' => $ingredients
+        ], 212);
+    }
+    
+    public function getIngredient($ingredient_id)
+    {
+       $ingredients = Ingredients::with('feed')->where('ingredient_id', "=", $ingredient_id)->get();
 
         return response([
             'ingredients' => $ingredients

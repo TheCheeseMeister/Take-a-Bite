@@ -20,7 +20,11 @@ Route::post('/feed/comment/{feed_id}', [RecipeController::class,'comment'])->mid
 
 Route::get('/feed/comments/{feed_id}', [RecipeController::class,'getComments'])->middleware('auth:sanctum');
 
-Route::get('/feed/ingredients/{ingredient_id}', [RecipeController::class,'getIngredients'])->middleware('auth:sanctum');
+Route::get('/feed/ingredients/', [RecipeController::class,'getIngredients'])->middleware('auth:sanctum');
+
+Route::get('/feed/ingredients/{ingredient_id}', [RecipeController::class,'getIngredient'])->middleware('auth:sanctum');
+
+
 
 #Route::get('/feed/ingredients/{feed_id}', [RecipeController::class,'getRecipe'])->middleware('auth:sanctum');
 
