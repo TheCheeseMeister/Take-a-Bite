@@ -42,8 +42,9 @@ class RecipeController extends Controller
         ]);
 
         return response([
-            'message' => 'success',
+            'message' => auth()->user()->feeds()->latest()->first(), //return recipe id
         ],201);
+
     }
 
     public function getRecipe($feed_id)
