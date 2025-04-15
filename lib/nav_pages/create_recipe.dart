@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:take_a_bite/globals.dart' as globals;
 
 class Ingredient {
@@ -34,6 +36,8 @@ class _CreateRecipeState extends State<CreateRecipe> {
   
   bool isVegan = false;
   bool isGlutenFree = false;
+
+  File ? selectedImage;
 
   //Map<String, dynamic> tempIngredient = {};
   Map<String, dynamic> tempIngredient = {};
@@ -86,6 +90,13 @@ class _CreateRecipeState extends State<CreateRecipe> {
       return response;
     }
     
+    Future imageFromGallery() async {
+      final returnedImage = await ImagePicker().pickImage(source: ImageSource.gallery);
+
+      if (returnedImage == null) return;
+      setState(() {selectedImage = File(returnedImage!.path);});
+    }
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: SingleChildScrollView(
@@ -117,6 +128,16 @@ class _CreateRecipeState extends State<CreateRecipe> {
               const Divider(
                 indent: 50,
                 endIndent: 50,
+              ),
+              // Image Picker
+              selectedImage != null
+              ? Image.file(selectedImage!)
+              : Text("No Image selected yet"),
+              TextButton(
+                onPressed: () {
+                  imageFromGallery();
+                },
+                child: Text("Select an image"),
               ),
               // Title of Recipe
               Padding(
