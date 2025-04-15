@@ -9,7 +9,7 @@ use App\Models\RecipeIngredients;
 use App\Models\Recipe;
 use App\Http\Requests\RecipeIngredientRequest;
 
-class RecipeingredientsLinkController extends Controller
+class RecipeIngredientsLinkController extends Controller
 {
 
     protected $table = 'TAB_recipes_ingredients';

@@ -69,7 +69,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
         url, headers: {"Authorization": 'Bearer ${globals.token}', "Content-Type": "application/json", "Accept": "application/json"},
         body: jsonEncode({
           'tags_id': tags_id,
-          'recipe_id': recipe_id})
+          'recipe_id': recipe_id}) // ingredients_id should be recipe_id
       );
       return response;
     }
@@ -79,9 +79,9 @@ class _CreateRecipeState extends State<CreateRecipe> {
       var response = await http.post(
         url, headers: {"Authorization": 'Bearer ${globals.token}', "Content-Type": "application/json", "Accept": "application/json"},
         body: jsonEncode({
-          'ri_recipe_id': ri_recipe_id,
-          'ri_ingredient_id': ri_ingredient_id,
-          'ri_ingredient_measurement': ri_ingredient_measurement})
+          'recipe_id': ri_recipe_id,
+          'ingredient_id': ri_ingredient_id,
+          'ingredient_measurement': ri_ingredient_measurement})
       );
       return response;
     }
@@ -494,7 +494,11 @@ class _CreateRecipeState extends State<CreateRecipe> {
                     // tags_id = 24 or 154, hardcoded for now
                     // recipe_id = response["recipe_id"] from storing recipe
                     //------------------------------------------//
-                    int recipe_id = jsonDecode(storeRecipeResponse.body)['recipe_id'];
+                    print(jsonDecode(storeRecipeResponse.body));
+                    int recipe_id = jsonDecode(storeRecipeResponse.body)['message']['recipe_id'];
+
+                    print(recipe_id);
+                    print(recipe_id.runtimeType);
                     
                     http.Response? veganResponse;
                     http.Response? glutenResponse;
@@ -505,6 +509,11 @@ class _CreateRecipeState extends State<CreateRecipe> {
 
                     if (isGlutenFree) {
                       glutenResponse = await storeRecipeTag(154, recipe_id);
+                    }
+
+                    if (glutenResponse?.statusCode == 422) {
+                      final data = jsonDecode(glutenResponse!.body);
+                      print('Validation errors: ${data['errors']}');
                     }
 
                     List<http.Response> ingredientResponses = [];
@@ -519,6 +528,12 @@ class _CreateRecipeState extends State<CreateRecipe> {
                     for (Ingredient ingredient in ingredients) {
                       int ingredient_id = ingredient.ingredientInfo["ingredient_id"];
                       http.Response response = await storeRecipeIngredient(recipe_id, ingredient_id, ingredient.portion);
+                      
+                      if (response.statusCode == 422) {
+                        final data = jsonDecode(response.body);
+                        print('Validation errors: ${data['errors']}');
+                      }
+                      
                       ingredientResponses.add(response);
                     }
 
@@ -546,7 +561,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                                 shrinkWrap: true,
                                 physics: const NeverScrollableScrollPhysics(),
                                 children: ingredientResponses.map((response) {
-                                  return Text("Ingredient Response - ${response.statusCode}"),
+                                  return Text("Ingredient Response - ${response.statusCode}");
                                 }).toList(),
                               ),
                               /*const Text("Current Values:"),

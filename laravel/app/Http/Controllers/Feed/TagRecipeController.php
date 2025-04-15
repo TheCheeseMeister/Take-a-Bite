@@ -18,7 +18,7 @@ class TagRecipeController extends Controller
         $request->validated();
         TagRecipe::create([
             'tags_id' => $request->tags_id,
-            'recipe_id' => $request->ingredients_id,
+            'recipe_id' => $request->recipe_id,
         ]);
 
         return response([
