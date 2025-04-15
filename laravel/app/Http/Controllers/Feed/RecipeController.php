@@ -120,19 +120,19 @@ class RecipeController extends Controller
         ]);
     }
     
-    public function getIngredients()
+    public function getIngredients() //get all ingredients
     {
 
-       $ingredients = Ingredients::with('feed')->get();
+       $ingredients = Ingredients::get();
 
         return response([
             'ingredients' => $ingredients
         ], 212);
     }
     
-    public function getIngredient($ingredient_id)
+    public function getIngredient($ingredient_id) //get singular ingredient
     {
-       $ingredients = Ingredients::with('feed')->where('ingredient_id', "=", $ingredient_id)->get();
+       $ingredients = Ingredients::where('ingredient_id', "=", $ingredient_id)->get();
 
         return response([
             'ingredients' => $ingredients

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthenticationController;
 use App\Http\Controllers\Feed\RecipeController;
+use App\Http\Controllers\Feed\RecipeIngredientsLinkController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -24,15 +25,10 @@ Route::get('/feed/ingredients/', [RecipeController::class,'getIngredients'])->mi
 
 Route::get('/feed/ingredients/{ingredient_id}', [RecipeController::class,'getIngredient'])->middleware('auth:sanctum');
 
+Route::get('/feed/recipeIngredient/{recipe_id}', [RecipeIngredientsLinkController::class,'getRecipeIngredient'])->middleware('auth:sanctum');
 
-
-#Route::get('/feed/ingredients/{feed_id}', [RecipeController::class,'getRecipe'])->middleware('auth:sanctum');
-
-/*
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-*/
+Route::post('/feed/recipeIngredient/store', [RecipeIngredientsLinkController::class,'storeRecipeIngredients'])->middleware('auth:sanctum');
+//Route::post('/feed/recipeIngredient/store', [RecipeController::class,'store'])->middleware('auth:sanctum');
 
 
 Route::get('/test', function(){
@@ -46,8 +42,6 @@ Route::post('/register', [AuthenticationController::class, 'register']);
 
 Route::post('/login', [AuthenticationController::class, 'login']);
 
-
-//Route::post('/feed/store', [FeedController::class, 'store']);
 
 //if not working, clear cache and config, then optimize (php artisan commands)
 
