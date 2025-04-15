@@ -62,6 +62,29 @@ class _CreateRecipeState extends State<CreateRecipe> {
       );
       return response;
     }
+
+    Future<http.Response> storeRecipeTag(int tags_id, int recipe_id) async {
+      var url = Uri.http('3.93.61.3', '/api/feed/tagRecipe/store');
+      var response = await http.post(
+        url, headers: {"Authorization": 'Bearer ${globals.token}', "Content-Type": "application/json", "Accept": "application/json"},
+        body: jsonEncode({
+          'tags_id': tags_id,
+          'recipe_id': recipe_id})
+      );
+      return response;
+    }
+
+    Future<http.Response> storeRecipeIngredient(int ri_recipe_id, int ri_ingredient_id, ri_ingredient_measurement) async {
+      var url = Uri.http('3.93.61.3', 'api/feed/recipeIngredient/store');
+      var response = await http.post(
+        url, headers: {"Authorization": 'Bearer ${globals.token}', "Content-Type": "application/json", "Accept": "application/json"},
+        body: jsonEncode({
+          'ri_recipe_id': ri_recipe_id,
+          'ri_ingredient_id': ri_ingredient_id,
+          'ri_ingredient_measurement': ri_ingredient_measurement})
+      );
+      return response;
+    }
     
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -471,6 +494,20 @@ class _CreateRecipeState extends State<CreateRecipe> {
                     // tags_id = 24 or 154, hardcoded for now
                     // recipe_id = response["recipe_id"] from storing recipe
                     //------------------------------------------//
+                    int recipe_id = jsonDecode(storeRecipeResponse.body)['recipe_id'];
+                    
+                    http.Response? veganResponse;
+                    http.Response? glutenResponse;
+
+                    if (isVegan) {
+                      veganResponse = await storeRecipeTag(24, recipe_id);
+                    }
+
+                    if (isGlutenFree) {
+                      glutenResponse = await storeRecipeTag(154, recipe_id);
+                    }
+
+                    List<http.Response> ingredientResponses = [];
 
                     // STORE RECIPE INGREDIENTS //
                     //------------------------------------------//
@@ -479,7 +516,12 @@ class _CreateRecipeState extends State<CreateRecipe> {
                     // ri_ingredient_id = ingredient.ingredientInfo["ingredient_id"]
                     // ri_ingredient_measurement = ingredient.portion
                     //------------------------------------------//
-                    
+                    for (Ingredient ingredient in ingredients) {
+                      int ingredient_id = ingredient.ingredientInfo["ingredient_id"];
+                      http.Response response = await storeRecipeIngredient(recipe_id, ingredient_id, ingredient.portion);
+                      ingredientResponses.add(response);
+                    }
+
                     // Success Dialog
                     showDialog<String>(
                       context: context,
@@ -494,6 +536,19 @@ class _CreateRecipeState extends State<CreateRecipe> {
                               const SizedBox(height: 15),
                               const Text("Status Codes:"),
                               Text("Store Recipe - Status: ${storeRecipeResponse.statusCode}"),
+                              isVegan
+                              ? Text("Recipe Vegan - Status: ${veganResponse?.statusCode}")
+                              : Text("Recipe Vegan - None"),
+                              isGlutenFree
+                              ? Text("Recipe Gluten - Status: ${glutenResponse?.statusCode}")
+                              : Text("Recipe Gluten - None"),
+                              ListView(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                children: ingredientResponses.map((response) {
+                                  return Text("Ingredient Response - ${response.statusCode}"),
+                                }).toList(),
+                              ),
                               /*const Text("Current Values:"),
                               Text("Title: ${titleController.text}"),
                               Text("Subtitle: ${subtitleController.text}"),
