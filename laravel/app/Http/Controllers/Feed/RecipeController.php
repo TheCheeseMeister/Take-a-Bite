@@ -55,6 +55,15 @@ class RecipeController extends Controller
         ],200);
     }
 
+    public function getRecipes()
+    {
+        $recipe_name = Recipe::get();
+
+        return response([
+            'recipe_name' => $recipe_name,
+        ],200);
+    }
+/*
     public function likePost($feed_id)
     {
         $feed = Recipe::where('id', '=', $feed_id)->first();
@@ -87,9 +96,9 @@ class RecipeController extends Controller
             }
         
         
-       
-    }
-
+        }
+        */
+        
     public function comment(Request $request, $feed_id)
     {
 

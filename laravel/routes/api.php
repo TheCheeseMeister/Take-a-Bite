@@ -18,6 +18,8 @@ Route::post('/feed/store', [RecipeController::class,'store'])->middleware('auth:
 
 Route::get('/feed/store/{feed_id}', [RecipeController::class,'getRecipe'])->middleware('auth:sanctum');
 
+Route::get('/feed/recipe/', [RecipeController::class,'getRecipes'])->middleware('auth:sanctum');
+
 Route::post('/feed/like/{feed_id}', [RecipeController::class,'likePost'])->middleware('auth:sanctum');
 
 Route::post('/feed/comment/{feed_id}', [RecipeController::class,'comment'])->middleware('auth:sanctum');

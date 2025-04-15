@@ -27,7 +27,7 @@ class Recipe extends Model
         'recipe_directions',
     ];
 
-    protected $appends = ['liked'];
+    //protected $appends = ['liked'];
 
     public function user(): BelongsTo{
         return $this->belongsTo(User::class);
@@ -55,10 +55,10 @@ class Recipe extends Model
         return $this->hasMany(Comment::class);
 
     }
-
+/*
     public function getLikedAttribute(): bool
     {
         return (bool) $this->likes()->where('recipe_id', $this->id)->where('user_id', $this->user_id)->exists();
     }
-
+*/
 }

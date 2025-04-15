@@ -1,0 +1,2 @@
+C:/Users/jimmy/Desktop/flutter export/Take-a-Bite/android/app/.cxx/Debug/1h664336/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/jimmy/Desktop/flutter export/Take-a-Bite/android/app/.cxx/Debug/1h664336/x86_64/CMakeFiles/rebuild_cache.dir
