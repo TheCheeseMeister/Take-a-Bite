@@ -24,14 +24,14 @@ class PostRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'recipe_name' => 'required|string|min:2',
-            'cook_time' => 'required|string|min:2',
-            'prep_time' => 'required|string|min:2',
-            'total_time' => 'required|string|min:2',
+            'recipe_name' => 'required|string',
+            'cook_time' => 'required|string',
+            'prep_time' => 'required|string',
+            'total_time' => 'required|string',
             'recipe_description' => 'string',
-            'recipe_category' => 'string|min:2',
+            'recipe_category' => 'string',
             'recipe_servings' => 'required|string',
-            'recipe_yield' => 'required|string|min:2',
+            'recipe_yield' => 'required|string',
             'recipe_directions' => 'required|string',
         ];
     }
