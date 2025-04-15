@@ -3,6 +3,9 @@
 use App\Http\Controllers\Auth\AuthenticationController;
 use App\Http\Controllers\Feed\RecipeController;
 use App\Http\Controllers\Feed\RecipeIngredientsLinkController;
+use App\Http\Controllers\Feed\TagController;
+use App\Http\Controllers\Feed\TagIngredientController;
+use App\Http\Controllers\Feed\TagRecipeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -28,7 +31,20 @@ Route::get('/feed/ingredients/{ingredient_id}', [RecipeController::class,'getIng
 Route::get('/feed/recipeIngredient/{recipe_id}', [RecipeIngredientsLinkController::class,'getRecipeIngredient'])->middleware('auth:sanctum');
 
 Route::post('/feed/recipeIngredient/store', [RecipeIngredientsLinkController::class,'storeRecipeIngredients'])->middleware('auth:sanctum');
-//Route::post('/feed/recipeIngredient/store', [RecipeController::class,'store'])->middleware('auth:sanctum');
+
+Route::get('/feed/tag/{tags_id}', [TagController::class,'getTag'])->middleware('auth:sanctum');
+
+Route::get('/feed/tag', [TagController::class,'getTags'])->middleware('auth:sanctum');
+
+Route::post('/feed/tagIngredient/store', [TagIngredientController::class,'storeTagIngredients'])->middleware('auth:sanctum');
+
+Route::get('/feed/tagIngredient/{tagIngredientID}', [TagIngredientController::class,'getTagIngredient'])->middleware('auth:sanctum');
+
+Route::post('/feed/tagRecipe/store', [TagRecipeController::class,'storeTagRecipe'])->middleware('auth:sanctum');
+
+Route::get('/feed/tagRecipe/{tagRecipeID}', [TagRecipeController::class,'getTagRecipe'])->middleware('auth:sanctum');
+
+
 
 
 Route::get('/test', function(){

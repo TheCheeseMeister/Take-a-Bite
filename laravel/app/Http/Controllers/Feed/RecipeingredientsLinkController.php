@@ -42,5 +42,6 @@ class RecipeingredientsLinkController extends Controller
         
     }
 
+    //add get that gets all ingredients from recipe id
 
 }
