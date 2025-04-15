@@ -349,7 +349,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<http.Response> checkIngredients() async {
-    var url = Uri.http('3.93.61.3', '/api/feed/ingredients/1');
+    var url = Uri.http('3.93.61.3', '/api/feed/ingredients');
     var response = await http.get(url, headers: {"Authorization": 'Bearer ${globals.token}', "Accept": "application/json"});
     return response;
   }

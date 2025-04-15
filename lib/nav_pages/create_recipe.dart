@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:take_a_bite/globals.dart' as globals;
 
 class Ingredient {
@@ -40,6 +43,26 @@ class _CreateRecipeState extends State<CreateRecipe> {
   // Image selector somewhere??
   @override
   Widget build(BuildContext context) {
+    Future<http.Response> storeRecipe(String recipe_name, String cook_time, String prep_time, String recipe_description, String recipe_category, String recipe_servings, String recipe_yield, String recipe_directions, int user_user_id) async {
+      // Store Recipe
+      var url = Uri.http('3.93.61.3', '/api/feed/store');
+      var response = await http.post(
+        url, headers: {"Authorization": 'Bearer ${globals.token}', "Content-Type": "application/json", "Accept": "application/json"},
+        body: jsonEncode({
+          'recipe_name': recipe_name,
+          'cook_time': cook_time,
+          'prep_time': prep_time,
+          'total_time': "NA",
+          'recipe_description': recipe_description,
+          'recipe_category': "NA",
+          'recipe_servings': recipe_servings,
+          'recipe_yield': "NA",
+          'recipe_directions': recipe_directions})
+          //'user_user_id': user_user_id}),
+      );
+      return response;
+    }
+    
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: SingleChildScrollView(
@@ -416,8 +439,48 @@ class _CreateRecipeState extends State<CreateRecipe> {
               ),
               // Create/Submit Button
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (formKey.currentState!.validate()) {
+                    // STORE RECIPE //
+                    //------------------------------------------//
+                    // recipe_name = titleController.text
+                    // cook_time = cookController.text
+                    // prep_time = prepController.text
+                    // recipe_description = subtitleController.text
+                    // recipe_category = "N/A"
+                    // recipe_servings = servingSizeController.text
+                    // recipe_yield = "N/A"
+                    // recipe_directions = instructionsController.text
+                    // user_user_id = globals.user["user_id"]
+                    //------------------------------------------//
+                    http.Response storeRecipeResponse = await storeRecipe(
+                      titleController.text,
+                      cookController.text,
+                      prepController.text,
+                      subtitleController.text,
+                      "N/A",
+                      servingSizeController.text,
+                      "N/A",
+                      instructionsController.text,
+                      globals.user["user_id"]
+                    );
+
+                    // STORE TAG RECIPE LINK //
+                    //------------------------------------------//
+                    // * Note: request for each tag
+                    // tags_id = 24 or 154, hardcoded for now
+                    // recipe_id = response["recipe_id"] from storing recipe
+                    //------------------------------------------//
+
+                    // STORE RECIPE INGREDIENTS //
+                    //------------------------------------------//
+                    // * Note: request for each ingredient
+                    // ri_recipe_id = response["recipe_id"] from storing recipe
+                    // ri_ingredient_id = ingredient.ingredientInfo["ingredient_id"]
+                    // ri_ingredient_measurement = ingredient.portion
+                    //------------------------------------------//
+                    
+                    // Success Dialog
                     showDialog<String>(
                       context: context,
                       builder: (BuildContext context) => Dialog(
@@ -427,14 +490,16 @@ class _CreateRecipeState extends State<CreateRecipe> {
                             mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text("Recipe successfuly created (soon)"),
+                              const Text("Recipe successfully created!"),
                               const SizedBox(height: 15),
-                              const Text("Current Values:"),
+                              const Text("Status Codes:"),
+                              Text("Store Recipe - Status: ${storeRecipeResponse.statusCode}"),
+                              /*const Text("Current Values:"),
                               Text("Title: ${titleController.text}"),
                               Text("Subtitle: ${subtitleController.text}"),
                               Text("Prep Time: ${prepController.text}"),
                               Text("Cook Time: ${cookController.text}"),
-                              Text("Serving Size: ${servingSizeController.text}"),
+                              Text("Serving Size: ${servingSizeController.text}"),*/
                               TextButton(
                                 onPressed: () {
                                   Navigator.pop(context);
