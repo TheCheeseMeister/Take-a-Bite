@@ -453,6 +453,7 @@ class _LoginPageState extends State<LoginPage> {
                           {
                             final loginData = jsonDecode(loginResponse.body);
                             setState(() {globals.token = loginData['token'];});
+                            setState(() {globals.user = loginData['user'];});
 
                             http.Response ingredientsResponse = await checkIngredients();
                             setState(() {ingredientsStatus = ingredientsResponse.statusCode;});
@@ -462,6 +463,7 @@ class _LoginPageState extends State<LoginPage> {
                             print('Login Status: $loginStatus');
                             print('Ingredients Status: $ingredientsStatus');
                             print('Ingredient test: ${globals.ingredientsList}');
+                            print('User info: ${globals.user}');
 
                             Navigator.pushNamed(context, '/Nav');
                           }
