@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:take_a_bite/globals.dart' as globals;
+import 'package:image/image.dart' as img;
 
 class Ingredient {
   final Map<String, dynamic> ingredientInfo;
@@ -39,6 +40,9 @@ class _CreateRecipeState extends State<CreateRecipe> {
 
   File ? selectedImage;
 
+  bool testLoading = false;
+  String? testImageUrl;
+
   //Map<String, dynamic> tempIngredient = {};
   Map<String, dynamic> tempIngredient = {};
   //List<Map<Map<String, dynamic>, int>> ingredients = [];
@@ -50,7 +54,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
     Future<http.Response> storeRecipe(String recipe_name, String cook_time, String prep_time, String recipe_description, String recipe_category, String recipe_servings, String recipe_yield, String recipe_directions, int user_user_id) async {
       // Store Recipe
       var url = Uri.http('3.93.61.3', '/api/feed/store');
-      var response = await http.post(
+      /*var response = await http.post(
         url, headers: {"Authorization": 'Bearer ${globals.token}', "Content-Type": "application/json", "Accept": "application/json"},
         body: jsonEncode({
           'recipe_name': recipe_name,
@@ -63,7 +67,43 @@ class _CreateRecipeState extends State<CreateRecipe> {
           'recipe_yield': "NA",
           'recipe_directions': recipe_directions})
           //'user_user_id': user_user_id}),
-      );
+      );*/
+
+      var request = http.MultipartRequest('POST', url);
+      request.headers.addAll({
+        "Authorization": 'Bearer ${globals.token}',
+        //"Content-Type": "application/json",
+        "Accept": "application/json"
+      });
+
+      request.fields['recipe_name'] = recipe_name;
+      request.fields['cook_time'] = cook_time;
+      request.fields['prep_time'] = prep_time;
+      request.fields['total_time'] = "NA";
+      request.fields['recipe_description'] = recipe_description;
+      request.fields['recipe_category'] = "NA";
+      request.fields['recipe_servings'] = recipe_servings;
+      request.fields['recipe_yield'] = "NA";
+      request.fields['recipe_directions'] = recipe_directions;
+
+      // Resize file
+      if (selectedImage != null) {
+        final bytes = await selectedImage!.readAsBytes();
+        img.Image? originalImage = img.decodeImage(bytes);
+
+        img.Image resized = img.copyResize(originalImage!, width: 800);
+        final resizedBytes = img.encodeJpg(resized, quality: 80);
+        final resizedImage = File(selectedImage!.path)..writeAsBytesSync(resizedBytes);
+
+        var file = await http.MultipartFile.fromPath('image', resizedImage.path);
+        request.files.add(file);
+      }
+
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      print(response.statusCode);
+
       return response;
     }
 
@@ -95,6 +135,28 @@ class _CreateRecipeState extends State<CreateRecipe> {
 
       if (returnedImage == null) return;
       setState(() {selectedImage = File(returnedImage!.path);});
+    }
+
+    Future<void> testGetImage(int recipe_id) async {
+      setState(() {testLoading = true;});
+
+      var url = Uri.http('3.93.61.3', 'api/feed/store/$recipe_id');
+      var response = await http.get(
+        url, headers: {"Authorization": 'Bearer ${globals.token}', "Content-Type": "application/json", "Accept": "application/json"},
+      );
+
+      print(response.statusCode);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body)['recipe_name'][0];
+        final retreivedUrl = data['recipe_image'];
+        print(data);
+        print(retreivedUrl);
+
+        setState(() {testImageUrl = retreivedUrl;});
+      }
+
+      setState(() {testLoading = false;});
     }
 
     return Scaffold(
@@ -605,6 +667,15 @@ class _CreateRecipeState extends State<CreateRecipe> {
                   }
                 },
                 child: const Text("Submit"),
+              ),
+              if (testLoading) CircularProgressIndicator(),
+              if (testImageUrl != null) Image.network(testImageUrl!)
+              else if (!testLoading) Text("No image loaded"),
+              TextButton(
+                onPressed: () {
+                  testGetImage(1033);
+                },
+                child: Text("Press me to load test url!"),
               ),
             ]),
           ),
