@@ -33,6 +33,7 @@ class PostRequest extends FormRequest
             'recipe_servings' => 'required|string',
             'recipe_yield' => 'required|string',
             'recipe_directions' => 'required|string',
+	    'recipe_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ];
     }
 }

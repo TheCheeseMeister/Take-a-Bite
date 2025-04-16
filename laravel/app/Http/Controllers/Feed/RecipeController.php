@@ -28,6 +28,12 @@ class RecipeController extends Controller
 
     public function store(PostRequest $request){
         $request->validated();
+	$imagePath = NULL;
+
+	if ($request->hasFile('image') && $request->file('image')->isValid()) {
+	    $path = $request->file('image')->store('images', 'public');
+	    $imagePath = url('storage/' . $path);
+	}
 
         auth()->user()->feeds()->create([
             'recipe_name' => $request->recipe_name,
@@ -39,6 +45,7 @@ class RecipeController extends Controller
             'recipe_yield' => $request->recipe_yield,
             'recipe_directions' => $request->recipe_directions,
             'user_user_id' => auth()->id(),
+	    'recipe_image' => $imagePath,
         ]);
 
         return response([
