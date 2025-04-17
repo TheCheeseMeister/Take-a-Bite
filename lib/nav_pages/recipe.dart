@@ -6,36 +6,50 @@ import 'package:take_a_bite/nav_pages/profile.dart';
 class RecipePage extends StatelessWidget {
   const RecipePage({
     super.key,
-    required this.image,
+    /*required this.image,
     required this.title,
     required this.ingredients,
     required this.prepTime,
     required this.cookTime,
     required this.servingSize,
     required this.instructions,
+    required this.index,*/
+    required this.recipeInfo,
+    required this.ingredients,
+    required this.image,
     required this.index,
   });
 
   // Info passed from Recipe Card
-  final Image image;
-  final String title;
-  final List<String> ingredients;
-  final int prepTime;
-  final int cookTime;
-  final String servingSize;
-  final String instructions; // Description of recipe
+  final Map<String, dynamic> recipeInfo;
+  final Map<String, dynamic> ingredients;
+  final Image? image;
   final int index; // For hero
 
   @override
   Widget build(BuildContext context) {
+    String title = recipeInfo['recipe_name'];
+    String prepTime = recipeInfo['prep_time'];
+    String cookTime = recipeInfo['cook_time'];
+    String servingSize = recipeInfo['recipe_servings'];
+    String instructions = recipeInfo['recipe_directions'];
+    String subtitle = recipeInfo['recipe_description'];
+
     timeDilation = 0.5;
+    
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
           children: [
             Hero(
               tag: 'recipe-$index',
-              child: image,
+              child: image == null
+              ? const Icon(
+                        Icons.image_not_supported,
+                        size: 300,
+                        color: Colors.grey,
+                      )
+              : image!,
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -52,10 +66,10 @@ class RecipePage extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
               child: Container(
                 constraints: const BoxConstraints(maxWidth: 250),
-                child: const Text(
-                  "Learn the ins and outs of making a Pizza in 10 minutes from the comfort of your own home.",
+                child: Text(
+                  subtitle,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.w300,
                     fontStyle: FontStyle.italic,
                   ),
@@ -92,11 +106,12 @@ class RecipePage extends StatelessWidget {
                     border: Border.all(color: Colors.black, width: 2),
                   ),
                   child: Column(
-                    children: ingredients.map((str) {
+                    children: ingredients['ingredients'] != null
+                    ? ingredients['ingredients'].entries.map<Widget>((e) {
                       return Padding(
                         padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
                         child: Text(
-                          str,
+                          "${e.value['portion']} ${e.value['ingredient_name']}",
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontWeight: FontWeight.w400,
@@ -104,7 +119,10 @@ class RecipePage extends StatelessWidget {
                           ),
                         ),
                       );
-                    }).toList(),
+                    }).toList()
+                    : [
+                      Text("No Ingredients."),
+                    ],
                   ),
                 ),
               ),
@@ -151,8 +169,11 @@ class RecipePage extends StatelessWidget {
             // Poster's profile (i.e. Made by CheeseMaster) / Likes? Or maybe Likes higher
             //Text("Insert creator profile here"),
             const RecipeCreator(),
+            const SizedBox(
+              height: 50,
+            ),
             // Comments (can go to poster's profile from comment)
-            const Padding(
+            /*const Padding(
               padding: EdgeInsets.fromLTRB(0, 48, 0, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -179,7 +200,7 @@ class RecipePage extends StatelessWidget {
                   ),
                 ],
               ),
-            ),
+            ),*/
           ],
         ),
       ),
@@ -278,8 +299,8 @@ class RecipeStats extends StatelessWidget {
       required this.cookTime,
       required this.servingSize});
 
-  final int prepTime;
-  final int cookTime;
+  final String prepTime;
+  final String cookTime;
   final String servingSize;
 
   @override

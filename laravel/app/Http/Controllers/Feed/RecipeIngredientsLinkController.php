@@ -34,7 +34,7 @@ class RecipeIngredientsLinkController extends Controller
 
     public function getRecipeIngredient($recipe_id) //get ingredients from recipe
     {
-        $ingredients = RecipeIngredients::get();
+        $ingredients = RecipeIngredients::where('ri_recipe_id', $recipe_id)->get();
 
         return response([
             'ingredients' => $ingredients

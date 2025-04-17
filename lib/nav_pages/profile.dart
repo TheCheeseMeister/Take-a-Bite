@@ -247,7 +247,7 @@ class ProfileRecipe extends StatelessWidget {
     return FractionallySizedBox(
       widthFactor: 0.9,
       child: InkWell(
-        onTap: () => PersistentNavBarNavigator.pushNewScreenWithRouteSettings(
+        /*onTap: () => PersistentNavBarNavigator.pushNewScreenWithRouteSettings(
           context,
           settings: const RouteSettings(),
           screen: RecipePage(
@@ -261,7 +261,7 @@ class ProfileRecipe extends StatelessWidget {
               index: index),
           withNavBar: true,
           pageTransitionAnimation: PageTransitionAnimation.fade,
-        ),
+        ),*/
         child: Column(
           children: [
             ClipRRect(
