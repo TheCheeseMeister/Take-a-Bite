@@ -10,12 +10,15 @@ import 'package:dropdown_search/dropdown_search.dart';
 
 import 'package:take_a_bite/globals.dart' as globals;
 
-List<Map<String, dynamic>> recipes = [];
-List<List<dynamic>> ingredients = [];
+List<Map<String, dynamic>> recipes = []; // Different recipes that will be displayed as cards
+List<List<dynamic>> ingredients = []; // Ingredients of recipe in foreign key format
+List<Map<String, dynamic>> recipeIngredients = []; // Ingredients of recipe in human readable format
+List<Map<String, dynamic>> recipeTags = [];
+bool searching = false; // Currently querying for recipes (loading symbol)
 
-List<Map<String, dynamic>> recipeIngredients = [];
-
-bool searching = false;
+List<String> selectedIngredients = []; // Selected ingredients in dropdown
+List<String> selectedTags = []; // Selected tags in dropdown
+final wordSearch = TextEditingController(); // Search recipe name
 
 // TODO: make StatefulWidget to allow setting of values
 class Search extends StatefulWidget {
@@ -42,7 +45,7 @@ class _SearchState extends State<Search> {
     //data.shuffle(); Use this for randomizing order
     data = data.reversed.toList();
     
-    for (var i = 0; i < 10; i++) {
+    for (var i = 0; i < 25; i++) {
       setState(() {recipes.add(data[i]);});
     }
   }
@@ -58,7 +61,31 @@ class _SearchState extends State<Search> {
     );
     final data = jsonDecode(response.body)['ingredients'];
     setState(() {ingredients.add(data);});
-    print(recipe_id);
+    //print(recipe_id);
+  }
+
+  Future<void> getRecipeTags(int recipe_id) async {
+    var url = Uri.http('3.93.61.3', '/api/feed/tagRecipe/$recipe_id');
+    var response = await http.get(url,
+        headers: {
+          "Authorization": 'Bearer ${globals.token}',
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+    );
+    final data = jsonDecode(response.body)['ingredients'];
+    if (data.isEmpty) {
+      Map<String, dynamic> empty = {};
+      setState(() {recipeTags.add(empty);});
+    } else {
+      List<dynamic> tagIds = data.map((e) => e['tags_id']).toList();
+      //print(tagIds);
+      List<dynamic> tags = globals.tagsList.where((element) => tagIds.contains(element['tags_id'])).map((element) => element['tag_name']).toList();
+      //print(tags);
+      Map<String, dynamic> temp = {"id": recipe_id, "tags": tags};
+      
+      setState(() {recipeTags.add(temp);});
+    }
   }
 
   void buildRecipeIngredients() {
@@ -84,26 +111,78 @@ class _SearchState extends State<Search> {
         recipe['ingredients'] = recipe_ingredients;
         
         recipeIngredients.add(recipe);
-        print(recipe);
+        //print(recipe);
       }
+    }
+    //print(recipeIngredients.firstWhere((e) => e['recipe_id'] == 1035, orElse: () => {})['ingredients']);
+  }
+
+  // Enforce selectedIngredients, remove repices without these ingredients
+  void enforceIngredients() {
+    for (var ingredient in selectedIngredients) {
+      recipes = recipes.where((recipe) {
+        var tempIngredients = recipeIngredients.firstWhere((e) => e['recipe_id'] == recipe['recipe_id'], orElse: () => {})['ingredients'];
+        if (tempIngredients == {}) return false;
+        if (tempIngredients != null) {
+          List<dynamic> tempIngredientNames = tempIngredients.values.map((e) => e['ingredient_name'] ?? '').toList();
+          //print(tempIngredientNames);
+          //print("$ingredient - ${tempIngredientNames.contains(ingredient)}");
+          return tempIngredientNames.contains(ingredient);
+        }
+        return false;
+      }).toList();
     }
   }
 
+  void enforceTags() {
+    for (var tag in selectedTags) {
+      recipes = recipes.where((recipe) {
+        //var tempTags = recipeTags.firstWhere((e) => e.keys == recipe['recipe_id'], orElse: () => {});
+        var tempTags = recipeTags.firstWhere((e) => e['id'] == recipe['recipe_id'], orElse: () => {});
+        if (tempTags == {}) return false;
+        if (tempTags != null) {
+          List<dynamic> tempTagList = tempTags['tags'] ?? [];
+          if (tempTagList == []) return false;
+          return tempTagList.contains(tag);
+        }
+        return false;
+      }).toList();
+    }
+  }
+
+  void enforceSearch() {
+    var query = wordSearch.text.toLowerCase();
+    //print(query);
+    recipes = recipes.where((recipe) {
+      return recipe['recipe_name'].toLowerCase().contains(query);
+    }).toList();
+  }
+
+  // Search method for SearchBar, sends callback to parent widget (this)
   Future<void> handleSearch() async {
+    FocusScope.of(context).unfocus();
+
     setState(() {searching = true;});
 
     await getRecipes();
             
     setState(() {ingredients = [];});
+    setState(() {recipeTags = [];});
     for (var recipe in recipes) {
       await getRecipeIngredients(recipe['recipe_id']);
+      await getRecipeTags(recipe['recipe_id']);
     }
-            
-    print(ingredients.length);
-    print(globals.ingredientsList);
+
     buildRecipeIngredients();
 
+    // filter
+    enforceIngredients();
+    enforceTags();
+    enforceSearch();
+
     setState(() {searching = false;});
+
+    //print(globals.tagsList);
   }
 
   @override
@@ -113,9 +192,41 @@ class _SearchState extends State<Search> {
         child: Center(
           child: Column(
             children: [
-              Padding(
-                padding: EdgeInsets.fromLTRB(0, 48, 0, 0),
-                child: SearchBar(searchMethod: handleSearch),
+              Row(
+                children: [
+                  SizedBox(
+                    height: 100,
+                    width: 290,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24,48,0,0),
+                      child: TextField(
+                        controller: wordSearch,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: "Search",
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8,48,0,0),
+                    child: IconButton(
+                      icon: const Icon(Icons.search),
+                      onPressed: () async {
+                        //await widget.searchMethod();
+                        await handleSearch();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(0, 8, 62, 0),
+                child: SearchBar(),
+              ),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(0, 8, 62, 0),
+                child: TagSearchBar(),
               ),
               searching
               ? const Padding(
@@ -123,7 +234,10 @@ class _SearchState extends State<Search> {
                 child: CircularProgressIndicator(),
               )
               : recipes.isEmpty
-              ? const Text("No Results.")
+              ? const Padding(
+                  padding: EdgeInsets.fromLTRB(0,24,0,0),
+                  child: Text("No Results."),
+                )
               : ListView(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -141,10 +255,8 @@ class _SearchState extends State<Search> {
 
 // Search Bar (uses Dropdown_Search package)
 class SearchBar extends StatefulWidget {
-  final Future<void> Function() searchMethod;
   const SearchBar({
     super.key,
-    required this.searchMethod,
   });
 
   @override
@@ -160,7 +272,7 @@ class _SearchBarState extends State<SearchBar> {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
           child: SizedBox(
-            width: 275,
+            width: 266,
             child: DropdownSearch<String>.multiSelection(
               //items: (filter, s) => ["a", "b", "c", "d", "e", "f", "g", "h", "i"],
               items: (filter, s) => globals.ingredientsList
@@ -169,7 +281,14 @@ class _SearchBarState extends State<SearchBar> {
               compareFn: (i, s) => i == s,
               onChanged: (List<String> selectedItems) {
                 // TODO: add httprequest to search for recipes with selected items
+                setState(() {selectedIngredients = selectedItems;});
               },
+              decoratorProps: const DropDownDecoratorProps(
+                decoration: InputDecoration(
+                  labelText: "Ingredients",
+                  border: OutlineInputBorder(),
+                ),
+              ),
               popupProps: PopupPropsMultiSelection.menu(
                 menuProps: const MenuProps(
                     backgroundColor: Color.fromARGB(255, 255, 255, 255)),
@@ -186,11 +305,59 @@ class _SearchBarState extends State<SearchBar> {
             ),
           ),
         ),
-        IconButton(
-          icon: const Icon(Icons.search),
-          onPressed: () async {
-            await widget.searchMethod();
-          },
+      ],
+    );
+  }
+}
+
+class TagSearchBar extends StatefulWidget {
+  const TagSearchBar({super.key});
+
+  @override
+  State<TagSearchBar> createState() => _TagSearchBarState();
+}
+
+class _TagSearchBarState extends State<TagSearchBar> {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
+          child: SizedBox(
+            width: 266,
+            child: DropdownSearch<String>.multiSelection(
+              //items: (filter, s) => ["a", "b", "c", "d", "e", "f", "g", "h", "i"],
+              items: (filter, s) => globals.tagsList
+                  .map<String>((tag) => tag['tag_name'])
+                  .toList(),
+              compareFn: (i, s) => i == s,
+              onChanged: (List<String> selectedItems) {
+                // TODO: add httprequest to search for recipes with selected items
+                setState(() {selectedTags = selectedItems;});
+              },
+              decoratorProps: const DropDownDecoratorProps(
+                decoration: InputDecoration(
+                  labelText: "Tags",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              popupProps: PopupPropsMultiSelection.menu(
+                menuProps: const MenuProps(
+                    backgroundColor: Color.fromARGB(255, 255, 255, 255)),
+                showSearchBox: true,
+                constraints:
+                    const BoxConstraints(maxWidth: 500, maxHeight: 400),
+                itemBuilder: (context, item, isDisabled, isSelected) {
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
+                    child: Text(item.toString()),
+                  );
+                },
+              ),
+            ),
+          ),
         ),
       ],
     );
@@ -208,16 +375,6 @@ class RecipeCard extends StatelessWidget {
     required this.index,
   });
 
-  // Normally loaded from database, but for sake of placeholder
-  //final String title = "How to make a pizza in 10 minutes";
-  //final Image image = const Image(image: AssetImage('lib/imgs/pizza.jpg'));
-  //final List<String> ingredients = fakeIngredients();
-  //final int prepTime = 10;
-  //final int cookTime = 10;
-  //final String servingSize = "4 - 5 people";
-  //final int index = 0; // Eventually will be put in a list, this will be its position
-  //String description = fakeInstructions();
-
   @override
   Widget build(BuildContext context) {
     String title = recipeInfo['recipe_name'];
@@ -227,9 +384,21 @@ class RecipeCard extends StatelessWidget {
     String servingSize = recipeInfo['recipe_servings'];
     String description = recipeInfo['recipe_directions'];
 
+    bool isVegan = false;
+    bool isGlutenFree = false;
+
     Map<String, dynamic> ingredients = recipeIngredients.firstWhere((element) => element['recipe_id'] == recipeInfo['recipe_id'], orElse: () => {});
 
-    //recipeInfo['recipe_id']
+    Map<String, dynamic> tempTags = recipeTags.firstWhere((element) => element['id'] == recipeInfo['recipe_id'], orElse:() => {});
+    if (tempTags.isNotEmpty) {
+      if (tempTags['tags'].contains('vegan')) {
+        isVegan = true;
+      }
+
+      if (tempTags['tags'].contains('gluten-free')) {
+        isGlutenFree = true;
+      }
+    }
 
     Image? img = null;
 
@@ -247,6 +416,8 @@ class RecipeCard extends StatelessWidget {
               recipeInfo: recipeInfo,
               ingredients: ingredients,
               image: image == "" ? null : img!,
+              isVegan: isVegan,
+              isGlutenFree: isGlutenFree,
               index: index),
           withNavBar: true,
           pageTransitionAnimation: PageTransitionAnimation.fade,

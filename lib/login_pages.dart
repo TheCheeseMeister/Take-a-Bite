@@ -354,6 +354,12 @@ class _LoginPageState extends State<LoginPage> {
     return response;
   }
 
+  Future<http.Response> checkTags() async {
+    var url = Uri.http('3.93.61.3', '/api/feed/tag');
+    var response = await http.get(url, headers: {"Authorization": 'Bearer ${globals.token}', "Accept": "application/json"});
+    return response;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -459,6 +465,13 @@ class _LoginPageState extends State<LoginPage> {
                             setState(() {ingredientsStatus = ingredientsResponse.statusCode;});
                             final ingredientsData = jsonDecode(ingredientsResponse.body);
                             globals.ingredientsList = ingredientsData['ingredients'];
+
+                            http.Response tagResponse = await checkTags();
+                            final tagsData = jsonDecode(tagResponse.body);
+                            globals.tagsList = tagsData['tag_name'];
+
+                            print('Tags Status: ${tagResponse.statusCode}');
+                            print('Tag test: ${globals.tagsList}');
 
                             print('Login Status: $loginStatus');
                             print('Ingredients Status: $ingredientsStatus');

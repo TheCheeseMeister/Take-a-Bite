@@ -17,6 +17,8 @@ class RecipePage extends StatelessWidget {
     required this.recipeInfo,
     required this.ingredients,
     required this.image,
+    required this.isVegan,
+    required this.isGlutenFree,
     required this.index,
   });
 
@@ -24,6 +26,8 @@ class RecipePage extends StatelessWidget {
   final Map<String, dynamic> recipeInfo;
   final Map<String, dynamic> ingredients;
   final Image? image;
+  final bool isVegan;
+  final bool isGlutenFree;
   final int index; // For hero
 
   @override
@@ -74,6 +78,30 @@ class RecipePage extends StatelessWidget {
                     fontStyle: FontStyle.italic,
                   ),
                 ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(36,0,0,0),
+              child: Row(
+                children: [
+                  if (isVegan) 
+                    const Chip(
+                      label: Text("Vegan", style: TextStyle(fontSize: 12)),
+                      shape: StadiumBorder(),
+                      backgroundColor: Color.fromARGB(255, 129, 212, 121),
+                    ),
+                  if (isVegan && isGlutenFree)
+                    const SizedBox(
+                      height: 20,
+                      width: 8,
+                    ),
+                  if (isGlutenFree) 
+                    const Chip(
+                      label: Text("Gluten-Free", style: TextStyle(fontSize: 12)),
+                      shape: StadiumBorder(),
+                      backgroundColor: Color.fromARGB(255, 255, 212, 82),
+                    ),
+                ],
               ),
             ),
             const Divider(
