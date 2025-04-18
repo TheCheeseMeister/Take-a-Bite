@@ -71,6 +71,16 @@ class RecipeController extends Controller
             'recipe_name' => $recipe_name,
         ],200);
     }
+
+
+    public function getUserRecipes($user_id){
+        $user_recipes = Recipe::where('user_user_id','=', $user_id)->get();
+
+        return response([
+            'user_recipes' => $user_recipes,
+        ],200);
+    }
+    
 /*
     public function likePost($feed_id)
     {

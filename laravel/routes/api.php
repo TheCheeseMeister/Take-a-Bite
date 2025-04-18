@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 
 
 
+
 Route::get('/feeds', [RecipeController::class,'index'])->middleware('auth:sanctum');
 
 Route::post('/feed/store', [RecipeController::class,'store'])->middleware('auth:sanctum');
@@ -46,6 +47,7 @@ Route::post('/feed/tagRecipe/store', [TagRecipeController::class,'storeTagRecipe
 
 Route::get('/feed/tagRecipe/{tagRecipeID}', [TagRecipeController::class,'getTagRecipe'])->middleware('auth:sanctum');
 
+Route::get('/feed/userRecipes/{user_id}', [RecipeController::class,'getUserRecipes'])->middleware('auth:sanctum');
 
 
 
