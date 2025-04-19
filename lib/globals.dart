@@ -3,6 +3,9 @@ library globals;
 // Stores user info when logging in
 Map<String, dynamic> user = {};
 
+// Recipes user created
+List<dynamic> createdRecipes = [];
+
 // Token for HttpRequests
 String token = "";
 
