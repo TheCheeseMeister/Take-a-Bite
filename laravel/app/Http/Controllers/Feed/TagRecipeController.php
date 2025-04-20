@@ -29,7 +29,7 @@ class TagRecipeController extends Controller
 
     public function getTagRecipe($tagRecipeID) //get recipes from recipe
     {
-        $recipes = TagRecipe::where("tags_recipes_id", "=", $tagRecipeID)->get();
+        $recipes = TagRecipe::where("recipe_id", "=", $tagRecipeID)->get();
 
         return response([
             'ingredients' => $recipes

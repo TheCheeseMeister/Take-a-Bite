@@ -6,6 +6,7 @@ use App\Http\Controllers\Feed\RecipeIngredientsLinkController;
 use App\Http\Controllers\Feed\TagController;
 use App\Http\Controllers\Feed\TagIngredientController;
 use App\Http\Controllers\Feed\TagRecipeController;
+use App\Http\Controllers\Feed\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -49,6 +50,13 @@ Route::get('/feed/tagRecipe/{tagRecipeID}', [TagRecipeController::class,'getTagR
 
 Route::get('/feed/userRecipes/{user_id}', [RecipeController::class,'getUserRecipes'])->middleware('auth:sanctum');
 
+Route::get('/feed/users', [UserController::class,'getUsers'])->middleware('auth:sanctum');
+
+Route::post('/feed/changeProfilePicture', [UserController::class,'storeProfilePicture'])->middleware('auth:sanctum');
+
+Route::post('/feed/changeProfileBio', [UserController::class,'storeProfileBio'])->middleware('auth:sanctum');
+
+Route::get('/feed/getUser/{user_id}', [UserController::class,'getUser'])->middleware('auth:sanctum');
 
 
 Route::get('/test', function(){
