@@ -165,6 +165,24 @@ class _CreateUserPassState extends State<CreateUserPass> {
 
   @override
   Widget build(BuildContext context) {
+    Future<http.Response> checkLogin(String username, String password) async {
+      var url = Uri.http('3.93.61.3', '/api/login');
+      var response = await http.post(url, headers: {"Accept": "application/json"}, body: {'username': username, 'password': password});
+      return response;
+    }
+
+    Future<http.Response> checkIngredients() async {
+      var url = Uri.http('3.93.61.3', '/api/feed/ingredients');
+      var response = await http.get(url, headers: {"Authorization": 'Bearer ${globals.token}', "Accept": "application/json"});
+      return response;
+    }
+
+    Future<http.Response> checkTags() async {
+      var url = Uri.http('3.93.61.3', '/api/feed/tag');
+      var response = await http.get(url, headers: {"Authorization": 'Bearer ${globals.token}', "Accept": "application/json"});
+      return response;
+    }
+
     final arguments = (ModalRoute.of(context)?.settings.arguments ?? <String, dynamic>{}) as Map;
     final email = arguments['email'];
 
@@ -301,12 +319,28 @@ class _CreateUserPassState extends State<CreateUserPass> {
                                   BorderRadius.all(Radius.circular(8)))),
                         ),
                         onPressed: () async {
-                          http.Response response = await checkRegister(usernameController.text, passwordController.text);
-                          setState(() {registerStatus = response.statusCode;});
+                          http.Response registerResponse = await checkRegister(usernameController.text, passwordController.text);
+                          setState(() {registerStatus = registerResponse.statusCode;});
                           // TODO: Add token and ingredients
                           if (formKey.currentState!.validate() && registerStatus == 201)
                             {
                               // TODO: Traverse to main app if account creation is successful
+                              final loginData = jsonDecode(registerResponse.body);
+                              setState(() {globals.token = loginData['token'];});
+                              setState(() {globals.user = loginData['user'];});
+
+                              http.Response ingredientsResponse = await checkIngredients();
+                              final ingredientsData = jsonDecode(ingredientsResponse.body);
+                              globals.ingredientsList = ingredientsData['ingredients'];
+
+                              http.Response tagResponse = await checkTags();
+                              final tagsData = jsonDecode(tagResponse.body);
+                              globals.tagsList = tagsData['tag_name'];
+
+                              if (globals.user['user_bio'] != null) {
+                                globals.userBio = ValueNotifier<String>(globals.user['user_bio']);
+                              }
+
                               Navigator.pushNamed(context, '/Nav');
                             }
                         },
@@ -477,6 +511,10 @@ class _LoginPageState extends State<LoginPage> {
                             print('Ingredients Status: $ingredientsStatus');
                             print('Ingredient test: ${globals.ingredientsList}');
                             print('User info: ${globals.user}');
+
+                            if (globals.user['user_bio'] != null) {
+                              globals.userBio = ValueNotifier<String>(globals.user['user_bio']);
+                            }
 
                             Navigator.pushNamed(context, '/Nav');
                           }
