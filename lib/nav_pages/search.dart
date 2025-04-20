@@ -415,7 +415,7 @@ class RecipeCard extends StatelessWidget {
           screen: RecipePage(
               recipeInfo: recipeInfo,
               ingredients: ingredients,
-              image: image == "" ? null : img!,
+              image: image,
               isVegan: isVegan,
               isGlutenFree: isGlutenFree,
               index: index),

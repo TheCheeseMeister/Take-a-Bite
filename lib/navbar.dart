@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:take_a_bite/globals.dart' as globals;
 import 'package:take_a_bite/nav_pages/create_recipe.dart';
 import 'package:take_a_bite/nav_pages/search.dart';
 import 'package:take_a_bite/nav_pages/meal_plan.dart';
@@ -26,9 +30,21 @@ class _NavBarState extends State<NavBar> {
   final int recipes = 0;
   final String bio = "Cooking Legend.\nSeeking cheese recipes night and day.\n#CheeseLovers25";
 
-
   @override
   Widget build(BuildContext context) {
+    Future<List<dynamic>> getCreatedRecipes(int user_id) async {
+      var url = Uri.http('3.93.61.3', '/api/feed/userRecipes/$user_id');
+      var response = await http.get(url,
+          headers: {
+            "Authorization": 'Bearer ${globals.token}',
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+      );
+      final data = jsonDecode(response.body)['user_recipes'];
+      return data;
+    }
+    
     return PersistentTabView(
       context,
       controller: _controller,
@@ -46,6 +62,13 @@ class _NavBarState extends State<NavBar> {
         ),
         const Settings(),
       ],
+      onItemSelected: (index) async {
+        if (index == 3) {
+          int user_id = globals.user['user_id'];
+          List<dynamic> tempCreated = await getCreatedRecipes(user_id);
+          setState(() {globals.createdRecipes = tempCreated;});
+        }
+      },
       items: [
         PersistentBottomNavBarItem(
           icon: const Icon(Icons.search),

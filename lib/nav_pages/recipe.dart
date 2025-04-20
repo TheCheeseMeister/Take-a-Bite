@@ -25,7 +25,7 @@ class RecipePage extends StatelessWidget {
   // Info passed from Recipe Card
   final Map<String, dynamic> recipeInfo;
   final Map<String, dynamic> ingredients;
-  final Image? image;
+  final String image;
   final bool isVegan;
   final bool isGlutenFree;
   final int index; // For hero
@@ -39,6 +39,8 @@ class RecipePage extends StatelessWidget {
     String instructions = recipeInfo['recipe_directions'];
     String subtitle = recipeInfo['recipe_description'];
 
+    print(ingredients);
+
     timeDilation = 0.5;
     
     return Scaffold(
@@ -47,13 +49,13 @@ class RecipePage extends StatelessWidget {
           children: [
             Hero(
               tag: 'recipe-$index',
-              child: image == null
+              child: image == ""
               ? const Icon(
                         Icons.image_not_supported,
                         size: 300,
                         color: Colors.grey,
                       )
-              : image!,
+              : Image.network(image),
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
