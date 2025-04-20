@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:take_a_bite/nav_pages/fake_instruct.dart';
 import './recipe.dart';
@@ -12,6 +14,9 @@ import 'package:take_a_bite/globals.dart' as globals;
 
 List<Map<String, dynamic>> recipes =
     []; // Different recipes that will be displayed as cards
+
+List<dynamic> newRecipeList = [];
+
 List<List<dynamic>> ingredients =
     []; // Ingredients of recipe in foreign key format
 List<Map<String, dynamic>> recipeIngredients =
@@ -50,6 +55,9 @@ class _SearchState extends State<Search> {
     var data = jsonDecode(response.body)['recipe_name'];
     //data.shuffle(); Use this for randomizing order
     data = data.reversed.toList();
+
+    print(response.statusCode);
+    //print(data[0]);
 
     for (var i = 0; i < 25; i++) {
       setState(() {
@@ -140,7 +148,11 @@ class _SearchState extends State<Search> {
   // Enforce selectedIngredients, remove repices without these ingredients
   void enforceIngredients() {
     for (var ingredient in selectedIngredients) {
-      recipes = recipes.where((recipe) {
+      newRecipeList = newRecipeList.where((recipe) {
+        var ingredientList = recipe['ingredients'].map((ingredient) => ingredient['ingredient_name']);
+        return ingredientList.contains(ingredient);
+      }).toList();
+      /*recipes = recipes.where((recipe) {
         var tempIngredients = recipeIngredients.firstWhere(
             (e) => e['recipe_id'] == recipe['recipe_id'],
             orElse: () => {})['ingredients'];
@@ -149,19 +161,20 @@ class _SearchState extends State<Search> {
           List<dynamic> tempIngredientNames = tempIngredients.values
               .map((e) => e['ingredient_name'] ?? '')
               .toList();
-          //print(tempIngredientNames);
-          //print("$ingredient - ${tempIngredientNames.contains(ingredient)}");
           return tempIngredientNames.contains(ingredient);
         }
         return false;
-      }).toList();
+      }).toList();*/
     }
   }
 
   void enforceTags() {
     for (var tag in selectedTags) {
-      recipes = recipes.where((recipe) {
-        //var tempTags = recipeTags.firstWhere((e) => e.keys == recipe['recipe_id'], orElse: () => {});
+      newRecipeList = newRecipeList.where((recipe) {
+        var tagsList = recipe['tags'].map((tag) => tag['tag_name']).toList();
+        return tagsList.contains(tag);
+      }).toList();
+      /*recipes = recipes.where((recipe) {
         var tempTags = recipeTags.firstWhere(
             (e) => e['id'] == recipe['recipe_id'],
             orElse: () => {});
@@ -172,16 +185,39 @@ class _SearchState extends State<Search> {
           return tempTagList.contains(tag);
         }
         return false;
-      }).toList();
+      }).toList();*/
     }
   }
 
   void enforceSearch() {
-    var query = wordSearch.text.toLowerCase();
-    //print(query);
+    /*var query = wordSearch.text.toLowerCase();
     recipes = recipes.where((recipe) {
       return recipe['recipe_name'].toLowerCase().contains(query);
+    }).toList();*/
+    var query = wordSearch.text.toLowerCase();
+    newRecipeList = newRecipeList.where((recipe) {
+      return recipe['recipe_name'].toLowerCase().contains(query);
     }).toList();
+  }
+
+  // Attempt to speed up Search
+  Future<void> getRecipesTest() async {
+    var url = Uri.http('3.93.61.3', '/api/feed/getRecipesAndInfo');
+    var response = await http.get(
+      url,
+      headers: {
+        "Authorization": 'Bearer ${globals.token}',
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Accept-Encoding": "identity",
+      },
+    );
+    
+    final data = jsonDecode(response.body)['user_recipes'].reversed.toList();
+
+    print(response.statusCode);
+
+    setState(() {newRecipeList = data;});
   }
 
   // Search method for SearchBar, sends callback to parent widget (this)
@@ -192,18 +228,43 @@ class _SearchState extends State<Search> {
       searching = true;
     });
 
-    await getRecipes();
+    await getRecipesTest();
 
-    setState(() {
+    print(newRecipeList.length);
+
+    enforceIngredients();
+    enforceTags();
+    enforceSearch();
+
+    print(newRecipeList.length);
+
+    //enforceTags();
+    //enforceSearch();
+    //await getRecipes();
+
+    //await getRecipesTest();
+    //print(globals.token);
+
+    //print(recipes.length);
+
+    //print("1");
+    //await getRecipes();
+
+    /*setState(() {
       ingredients = [];
     });
     setState(() {
       recipeTags = [];
     });
+
+    print("2");
+
     for (var recipe in recipes) {
       await getRecipeIngredients(recipe['recipe_id']);
       await getRecipeTags(recipe['recipe_id']);
     }
+
+    print("3");
 
     buildRecipeIngredients();
 
@@ -211,7 +272,7 @@ class _SearchState extends State<Search> {
     enforceIngredients();
     enforceTags();
     enforceSearch();
-
+*/
     setState(() {
       searching = false;
     });
@@ -267,7 +328,21 @@ class _SearchState extends State<Search> {
                       padding: EdgeInsets.fromLTRB(0, 48, 0, 0),
                       child: CircularProgressIndicator(),
                     )
-                  : recipes.isEmpty
+                  : newRecipeList.isEmpty
+                      ? const Padding(
+                          padding: EdgeInsets.fromLTRB(0, 24, 0, 0),
+                          child: Text("No Results."),
+                        )
+                      : ListView(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: List.generate(newRecipeList.length, (index) {
+                            return RecipeCard(
+                                recipeInfo: newRecipeList[index],
+                                index: index + 1000);
+                          }),
+                        ),
+                  /*recipes.isEmpty
                       ? const Padding(
                           padding: EdgeInsets.fromLTRB(0, 24, 0, 0),
                           child: Text("No Results."),
@@ -280,7 +355,7 @@ class _SearchState extends State<Search> {
                                 recipeInfo: recipes[index],
                                 index: index + 1000);
                           }),
-                        ),
+                        ),*/
             ],
           ),
         ),
