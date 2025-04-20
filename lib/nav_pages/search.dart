@@ -10,9 +10,12 @@ import 'package:dropdown_search/dropdown_search.dart';
 
 import 'package:take_a_bite/globals.dart' as globals;
 
-List<Map<String, dynamic>> recipes = []; // Different recipes that will be displayed as cards
-List<List<dynamic>> ingredients = []; // Ingredients of recipe in foreign key format
-List<Map<String, dynamic>> recipeIngredients = []; // Ingredients of recipe in human readable format
+List<Map<String, dynamic>> recipes =
+    []; // Different recipes that will be displayed as cards
+List<List<dynamic>> ingredients =
+    []; // Ingredients of recipe in foreign key format
+List<Map<String, dynamic>> recipeIngredients =
+    []; // Ingredients of recipe in human readable format
 List<Map<String, dynamic>> recipeTags = [];
 bool searching = false; // Currently querying for recipes (loading symbol)
 
@@ -30,61 +33,77 @@ class Search extends StatefulWidget {
 
 class _SearchState extends State<Search> {
   Future<void> getRecipes() async {
-    setState(() {recipes.clear();});
+    setState(() {
+      recipes.clear();
+    });
 
     var url = Uri.http('3.93.61.3', '/api/feed/recipe');
-    var response = await http.get(url,
-        headers: {
-          "Authorization": 'Bearer ${globals.token}',
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
+    var response = await http.get(
+      url,
+      headers: {
+        "Authorization": 'Bearer ${globals.token}',
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
     );
 
     var data = jsonDecode(response.body)['recipe_name'];
     //data.shuffle(); Use this for randomizing order
     data = data.reversed.toList();
-    
+
     for (var i = 0; i < 25; i++) {
-      setState(() {recipes.add(data[i]);});
+      setState(() {
+        recipes.add(data[i]);
+      });
     }
   }
 
   Future<void> getRecipeIngredients(int recipe_id) async {
     var url = Uri.http('3.93.61.3', '/api/feed/recipeIngredient/$recipe_id');
-    var response = await http.get(url,
-        headers: {
-          "Authorization": 'Bearer ${globals.token}',
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
+    var response = await http.get(
+      url,
+      headers: {
+        "Authorization": 'Bearer ${globals.token}',
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
     );
     final data = jsonDecode(response.body)['ingredients'];
-    setState(() {ingredients.add(data);});
+    setState(() {
+      ingredients.add(data);
+    });
     //print(recipe_id);
   }
 
   Future<void> getRecipeTags(int recipe_id) async {
     var url = Uri.http('3.93.61.3', '/api/feed/tagRecipe/$recipe_id');
-    var response = await http.get(url,
-        headers: {
-          "Authorization": 'Bearer ${globals.token}',
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
+    var response = await http.get(
+      url,
+      headers: {
+        "Authorization": 'Bearer ${globals.token}',
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
     );
     final data = jsonDecode(response.body)['ingredients'];
     if (data.isEmpty) {
       Map<String, dynamic> empty = {};
-      setState(() {recipeTags.add(empty);});
+      setState(() {
+        recipeTags.add(empty);
+      });
     } else {
       List<dynamic> tagIds = data.map((e) => e['tags_id']).toList();
       //print(tagIds);
-      List<dynamic> tags = globals.tagsList.where((element) => tagIds.contains(element['tags_id'])).map((element) => element['tag_name']).toList();
+      List<dynamic> tags = globals.tagsList
+          .where((element) => tagIds.contains(element['tags_id']))
+          .map((element) => element['tag_name'])
+          .toList();
       //print(tags);
       Map<String, dynamic> temp = {"id": recipe_id, "tags": tags};
-      
-      setState(() {recipeTags.add(temp);});
+
+      setState(() {
+        recipeTags.add(temp);
+      });
     }
   }
 
@@ -99,8 +118,9 @@ class _SearchState extends State<Search> {
         Map<String, dynamic> recipe_ingredients = {};
         for (var i = 0; i < r_ingredients.length; i++) {
           Map<String, dynamic> ingredient_info = {};
-          var ingredient_id = r_ingredients[i]['ri_ingredient_id']-1;
-          var ingredient_name = globals.ingredientsList[ingredient_id]['ingredient_name'];
+          var ingredient_id = r_ingredients[i]['ri_ingredient_id'] - 1;
+          var ingredient_name =
+              globals.ingredientsList[ingredient_id]['ingredient_name'];
           var portion = r_ingredients[i]['ri_ingredient_measurement'];
 
           ingredient_info['ingredient_name'] = ingredient_name;
@@ -109,7 +129,7 @@ class _SearchState extends State<Search> {
         }
 
         recipe['ingredients'] = recipe_ingredients;
-        
+
         recipeIngredients.add(recipe);
         //print(recipe);
       }
@@ -121,10 +141,14 @@ class _SearchState extends State<Search> {
   void enforceIngredients() {
     for (var ingredient in selectedIngredients) {
       recipes = recipes.where((recipe) {
-        var tempIngredients = recipeIngredients.firstWhere((e) => e['recipe_id'] == recipe['recipe_id'], orElse: () => {})['ingredients'];
+        var tempIngredients = recipeIngredients.firstWhere(
+            (e) => e['recipe_id'] == recipe['recipe_id'],
+            orElse: () => {})['ingredients'];
         if (tempIngredients == {}) return false;
         if (tempIngredients != null) {
-          List<dynamic> tempIngredientNames = tempIngredients.values.map((e) => e['ingredient_name'] ?? '').toList();
+          List<dynamic> tempIngredientNames = tempIngredients.values
+              .map((e) => e['ingredient_name'] ?? '')
+              .toList();
           //print(tempIngredientNames);
           //print("$ingredient - ${tempIngredientNames.contains(ingredient)}");
           return tempIngredientNames.contains(ingredient);
@@ -138,7 +162,9 @@ class _SearchState extends State<Search> {
     for (var tag in selectedTags) {
       recipes = recipes.where((recipe) {
         //var tempTags = recipeTags.firstWhere((e) => e.keys == recipe['recipe_id'], orElse: () => {});
-        var tempTags = recipeTags.firstWhere((e) => e['id'] == recipe['recipe_id'], orElse: () => {});
+        var tempTags = recipeTags.firstWhere(
+            (e) => e['id'] == recipe['recipe_id'],
+            orElse: () => {});
         if (tempTags == {}) return false;
         if (tempTags != null) {
           List<dynamic> tempTagList = tempTags['tags'] ?? [];
@@ -162,12 +188,18 @@ class _SearchState extends State<Search> {
   Future<void> handleSearch() async {
     FocusScope.of(context).unfocus();
 
-    setState(() {searching = true;});
+    setState(() {
+      searching = true;
+    });
 
     await getRecipes();
-            
-    setState(() {ingredients = [];});
-    setState(() {recipeTags = [];});
+
+    setState(() {
+      ingredients = [];
+    });
+    setState(() {
+      recipeTags = [];
+    });
     for (var recipe in recipes) {
       await getRecipeIngredients(recipe['recipe_id']);
       await getRecipeTags(recipe['recipe_id']);
@@ -180,7 +212,9 @@ class _SearchState extends State<Search> {
     enforceTags();
     enforceSearch();
 
-    setState(() {searching = false;});
+    setState(() {
+      searching = false;
+    });
 
     //print(globals.tagsList);
   }
@@ -198,7 +232,7 @@ class _SearchState extends State<Search> {
                     height: 100,
                     width: 290,
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(24,48,0,0),
+                      padding: const EdgeInsets.fromLTRB(24, 48, 0, 0),
                       child: TextField(
                         controller: wordSearch,
                         decoration: const InputDecoration(
@@ -209,7 +243,7 @@ class _SearchState extends State<Search> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(8,48,0,0),
+                    padding: const EdgeInsets.fromLTRB(8, 48, 0, 0),
                     child: IconButton(
                       icon: const Icon(Icons.search),
                       onPressed: () async {
@@ -229,22 +263,24 @@ class _SearchState extends State<Search> {
                 child: TagSearchBar(),
               ),
               searching
-              ? const Padding(
-                padding: EdgeInsets.fromLTRB(0,48,0,0),
-                child: CircularProgressIndicator(),
-              )
-              : recipes.isEmpty
-              ? const Padding(
-                  padding: EdgeInsets.fromLTRB(0,24,0,0),
-                  child: Text("No Results."),
-                )
-              : ListView(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                children: List.generate(recipes.length, (index) {
-                  return RecipeCard(recipeInfo: recipes[index], index: index+1000);
-                }),
-              ),
+                  ? const Padding(
+                      padding: EdgeInsets.fromLTRB(0, 48, 0, 0),
+                      child: CircularProgressIndicator(),
+                    )
+                  : recipes.isEmpty
+                      ? const Padding(
+                          padding: EdgeInsets.fromLTRB(0, 24, 0, 0),
+                          child: Text("No Results."),
+                        )
+                      : ListView(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: List.generate(recipes.length, (index) {
+                            return RecipeCard(
+                                recipeInfo: recipes[index],
+                                index: index + 1000);
+                          }),
+                        ),
             ],
           ),
         ),
@@ -281,7 +317,9 @@ class _SearchBarState extends State<SearchBar> {
               compareFn: (i, s) => i == s,
               onChanged: (List<String> selectedItems) {
                 // TODO: add httprequest to search for recipes with selected items
-                setState(() {selectedIngredients = selectedItems;});
+                setState(() {
+                  selectedIngredients = selectedItems;
+                });
               },
               decoratorProps: const DropDownDecoratorProps(
                 decoration: InputDecoration(
@@ -335,7 +373,9 @@ class _TagSearchBarState extends State<TagSearchBar> {
               compareFn: (i, s) => i == s,
               onChanged: (List<String> selectedItems) {
                 // TODO: add httprequest to search for recipes with selected items
-                setState(() {selectedTags = selectedItems;});
+                setState(() {
+                  selectedTags = selectedItems;
+                });
               },
               decoratorProps: const DropDownDecoratorProps(
                 decoration: InputDecoration(
@@ -365,7 +405,7 @@ class _TagSearchBarState extends State<TagSearchBar> {
 }
 
 // Recipe displayed on Search Page
-class RecipeCard extends StatelessWidget {
+class RecipeCard extends StatefulWidget {
   final Map<String, dynamic> recipeInfo;
   final int index;
 
@@ -376,20 +416,54 @@ class RecipeCard extends StatelessWidget {
   });
 
   @override
+  State<RecipeCard> createState() => _RecipeCardState();
+}
+
+class _RecipeCardState extends State<RecipeCard> {
+  String authorName = "";
+  String authorBio = "";
+  String authorPicture = "";
+
+  Future<void> getUser(int user_id) async {
+    var url = Uri.http('3.93.61.3', '/api/feed/getUser/$user_id');
+    var response = await http.get(
+      url,
+      headers: {
+        "Authorization": 'Bearer ${globals.token}',
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+    );
+
+    var data = jsonDecode(response.body)['user'];
+
+    setState(() {
+      authorName = data['user_username'];
+      authorBio = data['user_bio'];
+      authorPicture = data['user_profile_picture'];
+    });
+    print(authorPicture);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    String title = recipeInfo['recipe_name'];
-    String image = recipeInfo['recipe_image'] ?? "";
-    String prepTime = recipeInfo['prep_time'];
-    String cookTime = recipeInfo['cook_time'];
-    String servingSize = recipeInfo['recipe_servings'];
-    String description = recipeInfo['recipe_directions'];
+    String title = widget.recipeInfo['recipe_name'];
+    String image = widget.recipeInfo['recipe_image'] ?? "";
+    String prepTime = widget.recipeInfo['prep_time'];
+    String cookTime = widget.recipeInfo['cook_time'];
+    String servingSize = widget.recipeInfo['recipe_servings'];
+    String description = widget.recipeInfo['recipe_directions'];
 
     bool isVegan = false;
     bool isGlutenFree = false;
 
-    Map<String, dynamic> ingredients = recipeIngredients.firstWhere((element) => element['recipe_id'] == recipeInfo['recipe_id'], orElse: () => {});
+    Map<String, dynamic> ingredients = recipeIngredients.firstWhere(
+        (element) => element['recipe_id'] == widget.recipeInfo['recipe_id'],
+        orElse: () => {});
 
-    Map<String, dynamic> tempTags = recipeTags.firstWhere((element) => element['id'] == recipeInfo['recipe_id'], orElse:() => {});
+    Map<String, dynamic> tempTags = recipeTags.firstWhere(
+        (element) => element['id'] == widget.recipeInfo['recipe_id'],
+        orElse: () => {});
     if (tempTags.isNotEmpty) {
       if (tempTags['tags'].contains('vegan')) {
         isVegan = true;
@@ -403,25 +477,35 @@ class RecipeCard extends StatelessWidget {
     Image? img = null;
 
     if (image != "") {
-      img = Image.network(image,width: double.infinity,height: 300,fit: BoxFit.cover);
+      img = Image.network(image,
+          width: double.infinity, height: 300, fit: BoxFit.cover);
     }
 
     return FractionallySizedBox(
       widthFactor: 0.9,
       child: InkWell(
-        onTap: () => PersistentNavBarNavigator.pushNewScreenWithRouteSettings(
-          context,
-          settings: const RouteSettings(),
-          screen: RecipePage(
-              recipeInfo: recipeInfo,
-              ingredients: ingredients,
-              image: image,
-              isVegan: isVegan,
-              isGlutenFree: isGlutenFree,
-              index: index),
-          withNavBar: true,
-          pageTransitionAnimation: PageTransitionAnimation.fade,
-        ),
+        onTap: () async {
+          await getUser(widget.recipeInfo['user_user_id']);
+
+          if (!context.mounted) return;
+
+          PersistentNavBarNavigator.pushNewScreenWithRouteSettings(
+            context,
+            settings: const RouteSettings(),
+            screen: RecipePage(
+                recipeInfo: widget.recipeInfo,
+                ingredients: ingredients,
+                image: image,
+                isVegan: isVegan,
+                isGlutenFree: isGlutenFree,
+                authorName: authorName,
+                authorBio: authorBio,
+                authorPicture: authorPicture,
+                index: widget.index),
+            withNavBar: true,
+            pageTransitionAnimation: PageTransitionAnimation.fade,
+          );
+        },
         child: Card(
           child: Column(
             children: [
@@ -431,16 +515,15 @@ class RecipeCard extends StatelessWidget {
                     topRight: Radius.circular(8.0),
                   ),
                   child: Hero(
-                    tag: 'recipe-$index',
+                    tag: 'recipe-${widget.index}',
                     child: image != ""
-                      ? img!
-                      : const Icon(
-                        Icons.image_not_supported,
-                        size: 300,
-                        color: Colors.grey,
-                      ),
-                  )
-              ),
+                        ? img!
+                        : const Icon(
+                            Icons.image_not_supported,
+                            size: 300,
+                            color: Colors.grey,
+                          ),
+                  )),
               ListTile(
                   title: Material(
                       type: MaterialType.transparency,
