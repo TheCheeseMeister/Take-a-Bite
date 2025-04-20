@@ -273,6 +273,8 @@ class _SearchState extends State<Search> {
     enforceTags();
     enforceSearch();
 */
+    setState(() {recipeViewCount = 10;});
+
     setState(() {
       searching = false;
     });
@@ -280,10 +282,33 @@ class _SearchState extends State<Search> {
     //print(globals.tagsList);
   }
 
+  int recipeViewCount = -1;
+  final recipeScrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    recipeScrollController.addListener(() {
+      if (recipeScrollController.position.atEdge && recipeViewCount != -1) {
+      bool isTop = recipeScrollController.position.pixels == 0;
+      if (!isTop) {
+        incrementViewCount();
+      }
+    }
+    });
+  }
+
+  void incrementViewCount() async {
+    await Future.delayed(const Duration(milliseconds: 250));
+    setState(() {recipeViewCount += 10;});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
+        controller: recipeScrollController,
         child: Center(
           child: Column(
             children: [
@@ -333,7 +358,25 @@ class _SearchState extends State<Search> {
                           padding: EdgeInsets.fromLTRB(0, 24, 0, 0),
                           child: Text("No Results."),
                         )
-                      : ListView(
+                      : ListView.builder(
+                        //controller: recipeScrollController,
+                        shrinkWrap: true,
+                        physics: const ClampingScrollPhysics(),
+                        itemCount: recipeViewCount + 1,
+                        itemBuilder: (context, index) {
+                          if (index < recipeViewCount) {
+                            return RecipeCard(recipeInfo: newRecipeList[index], index: index+1000);
+                          } else {
+                            return const Padding(
+                              padding: EdgeInsets.fromLTRB(0,36,0,36),
+                              child: Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          }
+                        }
+                      ),
+                      /*ListView(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           children: List.generate(newRecipeList.length, (index) {
@@ -341,7 +384,7 @@ class _SearchState extends State<Search> {
                                 recipeInfo: newRecipeList[index],
                                 index: index + 1000);
                           }),
-                        ),
+                        ),*/
                   /*recipes.isEmpty
                       ? const Padding(
                           padding: EdgeInsets.fromLTRB(0, 24, 0, 0),
