@@ -16,5 +16,10 @@ class Tags extends Model
         'ingredients_id',
     ];
 
+    public function recipeTags(): HasMany
+    {
+	return $this->hasMany(TagRecipe::class, 'tags_id', 'tags_id');
+    }
+
 
 }

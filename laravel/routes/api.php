@@ -58,6 +58,8 @@ Route::post('/feed/changeProfileBio', [UserController::class,'storeProfileBio'])
 
 Route::get('/feed/getUser/{user_id}', [UserController::class,'getUser'])->middleware('auth:sanctum');
 
+Route::get('/feed/getRecipesAndInfo', [RecipeController::class,'getRecipesAndInfo'])->middleware('auth:sanctum');
+
 
 Route::get('/test', function(){
     return response([

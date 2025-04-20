@@ -80,6 +80,51 @@ class RecipeController extends Controller
             'user_recipes' => $user_recipes,
         ],200);
     }
+
+    public function getRecipesAndInfo()
+    {
+	$recipes = Recipe::with([
+	    'ingredients.ingredient',
+	    'tags.tag'
+	])->get();
+
+	$formatted = $recipes->map(function ($recipe) {
+	    return [
+	    	'recipe_id' => $recipe->recipe_id,
+		'recipe_name' => $recipe->recipe_name,
+		'cook_time' => $recipe->cook_time,
+		'prep_time' => $recipe->prep_time,
+		'recipe_description' => $recipe->recipe_description,
+		'recipe_category' => $recipe->recipe_category,
+		'recipe_servings' => $recipe->recipe_servings,
+		'recipe_yield' => $recipe->recipe_yield,
+		'recipe_directions' => $recipe->recipe_directions,
+		'user_user_id' => $recipe->user_user_id,
+		'created_at' => $recipe->created_at,
+		'updated_at' => $recipe->updated_at,
+		'recipe_image' => $recipe->recipe_image,
+		'ingredients' => $recipe->ingredients->map(function ($ri) {
+		    return [
+			'ingredient_id' => $ri->ingredient->ingredient_id ?? 'Unknown',
+		    	'ingredient_name' => $ri->ingredient->ingredient_name ?? 'Unknown',
+			'portion' => $ri->ri_ingredient_measurement,
+		    ];
+		}),
+		'tags' => $recipe->tags->map(function ($tr) {
+		    return [
+			'tag_id' => $tr->tag->tags_id,
+		    	'tag_name' => $tr->tag->tag_name,
+		    ];
+		}),
+		//'tags' => $recipe->tags->pluck('tags_name'),
+	    ];
+	});
+
+	return response([
+                'user_recipes' => $formatted,
+        ],200);
+	//return response()->json($formatted, 200);
+    }
     
 /*
     public function likePost($feed_id)
