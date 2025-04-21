@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Feed;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MealPlanRequest;
-use App\Models\Recipe;
+use App\Models\MealPlan;
 use Illuminate\Http\Request;
 
 class MealPlanController extends Controller
 {
     
+    protected $table = 'TAB_meal_plan';
+    protected $primaryKey = 'meal_plan_id';
 
     public function store(MealPlanRequest $request){
         $request->validated();
@@ -20,14 +22,14 @@ class MealPlanController extends Controller
         ]);
 
         return response([
-            'message' => auth()->user()->feeds()->latest()->first(), //return recipe id
+            'message' => "success", //return mealplan id
         ],201);
 
     }
 
     public function getMealPlans($mealPlan_id)
     {
-        $recipe_name = Recipe::with('user')->where('meal_plan_id', "=", $mealPlan_id)->latest()->get();
+        $recipe_name = MealPlan::where('meal_plan_id', "=", $mealPlan_id)->latest()->get();
 
         return response([
             'meal plans' => $recipe_name,

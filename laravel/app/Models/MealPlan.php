@@ -11,16 +11,14 @@ class MealPlan extends Model
     
     use HasFactory;
 
-    protected $table = 'TAB_recipes';
-    protected $primaryKey = 'recipe_id';
+    protected $table = 'TAB_meal_plan';
+    protected $primaryKey = 'meal_plan_id';
 
 
     protected $fillable = [
         'date_to_make',
         'time_to_make',
     ];
-
-    //protected $appends = ['liked'];
 
     public function user(): BelongsTo{
         return $this->belongsTo(User::class);

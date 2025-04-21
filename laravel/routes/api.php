@@ -8,7 +8,11 @@ use App\Http\Controllers\Feed\TagIngredientController;
 use App\Http\Controllers\Feed\TagRecipeController;
 use App\Http\Controllers\Feed\UserController;
 use App\Http\Controllers\Feed\UserSavedController;
+use App\Http\Controllers\Feed\MealPlanController;
+use App\Http\Controllers\Feed\MealPlanUserController;
+use App\Http\Controllers\Feed\MealPlanRecipeController;
 
+use App\Models\MealPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -69,6 +73,21 @@ Route::get('/feed/userSaved/{userSavedID}', [UserSavedController::class,'getUser
 Route::get('/feed/getUserSavedRecipes/{urs_user_id}', [UserSavedController::class, 'getUserSavedRecipes'])->middleware('auth:sanctum');
 
 Route::post('/feed/removeUserSaved', [UserSavedController::class, 'removeUserSaved'])->middleware('auth:sanctum');
+
+Route::post('/feed/mealPlan/store', [MealPlanController::class, 'store'])->middleware('auth:sanctum');
+
+Route::get('/feed/mealPlan/{mealPlan_id}', [MealPlanController::class, 'getMealPlans'])->middleware('auth:sanctum');
+
+Route::post('/feed/mealPlanUser/store', [MealPlanUserController::class, 'store'])->middleware('auth:sanctum');
+
+Route::get('/feed/mealPlanUser/{mealPlanUser_id}', [MealPlanUserController::class, 'getMealPlans'])->middleware('auth:sanctum');
+
+Route::post('/feed/mealPlanRecipe/store', [MealPlanRecipeController::class, 'store'])->middleware('auth:sanctum');
+
+Route::get('/feed/mealPlanRecipe/{mealPlanRecipe_id}', [MealPlanRecipeController::class, 'getMealPlans'])->middleware('auth:sanctum');
+//mealplan recipe
+
+
 
 
 
