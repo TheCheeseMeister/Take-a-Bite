@@ -301,7 +301,9 @@ class _SearchState extends State<Search> {
 
   void incrementViewCount() async {
     await Future.delayed(const Duration(milliseconds: 250));
-    setState(() {recipeViewCount += 10;});
+    // TODO: change depending on whether length is < 10 more
+    if (recipeViewCount + 10 > (newRecipeList.length)) setState(() {recipeViewCount += (newRecipeList.length - recipeViewCount);});
+    else setState(() {recipeViewCount += 10;});
   }
 
   @override
@@ -367,10 +369,12 @@ class _SearchState extends State<Search> {
                           if (index < recipeViewCount) {
                             return RecipeCard(recipeInfo: newRecipeList[index], index: index+1000);
                           } else {
-                            return const Padding(
-                              padding: EdgeInsets.fromLTRB(0,36,0,36),
+                            return Padding(
+                              padding: const EdgeInsets.fromLTRB(0,36,0,36),
                               child: Center(
-                                child: CircularProgressIndicator(),
+                                child: recipeViewCount == newRecipeList.length
+                                ? const Text("End of Results", style: TextStyle(fontStyle: FontStyle.italic))
+                                : const CircularProgressIndicator(),
                               ),
                             );
                           }
@@ -561,6 +565,7 @@ class _RecipeCardState extends State<RecipeCard> {
       authorPicture = data['user_profile_picture'];
     });
     print(authorPicture);
+    print(globals.savedRecipes);
   }
 
   @override

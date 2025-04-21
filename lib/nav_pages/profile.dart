@@ -316,13 +316,11 @@ class _RecipeListState extends State<RecipeList> {
                 GridView.count(
                   shrinkWrap: true,
                   crossAxisCount: 3,
-                  children: List.generate(100, (index) {
-                    return Center(
-                      child: Text(
-                        'Item $index',
-                      ),
-                    );
-                  }),
+                  children: globals.savedRecipes.asMap().entries.map((recipe) {
+                      int index = recipe.key;
+                      var item = recipe.value;
+                      return ProfileRecipe(index: index+1, recipe: item);
+                  }).toList().reversed.toList(),
                 ),
               ],
             ),

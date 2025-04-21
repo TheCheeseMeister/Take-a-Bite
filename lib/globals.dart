@@ -11,6 +11,9 @@ ValueNotifier<String> userBio = ValueNotifier<String>("");
 // Recipes user created
 List<dynamic> createdRecipes = [];
 
+// Recipes user saved
+List<dynamic> savedRecipes = [];
+
 // Token for HttpRequests
 String token = "";
 

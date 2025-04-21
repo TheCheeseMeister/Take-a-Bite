@@ -39,13 +39,69 @@ class RecipePage extends StatefulWidget {
   final String authorName;
   final String? authorBio;
   final String? authorPicture;
-  final int index; 
+  final int index;
   @override
   State<RecipePage> createState() => _RecipePageState();
 }
 
 class _RecipePageState extends State<RecipePage> {
- // For hero
+  // For hero
+  Future<void> saveRecipe(int recipe_id) async {
+    int user_id = globals.user['user_id'];
+
+    var url = Uri.http('3.93.61.3', '/api/feed/userSaved');
+    var response = await http.post(
+      url,
+      headers: {
+        "Authorization": 'Bearer ${globals.token}',
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: jsonEncode({
+        "urs_user_id": user_id,
+        "urs_recipe_id": recipe_id,
+      }),
+    );
+
+    print(response.statusCode);
+    print(response.body);
+    //print(globals.createdRecipes);
+  }
+
+  Future<List<dynamic>> refreshSavedRecipes(int user_id) async {
+    var url = Uri.http('3.93.61.3', '/api/feed/getUserSavedRecipes/$user_id');
+    var response = await http.get(url, headers: {
+      "Authorization": 'Bearer ${globals.token}',
+      "Accept": "application/json"
+    });
+
+    final data = jsonDecode(response.body)['recipes'];
+
+    return data;
+  }
+
+  Future<void> removeRecipe(int recipe_id) async {
+    int user_id = globals.user['user_id'];
+
+    var url = Uri.http('3.93.61.3', '/api/feed/removeUserSaved');
+    var response = await http.post(
+      url,
+      headers: {
+        "Authorization": 'Bearer ${globals.token}',
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: jsonEncode({
+        "urs_user_id": user_id,
+        "urs_recipe_id": recipe_id,
+      }),
+    );
+
+    print(response.statusCode);
+    print(response.body);
+    //print(globals.createdRecipes);
+  }
+
   @override
   Widget build(BuildContext context) {
     String title = widget.recipeInfo['recipe_name'];
@@ -56,7 +112,7 @@ class _RecipePageState extends State<RecipePage> {
     String subtitle = widget.recipeInfo['recipe_description'];
 
     timeDilation = 0.5;
-    
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -64,13 +120,73 @@ class _RecipePageState extends State<RecipePage> {
             Hero(
               tag: 'recipe-${widget.index}',
               child: widget.image == "" || widget.image == null
-              ? const Icon(
-                        Icons.image_not_supported,
-                        size: 300,
-                        color: Colors.grey,
-                      )
-              : Image.network(widget.image!),
+                  ? const Icon(
+                      Icons.image_not_supported,
+                      size: 300,
+                      color: Colors.grey,
+                    )
+                  : Image.network(widget.image!),
             ),
+            // User can't save their own recipe; User hasn't saved recipe yet.
+            if (widget.recipeInfo['user_user_id'] != globals.user['user_id'] &&
+                (globals.savedRecipes.isEmpty || globals.savedRecipes.any((recipe) =>
+                    recipe['recipe_id'] != widget.recipeInfo['recipe_id'])))
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 8, 24, 0),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () async {
+                      // User can't save their own recipe
+                      await saveRecipe(widget.recipeInfo['recipe_id']);
+                      List<dynamic> tempSaved = await refreshSavedRecipes(globals.user['user_id']);
+                      globals.savedRecipes = tempSaved;
+                      setState((){});
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 140, 199, 154),
+                      shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(8))),
+                    ),
+                    child: const Text(
+                      "Save Recipe",
+                      style: TextStyle(
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            // User already saved recipe; can remove recipe from saved.
+            if (widget.recipeInfo['user_user_id'] != globals.user['user_id'] &&
+                (globals.savedRecipes.any((recipe) =>
+                    recipe['recipe_id'] == widget.recipeInfo['recipe_id'])))
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 8, 24, 0),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () async {
+                      // User can't save their own recipe
+                      await removeRecipe(widget.recipeInfo['recipe_id']);
+                      List<dynamic> tempSaved = await refreshSavedRecipes(globals.user['user_id']);
+                      globals.savedRecipes = tempSaved;
+                      setState((){});
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 228, 98, 98),
+                      shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(8))),
+                    ),
+                    child: const Text(
+                      "Remove Recipe",
+                      style: TextStyle(
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
@@ -97,10 +213,10 @@ class _RecipePageState extends State<RecipePage> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(36,0,0,0),
+              padding: const EdgeInsets.fromLTRB(36, 0, 0, 0),
               child: Row(
                 children: [
-                  if (widget.isVegan) 
+                  if (widget.isVegan)
                     const Chip(
                       label: Text("Vegan", style: TextStyle(fontSize: 12)),
                       shape: StadiumBorder(),
@@ -111,9 +227,10 @@ class _RecipePageState extends State<RecipePage> {
                       height: 20,
                       width: 8,
                     ),
-                  if (widget.isGlutenFree) 
+                  if (widget.isGlutenFree)
                     const Chip(
-                      label: Text("Gluten-Free", style: TextStyle(fontSize: 12)),
+                      label:
+                          Text("Gluten-Free", style: TextStyle(fontSize: 12)),
                       shape: StadiumBorder(),
                       backgroundColor: Color.fromARGB(255, 255, 212, 82),
                     ),
@@ -151,22 +268,23 @@ class _RecipePageState extends State<RecipePage> {
                   ),
                   child: Column(
                     children: widget.ingredients['ingredients'] != null
-                    ? widget.ingredients['ingredients'].entries.map<Widget>((e) {
-                      return Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
-                        child: Text(
-                          "${e.value['portion']} ${e.value['ingredient_name']}",
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w400,
-                            fontSize: 14,
-                          ),
-                        ),
-                      );
-                    }).toList()
-                    : [
-                      Text("No Ingredients."),
-                    ],
+                        ? widget.ingredients['ingredients'].entries
+                            .map<Widget>((e) {
+                            return Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
+                              child: Text(
+                                "${e.value['portion']} ${e.value['ingredient_name']}",
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            );
+                          }).toList()
+                        : [
+                            Text("No Ingredients."),
+                          ],
                   ),
                 ),
               ),
@@ -212,7 +330,11 @@ class _RecipePageState extends State<RecipePage> {
             ),
             // Poster's profile (i.e. Made by CheeseMaster) / Likes? Or maybe Likes higher
             //Text("Insert creator profile here"),
-            RecipeCreator(authorName: widget.authorName, profileImage: widget.authorPicture, authorId: widget.recipeInfo['user_user_id'], authorBio: widget.authorBio),
+            RecipeCreator(
+                authorName: widget.authorName,
+                profileImage: widget.authorPicture,
+                authorId: widget.recipeInfo['user_user_id'],
+                authorBio: widget.authorBio),
             const SizedBox(
               height: 50,
             ),
@@ -254,13 +376,12 @@ class _RecipePageState extends State<RecipePage> {
 
 // Displays Recipe Creator and info, option to go to profile
 class RecipeCreator extends StatefulWidget {
-  const RecipeCreator({
-    super.key,
-    required this.authorName,
-    required this.profileImage,
-    required this.authorId,
-    required this.authorBio
-  });
+  const RecipeCreator(
+      {super.key,
+      required this.authorName,
+      required this.profileImage,
+      required this.authorId,
+      required this.authorBio});
 
   //final String profileImage = "lib/imgs/cheeseprofile.PNG";
   final String? profileImage;
@@ -281,12 +402,13 @@ class _RecipeCreatorState extends State<RecipeCreator> {
   Widget build(BuildContext context) {
     Future<List<dynamic>> getCreatedRecipes(int user_id) async {
       var url = Uri.http('3.93.61.3', '/api/feed/userRecipes/$user_id');
-      var response = await http.get(url,
-          headers: {
-            "Authorization": 'Bearer ${globals.token}',
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
+      var response = await http.get(
+        url,
+        headers: {
+          "Authorization": 'Bearer ${globals.token}',
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
       );
       final data = jsonDecode(response.body)['user_recipes'];
       return data;
@@ -310,56 +432,58 @@ class _RecipeCreatorState extends State<RecipeCreator> {
               ],
             ),
             child: InkWell(
-              onTap: () async {
-                List<dynamic> tempCreated = await getCreatedRecipes(widget.authorId);
+                onTap: () async {
+                  List<dynamic> tempCreated =
+                      await getCreatedRecipes(widget.authorId);
 
-                if (widget.authorId == globals.user['user_id']) {
-                  setState(() {globals.createdRecipes = tempCreated;});
+                  if (widget.authorId == globals.user['user_id']) {
+                    setState(() {
+                      globals.createdRecipes = tempCreated;
+                    });
 
-                  PersistentNavBarNavigator.pushNewScreenWithRouteSettings(
-                    context,
-                    settings: const RouteSettings(),
-                    screen: Profile(
-                      //profileImage: profileImage,
-                      displayName: widget.authorName,
-                      username: "", // temporary fix to not break things
-                      followers: followers,
-                      recipes: recipes,
-                      bio: widget.authorBio ?? "",
-                    ),
-                    withNavBar: true,
-                    pageTransitionAnimation: PageTransitionAnimation.fade,
-                  );
-                } else {
-                  PersistentNavBarNavigator.pushNewScreenWithRouteSettings(
-                    context,
-                    settings: const RouteSettings(),
-                    screen: OthersProfile(
-                      //profileImage: profileImage,
-                      displayName: widget.authorName,
-                      username: "", // temporary fix to not break things
-                      followers: followers,
-                      recipes: recipes,
-                      bio: widget.authorBio ?? "",
-                      profilePicture: widget.profileImage ?? "",
-                      createdRecipes: tempCreated,
-                    ),
-                    withNavBar: true,
-                    pageTransitionAnimation: PageTransitionAnimation.fade,
-                  );
-                }
-              }, 
-              child: widget.profileImage != "" && widget.profileImage != null
-              ? CircleAvatar(
-                radius: 40,
-                backgroundImage: NetworkImage(widget.profileImage!),
-              )
-              : CircleAvatar(
-                radius: 40,
-                backgroundColor: Colors.white,
-                child: Text(widget.authorName[0]),
-              )
-            ),
+                    PersistentNavBarNavigator.pushNewScreenWithRouteSettings(
+                      context,
+                      settings: const RouteSettings(),
+                      screen: Profile(
+                        //profileImage: profileImage,
+                        displayName: widget.authorName,
+                        username: "", // temporary fix to not break things
+                        followers: followers,
+                        recipes: recipes,
+                        bio: widget.authorBio ?? "",
+                      ),
+                      withNavBar: true,
+                      pageTransitionAnimation: PageTransitionAnimation.fade,
+                    );
+                  } else {
+                    PersistentNavBarNavigator.pushNewScreenWithRouteSettings(
+                      context,
+                      settings: const RouteSettings(),
+                      screen: OthersProfile(
+                        //profileImage: profileImage,
+                        displayName: widget.authorName,
+                        username: "", // temporary fix to not break things
+                        followers: followers,
+                        recipes: recipes,
+                        bio: widget.authorBio ?? "",
+                        profilePicture: widget.profileImage ?? "",
+                        createdRecipes: tempCreated,
+                      ),
+                      withNavBar: true,
+                      pageTransitionAnimation: PageTransitionAnimation.fade,
+                    );
+                  }
+                },
+                child: widget.profileImage != "" && widget.profileImage != null
+                    ? CircleAvatar(
+                        radius: 40,
+                        backgroundImage: NetworkImage(widget.profileImage!),
+                      )
+                    : CircleAvatar(
+                        radius: 40,
+                        backgroundColor: Colors.white,
+                        child: Text(widget.authorName[0]),
+                      )),
           ),
         ),
         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
