@@ -7,6 +7,8 @@ use App\Http\Controllers\Feed\TagController;
 use App\Http\Controllers\Feed\TagIngredientController;
 use App\Http\Controllers\Feed\TagRecipeController;
 use App\Http\Controllers\Feed\UserController;
+use App\Http\Controllers\Feed\UserSavedController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -59,6 +61,13 @@ Route::post('/feed/changeProfileBio', [UserController::class,'storeProfileBio'])
 Route::get('/feed/getUser/{user_id}', [UserController::class,'getUser'])->middleware('auth:sanctum');
 
 Route::get('/feed/getRecipesAndInfo', [RecipeController::class,'getRecipesAndInfo'])->middleware('auth:sanctum');
+
+Route::post('/feed/userSaved', [UserSavedController::class,'storeUserSaved'])->middleware('auth:sanctum');
+
+Route::get('/feed/userSaved/{userSavedID}', [UserSavedController::class,'getUserSaved'])->middleware('auth:sanctum');
+
+
+
 
 
 Route::get('/test', function(){
