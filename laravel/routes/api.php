@@ -66,7 +66,9 @@ Route::post('/feed/userSaved', [UserSavedController::class,'storeUserSaved'])->m
 
 Route::get('/feed/userSaved/{userSavedID}', [UserSavedController::class,'getUserSaved'])->middleware('auth:sanctum');
 
+Route::get('/feed/getUserSavedRecipes/{urs_user_id}', [UserSavedController::class, 'getUserSavedRecipes'])->middleware('auth:sanctum');
 
+Route::post('/feed/removeUserSaved', [UserSavedController::class, 'removeUserSaved'])->middleware('auth:sanctum');
 
 
 
