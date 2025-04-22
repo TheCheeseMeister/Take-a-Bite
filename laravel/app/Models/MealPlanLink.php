@@ -6,18 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class MealPlanUser extends Model
+class MealPlanLink extends Model
 {
     
     use HasFactory;
 
-    protected $table = 'TAB_meal_plan_user';
-    protected $primaryKey = 'mp_user_id';
     public $timestamps = false;
+    protected $table = 'TAB_mealplan_user_recipe';
+    protected $primaryKey = 'mur_id';
+
 
     protected $fillable = [
-        'mp_id',
-        'user_id',
+            'mur_user_id',
+            'mur_recipe_id',
+            'mur_mealplan_id',
     ];
 
     public function user(): BelongsTo{

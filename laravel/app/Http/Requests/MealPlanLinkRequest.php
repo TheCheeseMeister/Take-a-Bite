@@ -4,14 +4,13 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class MealPlanUserRequest extends FormRequest
+class MealPlanLinkRequest extends FormRequest
 {
 
-    
-    protected $table = 'TAB_meal_plan_user';
-    protected $primaryKey = 'mp_user_id';
+    protected $table = 'TAB_mealplan_user_recipe';
+    protected $primaryKey = 'mur_id';
 
-
+    public $timestamps = false;
 
     /**
      * Determine if the user is authorized to make this request.
@@ -29,8 +28,9 @@ class MealPlanUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'mp_id' => 'required',
-            'user_id' => 'required',
+            'mur_user_id' => 'required',
+            'mur_recipe_id' => 'required',
+            'mur_mealplan_id'=> 'required',
         ];
     }
 }

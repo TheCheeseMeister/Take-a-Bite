@@ -14,6 +14,7 @@ class MealPlan extends Model
     protected $table = 'TAB_meal_plan';
     protected $primaryKey = 'meal_plan_id';
 
+    public $timestamps = false;
 
     protected $fillable = [
         'date_to_make',
@@ -24,16 +25,5 @@ class MealPlan extends Model
         return $this->belongsTo(User::class);
     }
 
-       /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'created_at' => 'datetime'
-        ];
-    }
 
 }
