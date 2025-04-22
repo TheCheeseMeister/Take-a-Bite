@@ -394,9 +394,20 @@ class RecipeCreator extends StatefulWidget {
 }
 
 class _RecipeCreatorState extends State<RecipeCreator> {
-  final int followers = 0;
+  //final int followers = 0;
+  //final int recipes = 0;
 
-  final int recipes = 0;
+  Future<List<dynamic>> getSavedRecipes(int user_id) async {
+    var url = Uri.http('3.93.61.3', '/api/feed/getUserSavedRecipes/$user_id');
+    var response = await http.get(url, headers: {
+      "Authorization": 'Bearer ${globals.token}',
+      "Accept": "application/json"
+    });
+
+    final data = jsonDecode(response.body)['recipes'];
+
+    return data;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -448,14 +459,16 @@ class _RecipeCreatorState extends State<RecipeCreator> {
                         //profileImage: profileImage,
                         displayName: widget.authorName,
                         username: "", // temporary fix to not break things
-                        followers: followers,
-                        recipes: recipes,
+                        followers: 0,
+                        recipes: 0,
                         bio: widget.authorBio ?? "",
                       ),
                       withNavBar: true,
                       pageTransitionAnimation: PageTransitionAnimation.fade,
                     );
                   } else {
+                    List<dynamic> tempSaved = await getSavedRecipes(widget.authorId);
+
                     PersistentNavBarNavigator.pushNewScreenWithRouteSettings(
                       context,
                       settings: const RouteSettings(),
@@ -463,11 +476,12 @@ class _RecipeCreatorState extends State<RecipeCreator> {
                         //profileImage: profileImage,
                         displayName: widget.authorName,
                         username: "", // temporary fix to not break things
-                        followers: followers,
-                        recipes: recipes,
+                        followers: 0,
+                        recipes: 0,
                         bio: widget.authorBio ?? "",
                         profilePicture: widget.profileImage ?? "",
                         createdRecipes: tempCreated,
+                        savedRecipes: tempSaved,
                       ),
                       withNavBar: true,
                       pageTransitionAnimation: PageTransitionAnimation.fade,

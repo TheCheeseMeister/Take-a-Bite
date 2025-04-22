@@ -21,6 +21,7 @@ class OthersProfile extends StatefulWidget {
     required this.bio,
     required this.profilePicture,
     required this.createdRecipes,
+    required this.savedRecipes,
   }) : super(key: key);
   
   //final String profileImage;
@@ -31,6 +32,7 @@ class OthersProfile extends StatefulWidget {
   final String? profilePicture;
   final String bio;
   final List<dynamic> createdRecipes;
+  final List<dynamic> savedRecipes;
 
   @override
   State<OthersProfile> createState() => _OthersProfileState();
@@ -69,7 +71,7 @@ class _OthersProfileState extends State<OthersProfile> {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-              child: RecipeList(update: update, createdRecipes: widget.createdRecipes, authorName: widget.displayName, authorBio: widget.bio, authorPicture: widget.profilePicture),
+              child: RecipeList(update: update, createdRecipes: widget.createdRecipes, authorName: widget.displayName, authorBio: widget.bio, authorPicture: widget.profilePicture, savedRecipes: widget.savedRecipes),
             ),
           ],
         ),
@@ -253,11 +255,13 @@ class RecipeList extends StatefulWidget {
     required this.authorName,
     required this.authorBio,
     required this.authorPicture,
+    required this.savedRecipes,
   });
 
   // fake update to refresh page
   final bool update;
   final List<dynamic> createdRecipes;
+  final List<dynamic> savedRecipes;
   final String authorName;
   final String? authorBio;
   final String? authorPicture;
@@ -327,16 +331,15 @@ class _RecipeListState extends State<RecipeList> {
                   }).toList().reversed.toList(),
                 ),
                 // Second tab: Saved Recipes
-                GridView.count(
+                GridView.count( 
+                  childAspectRatio: 1,
                   shrinkWrap: true,
                   crossAxisCount: 3,
-                  children: List.generate(100, (index) {
-                    return Center(
-                      child: Text(
-                        'Item $index',
-                      ),
-                    );
-                  }),
+                  children: widget.savedRecipes.asMap().entries.map((recipe) {
+                    int index = recipe.key;
+                    var item = recipe.value;
+                    return ProfileRecipe(index: index+1, recipe: item, authorName: widget.authorName, authorBio: widget.authorBio, authorPicture: widget.authorPicture);
+                  }).toList().reversed.toList(),
                 ),
               ],
             ),
