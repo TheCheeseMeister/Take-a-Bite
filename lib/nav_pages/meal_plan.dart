@@ -60,7 +60,7 @@ class _ShoppingListState extends State<ShoppingList> {
   final timeController = TextEditingController();
   String currTime = "";
 
-  Future<int> createMealPlan(String time) async {
+  Future<List<dynamic>> createMealPlan() async {
     var url = Uri.http('3.93.61.3', '/api/feed/mealPlan/store');
     var response = await http.post(
       url,
@@ -71,13 +71,13 @@ class _ShoppingListState extends State<ShoppingList> {
       },
       body: jsonEncode({
         'date_to_make': DateTime.now().toString().split(" ")[0],
-        'time_to_make': time.toLowerCase(),
       }),
     );
 
     print(response.statusCode);
-    final mealPlanId = jsonDecode(response.body)['id'];
-    return mealPlanId;
+    
+    final data = jsonDecode(response.body)['plans'];
+    return data;
   }
 
   Future<void> createMealPlanLink(
@@ -98,6 +98,31 @@ class _ShoppingListState extends State<ShoppingList> {
     );
 
     print(response.statusCode);
+  }
+
+  Future<void> refreshMealPlans() async {
+    var url = Uri.http('3.93.61.3', '/api/feed/mealPlanLink/${globals.user['user_id']}');
+    var response = await http.get(
+      url,
+      headers: {
+        "Authorization": 'Bearer ${globals.token}',
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+    );
+
+    print(response.statusCode);
+    
+    final data = jsonDecode(response.body)['plans'];
+    
+    setState(() {plans = data;});
+
+    print(plans);
+    print(plans![0]);
+    print(plans![0]['recipe']);
+    print(plans![0]['recipe']['ingredients']);
+    print(plans![0]['recipe']['ingredients'][0]);
+    print(plans![0]['recipe']['ingredients'][0]['ingredient']);
   }
 
   Future<void> refreshCreatedRecipes() async {
@@ -131,6 +156,18 @@ class _ShoppingListState extends State<ShoppingList> {
     setState(() {
       globals.savedRecipes = data;
     });
+  }
+
+  List<dynamic>? plans;
+
+  void updatePlans(var item) {
+    setState(() {plans!.add(item);});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    refreshMealPlans();
   }
 
   @override
@@ -453,9 +490,32 @@ class _ShoppingListState extends State<ShoppingList> {
                                   // insert text for validation; needs at least one recipe selected.
                                   ElevatedButton(
                                     onPressed: () async {
-                                      int plan_id = await createMealPlan(
-                                          timeController.text);
-                                      //await createMealPlanLink(globals.user['user_id'], selectedRecipe['id'], plan_id);
+                                      List<dynamic> times = await createMealPlan();
+
+                                      int breakfast_id = times[0]['plan']['meal_plan_id'];
+                                      int lunch_id = times[1]['plan']['meal_plan_id'];
+                                      int dinner_id = times[2]['plan']['meal_plan_id'];
+                                      int snack_id = times[3]['plan']['meal_plan_id'];
+
+                                      print(breakfast_id);
+                                      print(lunch_id);
+                                      print(dinner_id);
+                                      print(snack_id);
+
+                                      for (var recipe in breakfast) {
+                                        var tempRecipeInfo = combinedRecipes.firstWhere((r) => r['recipe_name'] == recipe);
+                                        print(tempRecipeInfo);
+                                        int recipe_id = tempRecipeInfo['recipe_id'];
+                                        //setState(() {plans.add(recipe);});
+                                        //await createMealPlanLink(globals.user['user_id'], selectedRecipe['id'], plan_id);
+                                        await createMealPlanLink(globals.user['user_id'], recipe_id, breakfast_id);
+                                        //updatePlans(recipe);
+                                      }
+
+                                      //print("mealplans___");
+                                      await refreshMealPlans();
+
+                                      //print(plans);
 
                                       Navigator.of(context).pop();
                                     },
@@ -477,11 +537,20 @@ class _ShoppingListState extends State<ShoppingList> {
               icon: const Icon(Icons.add),
             )),
       ),
-      const Column(
+      Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text("No Meal Plans..."),
-        ],
+        children: plans == null
+          ? [const CircularProgressIndicator()]
+          : plans!.isEmpty
+          ? [const Text("No Meal Plans...")]
+          : plans!.map((plan) {
+            return TextButton(
+              onPressed: () {
+                setState(() {plans!.remove(plan);});
+              },
+              child: Text(plan['mur_recipe_id'].toString()),
+            );
+          }).toList(),
       )
     ]);
   }
