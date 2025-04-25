@@ -18,13 +18,27 @@ class MealPlanController extends Controller
     public function store(MealPlanRequest $request){
         $request->validated();
 
-        MealPlan::create([
+	$mealTimes = ['breakfast', 'lunch', 'dinner', 'snack'];
+	$mealPlans = [];
+
+	foreach ($mealTimes as $time) {
+	    $mealPlan = MealPlan::firstOrCreate([
+	    	'date_to_make' => $request->date_to_make,
+		'time_to_make' => $time,
+	    ]);
+
+	    $mealPlans[] = [
+	    	'plan' => $mealPlan,
+            ];
+	}
+
+        /*$mealPlan = MealPlan::create([
             'date_to_make' => $request->date_to_make,
             'time_to_make' => $request->time_to_make
-        ]);
+        ]);*/
 
         return response([
-            'message' => MealPlan::first(), //return mealplan id
+            'plans' => $mealPlans,
         ],201);
 
     }

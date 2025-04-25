@@ -80,7 +80,7 @@ Route::get('/feed/mealPlan/{mealPlan_id}', [MealPlanController::class, 'getMealP
 
 Route::post('/feed/mealPlanLink/store', [MealPlanLinkController::class, 'store'])->middleware('auth:sanctum');
 
-Route::get('/feed/mealPlanLink/{mealPlanLink_id}', [MealPlanLinkController::class, 'getMealPlans'])->middleware('auth:sanctum');
+Route::get('/feed/mealPlanLink/{mur_user_id}', [MealPlanLinkController::class, 'getMealPlans'])->middleware('auth:sanctum');
 
 
 
