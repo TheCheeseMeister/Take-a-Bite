@@ -149,7 +149,8 @@ class _SearchState extends State<Search> {
   void enforceIngredients() {
     for (var ingredient in selectedIngredients) {
       newRecipeList = newRecipeList.where((recipe) {
-        var ingredientList = recipe['ingredients'].map((ingredient) => ingredient['ingredient_name']);
+        var ingredientList = recipe['ingredients']
+            .map((ingredient) => ingredient['ingredient_name']);
         return ingredientList.contains(ingredient);
       }).toList();
       /*recipes = recipes.where((recipe) {
@@ -212,12 +213,14 @@ class _SearchState extends State<Search> {
         "Accept-Encoding": "identity",
       },
     );
-    
+
     final data = jsonDecode(response.body)['user_recipes'].reversed.toList();
 
     print(response.statusCode);
 
-    setState(() {newRecipeList = data;});
+    setState(() {
+      newRecipeList = data;
+    });
   }
 
   // Search method for SearchBar, sends callback to parent widget (this)
@@ -273,7 +276,9 @@ class _SearchState extends State<Search> {
     enforceTags();
     enforceSearch();
 */
-    setState(() {recipeViewCount = 10;});
+    setState(() {
+      recipeViewCount = 10;
+    });
 
     setState(() {
       searching = false;
@@ -291,19 +296,25 @@ class _SearchState extends State<Search> {
 
     recipeScrollController.addListener(() {
       if (recipeScrollController.position.atEdge && recipeViewCount != -1) {
-      bool isTop = recipeScrollController.position.pixels == 0;
-      if (!isTop) {
-        incrementViewCount();
+        bool isTop = recipeScrollController.position.pixels == 0;
+        if (!isTop) {
+          incrementViewCount();
+        }
       }
-    }
     });
   }
 
   void incrementViewCount() async {
     await Future.delayed(const Duration(milliseconds: 250));
     // TODO: change depending on whether length is < 10 more
-    if (recipeViewCount + 10 > (newRecipeList.length)) setState(() {recipeViewCount += (newRecipeList.length - recipeViewCount);});
-    else setState(() {recipeViewCount += 10;});
+    if (recipeViewCount + 10 > (newRecipeList.length))
+      setState(() {
+        recipeViewCount += (newRecipeList.length - recipeViewCount);
+      });
+    else
+      setState(() {
+        recipeViewCount += 10;
+      });
   }
 
   @override
@@ -361,26 +372,30 @@ class _SearchState extends State<Search> {
                           child: Text("No Results."),
                         )
                       : ListView.builder(
-                        //controller: recipeScrollController,
-                        shrinkWrap: true,
-                        physics: const ClampingScrollPhysics(),
-                        itemCount: recipeViewCount + 1,
-                        itemBuilder: (context, index) {
-                          if (index < recipeViewCount) {
-                            return RecipeCard(recipeInfo: newRecipeList[index], index: index+1000);
-                          } else {
-                            return Padding(
-                              padding: const EdgeInsets.fromLTRB(0,36,0,36),
-                              child: Center(
-                                child: recipeViewCount == newRecipeList.length
-                                ? const Text("End of Results", style: TextStyle(fontStyle: FontStyle.italic))
-                                : const CircularProgressIndicator(),
-                              ),
-                            );
-                          }
-                        }
-                      ),
-                      /*ListView(
+                          //controller: recipeScrollController,
+                          shrinkWrap: true,
+                          physics: const ClampingScrollPhysics(),
+                          itemCount: recipeViewCount + 1,
+                          itemBuilder: (context, index) {
+                            if (index < recipeViewCount) {
+                              return RecipeCard(
+                                  recipeInfo: newRecipeList[index],
+                                  index: index + 1000);
+                            } else {
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(0, 36, 0, 36),
+                                child: Center(
+                                  child: recipeViewCount == newRecipeList.length
+                                      ? const Text("End of Results",
+                                          style: TextStyle(
+                                              fontStyle: FontStyle.italic))
+                                      : const CircularProgressIndicator(),
+                                ),
+                              );
+                            }
+                          }),
+              /*ListView(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           children: List.generate(newRecipeList.length, (index) {
@@ -389,7 +404,7 @@ class _SearchState extends State<Search> {
                                 index: index + 1000);
                           }),
                         ),*/
-                  /*recipes.isEmpty
+              /*recipes.isEmpty
                       ? const Padding(
                           padding: EdgeInsets.fromLTRB(0, 24, 0, 0),
                           child: Text("No Results."),
@@ -432,7 +447,28 @@ class _SearchBarState extends State<SearchBar> {
           child: SizedBox(
             width: 266,
             child: DropdownSearch<String>.multiSelection(
-              //items: (filter, s) => ["a", "b", "c", "d", "e", "f", "g", "h", "i"],
+              dropdownBuilder: (context, selectedItems) {
+                return Wrap(
+                  children: selectedItems
+                      .map(
+                        (item) => Chip(
+                          label: Text(
+                            item,
+                            style: TextStyle(fontSize: 14),
+                            overflow: TextOverflow
+                                .ellipsis, // This is for overflow handling
+                            softWrap:
+                                true, // This enables wrapping of text in Chip
+                          ),
+                          deleteIcon: const Icon(Icons.clear),
+                          onDeleted: () {
+                            setState(() {selectedItems.remove(item);});
+                          },
+                        ),
+                      )
+                      .toList(),
+                );
+              },
               items: (filter, s) => globals.ingredientsList
                   .map<String>((ingredient) => ingredient['ingredient_name'])
                   .toList(),
@@ -488,7 +524,28 @@ class _TagSearchBarState extends State<TagSearchBar> {
           child: SizedBox(
             width: 266,
             child: DropdownSearch<String>.multiSelection(
-              //items: (filter, s) => ["a", "b", "c", "d", "e", "f", "g", "h", "i"],
+              dropdownBuilder: (context, selectedItems) {
+                return Wrap(
+                  children: selectedItems
+                      .map(
+                        (item) => Chip(
+                          label: Text(
+                            item,
+                            style: TextStyle(fontSize: 14),
+                            overflow: TextOverflow
+                                .ellipsis, // This is for overflow handling
+                            softWrap:
+                                true, // This enables wrapping of text in Chip
+                          ),
+                          deleteIcon: const Icon(Icons.clear),
+                          onDeleted: () {
+                            setState(() {selectedItems.remove(item);});
+                          },
+                        ),
+                      )
+                      .toList(),
+                );
+              },
               items: (filter, s) => globals.tagsList
                   .map<String>((tag) => tag['tag_name'])
                   .toList(),

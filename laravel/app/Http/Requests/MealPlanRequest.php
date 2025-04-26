@@ -28,7 +28,7 @@ class MealPlanRequest extends FormRequest
     {
         return [
             'date_to_make' => 'required',
-            'time_to_make' => 'required',
+           // 'time_to_make' => 'required',
         ];
     }
 }

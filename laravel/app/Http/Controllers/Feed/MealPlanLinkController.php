@@ -17,7 +17,7 @@ class MealPlanLinkController extends Controller
     public function store(MealPlanLinkRequest $request){
         $request->validated();
 
-        MealPlanLink::create([
+        MealPlanLink::firstOrCreate([
             'mur_user_id' => $request->mur_user_id,
             'mur_recipe_id' => $request->mur_recipe_id,
             'mur_mealplan_id' => $request->mur_mealplan_id,
@@ -29,12 +29,12 @@ class MealPlanLinkController extends Controller
 
     }
 
-    public function getMealPlans($mealPlan_id)
+    public function getMealPlans($mur_user_id)
     {
-        $recipe_name = MealPlanLink::where('mur_id', "=", $mealPlan_id)->get();
+        $mealPlans = MealPlanLink::where('mur_user_id', "=", $mur_user_id)->with('recipe.ingredients.ingredient')->get();
 
         return response([
-            'meal plan link' => $recipe_name,
+            'plans' => $mealPlans,
         ],200);
     }
 }
