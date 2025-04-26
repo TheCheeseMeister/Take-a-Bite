@@ -7,6 +7,7 @@ use App\Http\Controllers\Feed\TagController;
 use App\Http\Controllers\Feed\TagIngredientController;
 use App\Http\Controllers\Feed\TagRecipeController;
 use App\Http\Controllers\Feed\UserController;
+use App\Http\Controllers\Feed\UserIngredientsController;
 use App\Http\Controllers\Feed\UserSavedController;
 use App\Http\Controllers\Feed\MealPlanController;
 use App\Http\Controllers\Feed\MealPlanLinkController;
@@ -82,6 +83,9 @@ Route::post('/feed/mealPlanLink/store', [MealPlanLinkController::class, 'store']
 
 Route::get('/feed/mealPlanLink/{mealPlanLink_id}', [MealPlanLinkController::class, 'getMealPlans'])->middleware('auth:sanctum');
 
+Route::post('/feed/userIngredients/store', [UserIngredientsController::class, 'store'])->middleware('auth:sanctum');
+
+Route::get('/feed/userIngredients/{userIngredientsID}', [UserIngredientsController::class, 'getUserIngredients'])->middleware('auth:sanctum');
 
 
 
