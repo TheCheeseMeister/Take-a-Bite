@@ -60,7 +60,7 @@ class _ShoppingListState extends State<ShoppingList> {
   final timeController = TextEditingController();
   String currTime = "";
 
-  Future<List<dynamic>> createMealPlan() async {
+  Future<List<dynamic>> createMealPlan(String date) async {
     var url = Uri.http('3.93.61.3', '/api/feed/mealPlan/store');
     var response = await http.post(
       url,
@@ -70,7 +70,7 @@ class _ShoppingListState extends State<ShoppingList> {
         "Accept": "application/json"
       },
       body: jsonEncode({
-        'date_to_make': DateTime.now().toString().split(" ")[0],
+        'date_to_make': date,
       }),
     );
 
@@ -117,12 +117,51 @@ class _ShoppingListState extends State<ShoppingList> {
     
     setState(() {plans = data;});
 
-    print(plans);
+    await groupPlansByDate();
+
+    /*print(plans);
     print(plans![0]);
     print(plans![0]['recipe']);
     print(plans![0]['recipe']['ingredients']);
     print(plans![0]['recipe']['ingredients'][0]);
     print(plans![0]['recipe']['ingredients'][0]['ingredient']);
+    print(plans![0]['plan']);*/
+  }
+
+  Future<void> groupPlansByDate() async {
+    final Map<String, List<Map<String, dynamic>>> grouped = {};
+    if (plans!.isEmpty) {
+      setState(() {datedPlans = {};});
+      return;
+    }
+
+    for (var plan in plans!) {
+      String date = plan['plan']['date_to_make'];
+
+      if (grouped.containsKey(date)) {
+        grouped[date]!.add(plan);
+      } else {
+        grouped[date] = [plan];
+      }
+    }
+
+    setState(() {datedPlans = grouped;});
+  }
+
+  Map<String, List<Map<String, dynamic>>> groupPlansByTime(List<Map<String, dynamic>> items) {
+    final Map<String, List<Map<String, dynamic>>> grouped = {};
+
+    for (var item in items) {
+      String time = item['plan']['time_to_make'];
+
+      if (grouped.containsKey(time)) {
+        grouped[time]!.add(item);
+      } else {
+        grouped[time] = [item];
+      }
+    }
+
+    return grouped;
   }
 
   Future<void> refreshCreatedRecipes() async {
@@ -159,6 +198,7 @@ class _ShoppingListState extends State<ShoppingList> {
   }
 
   List<dynamic>? plans;
+  Map<String, List<Map<String, dynamic>>> datedPlans = {};
 
   void updatePlans(var item) {
     setState(() {plans!.add(item);});
@@ -176,7 +216,7 @@ class _ShoppingListState extends State<ShoppingList> {
       Align(
         alignment: Alignment.topRight,
         child: Padding(
-            padding: const EdgeInsets.fromLTRB(0, 24, 24, 0),
+            padding: const EdgeInsets.fromLTRB(0, 24, 16, 0),
             child: IconButton(
               onPressed: () async {
                 await refreshCreatedRecipes();
@@ -209,8 +249,22 @@ class _ShoppingListState extends State<ShoppingList> {
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
+                    String selectedDate = DateTime.now().toString().split(" ")[0];
                     return StatefulBuilder(
                       builder: (context, setState) {
+                        Future<void> openCalendar() async {
+                          final DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime.now().add(const Duration(days: 365))
+                          );
+
+                          String date = pickedDate.toString().split(" ")[0];
+                          setState(() {selectedDate = date;});
+                          print(selectedDate);
+                        }
+
                         return Dialog(
                           child: SingleChildScrollView(
                             child: FractionallySizedBox(
@@ -219,14 +273,43 @@ class _ShoppingListState extends State<ShoppingList> {
                                 //mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   const SizedBox(height: 36),
-                                  Text(
-                                    "Meal Plan - $title",
-                                    style: const TextStyle(
+                                  const Text(
+                                    //"Meal Plan - $title",
+                                    "Meal Plan",
+                                    style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                   const SizedBox(height: 36),
+                                  //Text("Selected Date: $selectedDate"),
+                                  RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        const TextSpan(
+                                          text: "Selected Date: ",
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: selectedDate,
+                                          style: const TextStyle(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      openCalendar();
+                                    },
+                                    child: Text("Select Date"),
+                                  ),
+                                  const SizedBox(height: 24),
                                   DropdownSearch<String>.multiSelection(
                                     dropdownBuilder: (context, breakfast) {
                                       return Wrap(
@@ -490,32 +573,42 @@ class _ShoppingListState extends State<ShoppingList> {
                                   // insert text for validation; needs at least one recipe selected.
                                   ElevatedButton(
                                     onPressed: () async {
-                                      List<dynamic> times = await createMealPlan();
+                                      List<dynamic> times = await createMealPlan(selectedDate);
 
                                       int breakfast_id = times[0]['plan']['meal_plan_id'];
                                       int lunch_id = times[1]['plan']['meal_plan_id'];
                                       int dinner_id = times[2]['plan']['meal_plan_id'];
                                       int snack_id = times[3]['plan']['meal_plan_id'];
 
-                                      print(breakfast_id);
+                                      /*print(breakfast_id);
                                       print(lunch_id);
                                       print(dinner_id);
-                                      print(snack_id);
+                                      print(snack_id);*/
 
                                       for (var recipe in breakfast) {
                                         var tempRecipeInfo = combinedRecipes.firstWhere((r) => r['recipe_name'] == recipe);
-                                        print(tempRecipeInfo);
                                         int recipe_id = tempRecipeInfo['recipe_id'];
-                                        //setState(() {plans.add(recipe);});
-                                        //await createMealPlanLink(globals.user['user_id'], selectedRecipe['id'], plan_id);
                                         await createMealPlanLink(globals.user['user_id'], recipe_id, breakfast_id);
-                                        //updatePlans(recipe);
                                       }
 
-                                      //print("mealplans___");
-                                      await refreshMealPlans();
+                                      for (var recipe in lunch) {
+                                        var tempRecipeInfo = combinedRecipes.firstWhere((r) => r['recipe_name'] == recipe);
+                                        int recipe_id = tempRecipeInfo['recipe_id'];
+                                        await createMealPlanLink(globals.user['user_id'], recipe_id, lunch_id);
+                                      }
 
-                                      //print(plans);
+                                      for (var recipe in dinner) {
+                                        var tempRecipeInfo = combinedRecipes.firstWhere((r) => r['recipe_name'] == recipe);
+                                        int recipe_id = tempRecipeInfo['recipe_id'];
+                                        await createMealPlanLink(globals.user['user_id'], recipe_id, dinner_id);
+                                      }
+
+                                      for (var recipe in snack) {
+                                        var tempRecipeInfo = combinedRecipes.firstWhere((r) => r['recipe_name'] == recipe);
+                                        int recipe_id = tempRecipeInfo['recipe_id'];
+                                        await createMealPlanLink(globals.user['user_id'], recipe_id, snack_id);
+                                      }
+                                      await refreshMealPlans();
 
                                       Navigator.of(context).pop();
                                     },
@@ -541,16 +634,73 @@ class _ShoppingListState extends State<ShoppingList> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: plans == null
           ? [const CircularProgressIndicator()]
-          : plans!.isEmpty
-          ? [const Text("No Meal Plans...")]
-          : plans!.map((plan) {
-            return TextButton(
-              onPressed: () {
-                setState(() {plans!.remove(plan);});
-              },
-              child: Text(plan['mur_recipe_id'].toString()),
-            );
-          }).toList(),
+          : datedPlans.isEmpty 
+          ? [const Text("No Meal Plans...")] 
+          : [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 72, 0, 0),
+                  child: ListView.builder(
+                    itemCount: datedPlans.length,
+                    itemBuilder: (context, index) {
+                      String date = datedPlans.keys.elementAt(index);
+                      List<Map<String, dynamic>> items = datedPlans[date]!;
+                  
+                      return ExpansionTile(
+                        title: Text(date),
+                        collapsedBackgroundColor: const Color.fromARGB(255, 211, 211, 211),
+                        children: groupPlansByTime(items).entries.map((time) {
+                          String time_to_make = time.key[0].toUpperCase() + time.key.substring(1);
+                          List<dynamic> grouped = time.value;
+                  
+                          return ExpansionTile(
+                            title: Text(time_to_make),
+                            children: grouped.map((plan) {
+                              return Column(
+                                  children: [
+                                    Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Padding(
+                                        padding: const EdgeInsets.fromLTRB(16,0,0,0),
+                                        child: Row(
+                                          children: [
+                                            Text(
+                                              plan['recipe']['recipe_name'],
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                            const Spacer(),
+                                            Text(
+                                              plan['recipe']['cook_time'] + " | ",
+                                              style: const TextStyle(
+                                                fontSize: 15,
+                                              ),
+                                            ),
+                                            Text(
+                                              plan['recipe']['recipe_servings'],
+                                              style: const TextStyle(
+                                                fontSize: 15,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                          ]
+                                        ),
+                                      ),
+                                    ),
+                                    // List ingredients of recipe
+                                  ],
+                                );
+                            }).toList(),
+                          );
+                        }).toList(),
+                      );
+                    }
+                  ),
+                )
+              )
+          ],
       )
     ]);
   }
