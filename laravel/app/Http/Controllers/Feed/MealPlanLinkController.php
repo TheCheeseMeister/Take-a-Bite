@@ -31,7 +31,9 @@ class MealPlanLinkController extends Controller
 
     public function getMealPlans($mur_user_id)
     {
-        $mealPlans = MealPlanLink::where('mur_user_id', "=", $mur_user_id)->with('recipe.ingredients.ingredient')->get();
+        $mealPlans = MealPlanLink::where('mur_user_id', "=", $mur_user_id)
+		->with('recipe.ingredients.ingredient')
+		->with('plan')->get();
 
         return response([
             'plans' => $mealPlans,

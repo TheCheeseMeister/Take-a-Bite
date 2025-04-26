@@ -31,5 +31,10 @@ class MealPlanLink extends Model
 	return $this->belongsTo(Recipe::class, 'mur_recipe_id', 'recipe_id');
     }
 
+    public function plan(): BelongsTo
+    {
+	return $this->belongsTo(MealPlan::class, 'mur_mealplan_id', 'meal_plan_id');
+    }
+
 
 }
