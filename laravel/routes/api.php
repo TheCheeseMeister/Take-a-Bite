@@ -87,6 +87,7 @@ Route::post('/feed/userIngredients/store', [UserIngredientsController::class, 's
 
 Route::get('/feed/userIngredients/{userIngredientsID}', [UserIngredientsController::class, 'getUserIngredients'])->middleware('auth:sanctum');
 
+Route::post('/feed/removeMealPlanLink', [MealPlanLinkController::class, 'removeMealPlan'])->middleware('auth:sanctum');
 
 
 
