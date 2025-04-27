@@ -14,6 +14,15 @@ List<dynamic> createdRecipes = [];
 // Recipes user saved
 List<dynamic> savedRecipes = [];
 
+// Meal Plans for user
+List<dynamic>? plans = [];
+
+// Meal Plans sorted by Date (for refreshing from navbar)
+Map<String, List<Map<String, dynamic>>> datedPlans = {};
+
+// To update plans display
+final plansChanged = ValueNotifier<int>(0);
+
 // Token for HttpRequests
 String token = "";
 
