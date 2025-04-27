@@ -33,10 +33,21 @@ class MealPlanLinkController extends Controller
     {
         $mealPlans = MealPlanLink::where('mur_user_id', "=", $mur_user_id)
 		->with('recipe.ingredients.ingredient')
+		->with('recipe.tags.tag')
+		->with('user')
 		->with('plan')->get();
 
         return response([
             'plans' => $mealPlans,
         ],200);
+    }
+
+    public function removeMealPlan(Request $request)
+    {
+	MealPlanLink::where('mur_id',$request->mur_id)->delete();
+	
+	return response([
+	   'message' => 'success'
+	], 201);
     }
 }
