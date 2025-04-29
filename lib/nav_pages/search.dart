@@ -277,7 +277,11 @@ class _SearchState extends State<Search> {
     enforceSearch();
 */
     setState(() {
-      recipeViewCount = 10;
+      if (newRecipeList.length < 10) {
+        recipeViewCount = newRecipeList.length;
+      } else {
+        recipeViewCount = 10;
+      }
     });
 
     setState(() {
@@ -307,14 +311,16 @@ class _SearchState extends State<Search> {
   void incrementViewCount() async {
     await Future.delayed(const Duration(milliseconds: 250));
     // TODO: change depending on whether length is < 10 more
-    if (recipeViewCount + 10 > (newRecipeList.length))
+    if (recipeViewCount + 10 > (newRecipeList.length)) {
       setState(() {
         recipeViewCount += (newRecipeList.length - recipeViewCount);
       });
-    else
+    }
+    else {
       setState(() {
         recipeViewCount += 10;
       });
+    }
   }
 
   @override
@@ -618,8 +624,8 @@ class _RecipeCardState extends State<RecipeCard> {
 
     setState(() {
       authorName = data['user_username'];
-      authorBio = data['user_bio'];
-      authorPicture = data['user_profile_picture'];
+      authorBio = data['user_bio'] ?? "";
+      authorPicture = data['user_profile_picture'] ?? "";
     });
     print(authorPicture);
     print(globals.savedRecipes);

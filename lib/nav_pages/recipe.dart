@@ -733,8 +733,8 @@ class RecipeStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Wrap(
+      //mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // Prep Time
         const Spacer(),
@@ -748,7 +748,7 @@ class RecipeStats extends StatelessWidget {
               const TextSpan(
                   text: 'Prep Time: ',
                   style: TextStyle(fontWeight: FontWeight.bold)),
-              TextSpan(text: '$prepTime mins')
+              TextSpan(text: '$prepTime mins | ')
             ],
           ),
         ),
@@ -764,7 +764,7 @@ class RecipeStats extends StatelessWidget {
               const TextSpan(
                   text: 'Cook Time: ',
                   style: TextStyle(fontWeight: FontWeight.bold)),
-              TextSpan(text: '$cookTime mins')
+              TextSpan(text: '$cookTime mins | ')
             ],
           ),
         ),
