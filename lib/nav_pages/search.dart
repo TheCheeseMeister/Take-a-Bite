@@ -331,41 +331,49 @@ class _SearchState extends State<Search> {
         child: Center(
           child: Column(
             children: [
-              Row(
-                children: [
-                  SizedBox(
-                    height: 100,
-                    width: 290,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 48, 0, 0),
-                      child: TextField(
-                        controller: wordSearch,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: "Search",
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0,0,0,16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Column(
+                      children: [
+                        SizedBox(
+                          height: 100,
+                          width: 282,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 48, 0, 0),
+                            child: TextField(
+                              controller: wordSearch,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                labelText: "Search",
+                              ),
+                            ),
+                          ),
                         ),
+                        const Padding(
+                          padding: EdgeInsets.fromLTRB(0, 8, 0, 0),
+                          child: SearchBar(),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.fromLTRB(0, 8, 0, 0),
+                          child: TagSearchBar(),
+                        ),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 0, 8, 64),
+                      child: IconButton(
+                        icon: const Icon(Icons.search),
+                        onPressed: () async {
+                          //await widget.searchMethod();
+                          await handleSearch();
+                        },
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 48, 0, 0),
-                    child: IconButton(
-                      icon: const Icon(Icons.search),
-                      onPressed: () async {
-                        //await widget.searchMethod();
-                        await handleSearch();
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              const Padding(
-                padding: EdgeInsets.fromLTRB(0, 8, 62, 0),
-                child: SearchBar(),
-              ),
-              const Padding(
-                padding: EdgeInsets.fromLTRB(0, 8, 62, 0),
-                child: TagSearchBar(),
+                  ],
+                ),
               ),
               searching
                   ? const Padding(
