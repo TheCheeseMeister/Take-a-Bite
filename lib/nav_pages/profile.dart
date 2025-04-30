@@ -464,6 +464,7 @@ class _ProfileRecipeState extends State<ProfileRecipe> {
             );
           } else {
             Map<String, dynamic> creator = await getUser(widget.recipe['user_user_id']);
+            print(ingredients);
             PersistentNavBarNavigator.pushNewScreenWithRouteSettings(
               context,
               settings: const RouteSettings(),

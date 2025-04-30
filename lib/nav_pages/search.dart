@@ -56,6 +56,8 @@ class _SearchState extends State<Search> {
     //data.shuffle(); Use this for randomizing order
     data = data.reversed.toList();
 
+    print(data);
+
     print(response.statusCode);
     //print(data[0]);
 
@@ -67,6 +69,7 @@ class _SearchState extends State<Search> {
   }
 
   Future<void> getRecipeIngredients(int recipe_id) async {
+    if (recipe_id == 970) print("WHAT");
     var url = Uri.http('3.93.61.3', '/api/feed/recipeIngredient/$recipe_id');
     var response = await http.get(
       url,
@@ -651,19 +654,37 @@ class _RecipeCardState extends State<RecipeCard> {
     bool isVegan = false;
     bool isGlutenFree = false;
 
-    Map<String, dynamic> ingredients = recipeIngredients.firstWhere(
-        (element) => element['recipe_id'] == widget.recipeInfo['recipe_id'],
-        orElse: () => {});
+    var tempIngredients = newRecipeList.where((element) => element['recipe_id'] == widget.recipeInfo['recipe_id']).first['ingredients'];
+
+    int index = 0;
+    Map<String, dynamic> ingredients = {};
+    ingredients['recipe_id'] = widget.recipeInfo['recipe_id'];
+
+    var tempMap = {};
+    for (var ingredient in tempIngredients) {
+      var tempInfo = {};
+      tempInfo['ingredient_name'] = ingredient['ingredient_name'];
+      tempInfo['portion'] = ingredient['portion'];
+      tempMap[index] = tempInfo;
+
+      index++;
+    }
+
+    ingredients['ingredients'] = tempMap;
 
     Map<String, dynamic> tempTags = recipeTags.firstWhere(
         (element) => element['id'] == widget.recipeInfo['recipe_id'],
         orElse: () => {});
-    if (tempTags.isNotEmpty) {
-      if (tempTags['tags'].contains('vegan')) {
+    
+    var tags = newRecipeList.where((element) => element['recipe_id'] == widget.recipeInfo['recipe_id']).first['tags'];
+    tags = tags.map((tag) => tag['tag_name']).toList();
+    
+    if (tags.isNotEmpty) {
+      if (tags.contains('vegan')) {
         isVegan = true;
       }
 
-      if (tempTags['tags'].contains('gluten-free')) {
+      if (tags.contains('gluten-free')) {
         isGlutenFree = true;
       }
     }
