@@ -737,7 +737,7 @@ class RecipeStats extends StatelessWidget {
       //mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // Prep Time
-        const Spacer(),
+        //const Spacer(),
         RichText(
           text: TextSpan(
             style: const TextStyle(
@@ -752,7 +752,7 @@ class RecipeStats extends StatelessWidget {
             ],
           ),
         ),
-        const Spacer(),
+        //const Spacer(),
         // Cook Time
         RichText(
           text: TextSpan(
@@ -768,7 +768,7 @@ class RecipeStats extends StatelessWidget {
             ],
           ),
         ),
-        const Spacer(),
+        //const Spacer(),
         // Serving Size
         RichText(
           text: TextSpan(
@@ -784,7 +784,7 @@ class RecipeStats extends StatelessWidget {
             ],
           ),
         ),
-        const Spacer(),
+        //const Spacer(),
       ],
     );
   }

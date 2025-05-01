@@ -43,6 +43,8 @@ class _CreateRecipeState extends State<CreateRecipe> {
   bool testLoading = false;
   String? testImageUrl;
 
+  bool portionValidate = true;
+
   //Map<String, dynamic> tempIngredient = {};
   Map<String, dynamic> tempIngredient = {};
   //List<Map<Map<String, dynamic>, int>> ingredients = [];
@@ -85,6 +87,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
       request.fields['recipe_servings'] = recipe_servings;
       request.fields['recipe_yield'] = "NA";
       request.fields['recipe_directions'] = recipe_directions;
+      request.fields['is_public'] = 1.toString(); // temp for no public/private option
 
       // Resize file
       if (selectedImage != null) {
@@ -102,6 +105,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
       var streamedResponse = await request.send();
       var response = await http.Response.fromStream(streamedResponse);
 
+      print(recipe_description.runtimeType);
       print(response.statusCode);
 
       return response;
@@ -245,7 +249,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
               // Ingredients display (proportions too)
               ingredients.isEmpty
                   ? const Padding(
-                      padding: EdgeInsets.fromLTRB(0, 0, 0, 8),
+                      padding: EdgeInsets.fromLTRB(0, 16, 0, 16),
                       child: Text(
                         "No Ingredients Selected",
                         style: TextStyle(
@@ -253,34 +257,37 @@ class _CreateRecipeState extends State<CreateRecipe> {
                         ),
                       ),
                     )
-                  : ListView(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      children: ingredients.map((ingredient) {
-                        var tempInfo = ingredient.ingredientInfo;
-                        var tempPortion = ingredient.portion;
-                        return FractionallySizedBox(
-                          widthFactor: 0.8,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
-                            child: Card(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(tempInfo["ingredient_name"]),
-                                    //Text("Temp portion display"),
-                                    Text(tempPortion),
-                                  ],
+                  : Padding(
+                    padding: const EdgeInsets.fromLTRB(0,0,0,16),
+                    child: ListView(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        children: ingredients.map((ingredient) {
+                          var tempInfo = ingredient.ingredientInfo;
+                          var tempPortion = ingredient.portion;
+                          return FractionallySizedBox(
+                            widthFactor: 0.8,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
+                              child: Card(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(tempInfo["ingredient_name"]),
+                                      //Text("Temp portion display"),
+                                      Text(tempPortion),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
+                          );
+                        }).toList(),
+                      ),
+                  ),
               // Ingredient input
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -307,6 +314,12 @@ class _CreateRecipeState extends State<CreateRecipe> {
                             print(tempIngredient);
                           }
                         },
+                        decoratorProps: const DropDownDecoratorProps(
+                          decoration: InputDecoration(
+                            labelText: "Ingredient",
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
                         popupProps: PopupProps.menu(
                           menuProps: const MenuProps(
                               backgroundColor:
@@ -337,58 +350,71 @@ class _CreateRecipeState extends State<CreateRecipe> {
                           border: OutlineInputBorder(),
                         ),
                         validator: (String? value) {
-                          return (value == null || value.isEmpty)
+                          return null;
+                          /*return (value == null || value.isEmpty)
                               ? "Required"
-                              : null;
+                              : null;*/
                         }),
                   ),
                 ],
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 8, 8, 8),
-                    child: TextButton(
-                      onPressed: () {
-                        if (tempIngredient.isNotEmpty) {
-                          Ingredient temp = Ingredient(ingredientInfo: tempIngredient, portion: portionController.text);
+              if (portionValidate == false) const Padding(
+                padding: EdgeInsets.fromLTRB(0,16,0,8),
+                child: Text("All fields of ingredient should be filled.", style: TextStyle(color: Colors.red)),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0,8,0,16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 8, 8, 8),
+                      child: TextButton(
+                        onPressed: () {
+                          if (tempIngredient.isNotEmpty && portionController.text != "") {
+                            Ingredient temp = Ingredient(ingredientInfo: tempIngredient, portion: portionController.text);
+                            setState(() {
+                              ingredients.add(temp);
+                              portionValidate = true;
+                              portionController.text = "";
+                            });
+                          } else {
+                            setState(() {portionValidate = false;});
+                          }
+                        },
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color.fromARGB(255, 129, 214, 131),
+                        ),
+                        child: const Text(
+                          "Add Ingredient",
+                          style: TextStyle(
+                            color: Color.fromARGB(255, 0, 0, 0),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+                      child: TextButton(
+                        onPressed: () {
                           setState(() {
-                            ingredients.add(temp);
+                            ingredients = [];
+                            portionValidate = true;
                           });
-                        }
-                      },
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 129, 214, 131),
-                      ),
-                      child: const Text(
-                        "Add Ingredient",
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 0, 0, 0),
+                        },
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color.fromARGB(255, 255, 106, 106),
+                        ),
+                        child: const Text(
+                          "Clear Ingredients",
+                          style: TextStyle(
+                            color: Color.fromARGB(255, 0, 0, 0),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
-                    child: TextButton(
-                      onPressed: () {
-                        setState(() {
-                          ingredients = [];
-                        });
-                      },
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 255, 106, 106),
-                      ),
-                      child: const Text(
-                        "Clear Ingredients",
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 0, 0, 0),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               // Prep Time
               Padding(
@@ -411,9 +437,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                       validator: (String? value) {
                         return (value == null || value.isEmpty)
                             ? "Required."
-                            : value.length < 2
-                                ? "why?"
-                                : null;
+                            : null;
                       }),
                 ),
               ),
@@ -435,9 +459,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                       validator: (String? value) {
                         return (value == null || value.isEmpty)
                             ? "Required."
-                            : value.length < 2
-                                ? "why?"
-                                : null;
+                            : null;
                       }),
                 ),
               ),
@@ -459,9 +481,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                       validator: (String? value) {
                         return (value == null || value.isEmpty)
                             ? "Required."
-                            : value.length < 2
-                                ? "why?"
-                                : null;
+                            : null;
                       }),
                 ),
               ),
@@ -543,6 +563,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                   ),
                 ],
               ),
+              const SizedBox(height: 16),
               // Create/Submit Button
               ElevatedButton(
                 onPressed: () async {
@@ -577,6 +598,8 @@ class _CreateRecipeState extends State<CreateRecipe> {
                     // tags_id = 24 or 154, hardcoded for now
                     // recipe_id = response["recipe_id"] from storing recipe
                     //------------------------------------------//
+                    print("here?");
+                    print(storeRecipeResponse.statusCode);
                     print(jsonDecode(storeRecipeResponse.body));
                     int recipe_id = jsonDecode(storeRecipeResponse.body)['message']['recipe_id'];
 
@@ -632,7 +655,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                             children: [
                               const Text("Recipe successfully created!"),
                               const SizedBox(height: 15),
-                              const Text("Status Codes:"),
+                              /*const Text("Status Codes:"),
                               Text("Store Recipe - Status: ${storeRecipeResponse.statusCode}"),
                               isVegan
                               ? Text("Recipe Vegan - Status: ${veganResponse?.statusCode}")
@@ -646,7 +669,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                                 children: ingredientResponses.map((response) {
                                   return Text("Ingredient Response - ${response.statusCode}");
                                 }).toList(),
-                              ),
+                              ),*/
                               /*const Text("Current Values:"),
                               Text("Title: ${titleController.text}"),
                               Text("Subtitle: ${subtitleController.text}"),
@@ -668,7 +691,8 @@ class _CreateRecipeState extends State<CreateRecipe> {
                 },
                 child: const Text("Submit"),
               ),
-              if (testLoading) CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              /*if (testLoading) CircularProgressIndicator(),
               if (testImageUrl != null) Image.network(testImageUrl!)
               else if (!testLoading) Text("No image loaded"),
               TextButton(
@@ -676,7 +700,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                   testGetImage(1033);
                 },
                 child: Text("Press me to load test url!"),
-              ),
+              ),*/
             ]),
           ),
         ),
