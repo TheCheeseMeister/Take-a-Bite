@@ -309,7 +309,7 @@ class _RecipeListState extends State<RecipeList> {
                   children: globals.createdRecipes.asMap().entries.map((recipe) {
                     int index = recipe.key;
                     var item = recipe.value;
-                    return ProfileRecipe(index: index+1, recipe: item);
+                    return ProfileRecipe(index: index+1, recipe: item, isCreated: true);
                   }).toList().reversed.toList(),
                 ),
                 // Second tab: Saved Recipes
@@ -319,7 +319,7 @@ class _RecipeListState extends State<RecipeList> {
                   children: globals.savedRecipes.asMap().entries.map((recipe) {
                       int index = recipe.key;
                       var item = recipe.value;
-                      return ProfileRecipe(index: index+1, recipe: item);
+                      return ProfileRecipe(index: index+1, recipe: item, isCreated: false);
                   }).toList().reversed.toList(),
                 ),
               ],
@@ -333,10 +333,11 @@ class _RecipeListState extends State<RecipeList> {
 
 // Created/Saved Recipes
 class ProfileRecipe extends StatefulWidget {
-  ProfileRecipe({super.key, required this.index, required this.recipe});
+  const ProfileRecipe({super.key, required this.index, required this.recipe, required this.isCreated});
 
   final Map<String, dynamic> recipe; // recipeInfo
   final int index; 
+  final bool isCreated;
 
   @override
   State<ProfileRecipe> createState() => _ProfileRecipeState();
@@ -411,6 +412,22 @@ class _ProfileRecipeState extends State<ProfileRecipe> {
     
     Image? image = widget.recipe['recipe_image'] == null ? null : Image.network(widget.recipe['recipe_image'], width: double.infinity, height: 100, fit: BoxFit.cover);
 
+    print(widget.recipe);
+
+    Future<Map<String, dynamic>> getUser(int user_id) async {
+      var url = Uri.http('3.93.61.3', '/api/feed/getUser/$user_id');
+      var response = await http.get(url,
+          headers: {
+            "Authorization": 'Bearer ${globals.token}',
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+      );
+      final data = jsonDecode(response.body)['user'];
+      
+      return data;
+    }
+
     return FractionallySizedBox(
       widthFactor: 0.9,
       child: InkWell(
@@ -428,22 +445,44 @@ class _ProfileRecipeState extends State<ProfileRecipe> {
 
           if (!context.mounted) return;
 
-          PersistentNavBarNavigator.pushNewScreenWithRouteSettings(
-            context,
-            settings: const RouteSettings(),
-            screen: RecipePage(
-                recipeInfo: widget.recipe,
-                ingredients: ingredients,
-                image: widget.recipe['recipe_image'],
-                isVegan: isVegan,
-                isGlutenFree: isGlutenFree,
-                authorName: globals.user['user_username'],
-                authorBio: globals.userBio.value,
-                authorPicture: globals.user['user_profile_picture'],
-                index: widget.index),
-            withNavBar: true,
-            pageTransitionAnimation: PageTransitionAnimation.fade,
-          );
+          if (widget.isCreated) {
+            PersistentNavBarNavigator.pushNewScreenWithRouteSettings(
+              context,
+              settings: const RouteSettings(),
+              screen: RecipePage(
+                  recipeInfo: widget.recipe,
+                  ingredients: ingredients,
+                  image: widget.recipe['recipe_image'],
+                  isVegan: isVegan,
+                  isGlutenFree: isGlutenFree,
+                  authorName: globals.user['user_username'],
+                  authorBio: globals.userBio.value,
+                  authorPicture: globals.user['user_profile_picture'],
+                  index: widget.index),
+              withNavBar: true,
+              pageTransitionAnimation: PageTransitionAnimation.fade,
+            );
+          } else {
+            Map<String, dynamic> creator = await getUser(widget.recipe['user_user_id']);
+            print(ingredients);
+            PersistentNavBarNavigator.pushNewScreenWithRouteSettings(
+              context,
+              settings: const RouteSettings(),
+              screen: RecipePage(
+                  recipeInfo: widget.recipe,
+                  ingredients: ingredients,
+                  image: widget.recipe['recipe_image'],
+                  isVegan: isVegan,
+                  isGlutenFree: isGlutenFree,
+                  authorName: creator['user_username'],
+                  authorBio: creator['user_bio'] ?? "",
+                  authorPicture: creator['user_profile_picture'] ?? "",
+                  index: widget.index),
+              withNavBar: true,
+              pageTransitionAnimation: PageTransitionAnimation.fade,
+            );
+          }
+          
         },
         child: Column(
           children: [

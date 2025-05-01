@@ -113,6 +113,46 @@ class _RecipePageState extends State<RecipePage> {
 
     timeDilation = 0.5;
 
+    Future<List<dynamic>> createMealPlan(String date) async {
+      var url = Uri.http('3.93.61.3', '/api/feed/mealPlan/store');
+      var response = await http.post(
+        url,
+        headers: {
+          "Authorization": 'Bearer ${globals.token}',
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: jsonEncode({
+          'date_to_make': date,
+        }),
+      );
+
+      print(response.statusCode);
+
+      final data = jsonDecode(response.body)['plans'];
+      return data;
+    }
+
+    Future<void> createMealPlanLink(
+        int user_id, int recipe_id, int mealplan_id) async {
+      var url = Uri.http('3.93.61.3', '/api/feed/mealPlanLink/store');
+      var response = await http.post(
+        url,
+        headers: {
+          "Authorization": 'Bearer ${globals.token}',
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: jsonEncode({
+          'mur_user_id': user_id,
+          'mur_recipe_id': recipe_id,
+          'mur_mealplan_id': mealplan_id
+        }),
+      );
+
+      print(response.statusCode);
+    }
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -129,8 +169,9 @@ class _RecipePageState extends State<RecipePage> {
             ),
             // User can't save their own recipe; User hasn't saved recipe yet.
             if (widget.recipeInfo['user_user_id'] != globals.user['user_id'] &&
-                (globals.savedRecipes.isEmpty || globals.savedRecipes.any((recipe) =>
-                    recipe['recipe_id'] != widget.recipeInfo['recipe_id'])))
+                (globals.savedRecipes.isEmpty ||
+                    globals.savedRecipes.any((recipe) =>
+                        recipe['recipe_id'] != widget.recipeInfo['recipe_id'])))
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 8, 24, 0),
                 child: Align(
@@ -139,9 +180,10 @@ class _RecipePageState extends State<RecipePage> {
                     onPressed: () async {
                       // User can't save their own recipe
                       await saveRecipe(widget.recipeInfo['recipe_id']);
-                      List<dynamic> tempSaved = await refreshSavedRecipes(globals.user['user_id']);
+                      List<dynamic> tempSaved =
+                          await refreshSavedRecipes(globals.user['user_id']);
                       globals.savedRecipes = tempSaved;
-                      setState((){});
+                      setState(() {});
                     },
                     style: TextButton.styleFrom(
                       backgroundColor: const Color.fromARGB(255, 140, 199, 154),
@@ -169,9 +211,10 @@ class _RecipePageState extends State<RecipePage> {
                     onPressed: () async {
                       // User can't save their own recipe
                       await removeRecipe(widget.recipeInfo['recipe_id']);
-                      List<dynamic> tempSaved = await refreshSavedRecipes(globals.user['user_id']);
+                      List<dynamic> tempSaved =
+                          await refreshSavedRecipes(globals.user['user_id']);
                       globals.savedRecipes = tempSaved;
-                      setState((){});
+                      setState(() {});
                     },
                     style: TextButton.styleFrom(
                       backgroundColor: const Color.fromARGB(255, 228, 98, 98),
@@ -187,6 +230,153 @@ class _RecipePageState extends State<RecipePage> {
                   ),
                 ),
               ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 8, 24, 0),
+                child: TextButton(
+                  onPressed: () async {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          String selectedDate =
+                              DateTime.now().toString().split(" ")[0];
+                          final planTimeSelection = TextEditingController();
+                          String selectedTime = "breakfast";
+
+                          return StatefulBuilder(builder: (context, setState) {
+                            Future<void> openCalendar() async {
+                              final DateTime? pickedDate = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime.now(),
+                                  lastDate: DateTime.now()
+                                      .add(const Duration(days: 365)));
+
+                              String date = pickedDate.toString().split(" ")[0];
+                              setState(() {
+                                selectedDate = date;
+                              });
+                            }
+
+                            return Dialog(
+                              child: FractionallySizedBox(
+                                widthFactor: 0.9,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const SizedBox(height: 24),
+                                    const Text(
+                                      "Add to Meal Plan",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 24),
+                                    RichText(
+                                      text: TextSpan(
+                                        children: [
+                                          const TextSpan(
+                                            text: "Selected Date: ",
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: selectedDate,
+                                            style: const TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        openCalendar();
+                                      },
+                                      child: const Text("Select Date"),
+                                    ),
+                                    const SizedBox(height: 24),
+                                    DropdownMenu<String>(
+                                      initialSelection: selectedTime,
+                                      label: const Text("Time"),
+                                      controller: planTimeSelection,
+                                      onSelected: (String? time) {
+                                        setState(() {
+                                          selectedTime = time!;
+                                        });
+                                        print(selectedTime);
+                                      },
+                                      dropdownMenuEntries: const [
+                                        DropdownMenuEntry(
+                                            value: "breakfast",
+                                            label: "Breakfast"),
+                                        DropdownMenuEntry(
+                                            value: "lunch", label: "Lunch"),
+                                        DropdownMenuEntry(
+                                            value: "dinner", label: "Dinner"),
+                                        DropdownMenuEntry(
+                                            value: "snack", label: "Snack"),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 24),
+                                    ElevatedButton(
+                                      onPressed: () async {
+                                        List<dynamic> times = await createMealPlan(selectedDate);
+
+                                        int breakfast_id = times[0]['plan']['meal_plan_id'];
+                                        int lunch_id = times[1]['plan']['meal_plan_id'];
+                                        int dinner_id = times[2]['plan']['meal_plan_id'];
+                                        int snack_id = times[3]['plan']['meal_plan_id'];
+
+                                        switch (selectedTime) {
+                                          case 'breakfast':
+                                            await createMealPlanLink(globals.user['user_id'], widget.recipeInfo['recipe_id'], breakfast_id);
+                                            break;
+                                          case 'lunch':
+                                            await createMealPlanLink(globals.user['user_id'], widget.recipeInfo['recipe_id'], lunch_id);
+                                            break;
+                                          case 'dinner':
+                                            await createMealPlanLink(globals.user['user_id'], widget.recipeInfo['recipe_id'], dinner_id);
+                                            break;
+                                          case 'snack':
+                                            await createMealPlanLink(globals.user['user_id'], widget.recipeInfo['recipe_id'], snack_id);
+                                            break;
+                                          default:
+                                        }
+
+                                        globals.plansChanged.value++;
+
+                                        print("GLOBAL VALUE: ${globals.plansChanged.value}");
+
+                                        if (!context.mounted) return;
+
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: const Text("Add to Plan"),
+                                    ),
+                                    const SizedBox(height: 24),
+                                  ],
+                                ),
+                              ),
+                            );
+                          });
+                        });
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 104, 214, 205),
+                    shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8))),
+                  ),
+                  child: const Text("Add to Plan",
+                      style: TextStyle(color: Colors.black)),
+                ),
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
@@ -213,7 +403,7 @@ class _RecipePageState extends State<RecipePage> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(36, 0, 0, 0),
+              padding: const EdgeInsets.fromLTRB(36, 0, 0, 16),
               child: Row(
                 children: [
                   if (widget.isVegan)
@@ -467,7 +657,8 @@ class _RecipeCreatorState extends State<RecipeCreator> {
                       pageTransitionAnimation: PageTransitionAnimation.fade,
                     );
                   } else {
-                    List<dynamic> tempSaved = await getSavedRecipes(widget.authorId);
+                    List<dynamic> tempSaved =
+                        await getSavedRecipes(widget.authorId);
 
                     PersistentNavBarNavigator.pushNewScreenWithRouteSettings(
                       context,
@@ -542,8 +733,8 @@ class RecipeStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Wrap(
+      //mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // Prep Time
         const Spacer(),
@@ -557,7 +748,7 @@ class RecipeStats extends StatelessWidget {
               const TextSpan(
                   text: 'Prep Time: ',
                   style: TextStyle(fontWeight: FontWeight.bold)),
-              TextSpan(text: '$prepTime mins')
+              TextSpan(text: '$prepTime mins | ')
             ],
           ),
         ),
@@ -573,7 +764,7 @@ class RecipeStats extends StatelessWidget {
               const TextSpan(
                   text: 'Cook Time: ',
                   style: TextStyle(fontWeight: FontWeight.bold)),
-              TextSpan(text: '$cookTime mins')
+              TextSpan(text: '$cookTime mins | ')
             ],
           ),
         ),

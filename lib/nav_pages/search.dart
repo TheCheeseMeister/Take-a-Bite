@@ -56,6 +56,8 @@ class _SearchState extends State<Search> {
     //data.shuffle(); Use this for randomizing order
     data = data.reversed.toList();
 
+    print(data);
+
     print(response.statusCode);
     //print(data[0]);
 
@@ -67,6 +69,7 @@ class _SearchState extends State<Search> {
   }
 
   Future<void> getRecipeIngredients(int recipe_id) async {
+    if (recipe_id == 970) print("WHAT");
     var url = Uri.http('3.93.61.3', '/api/feed/recipeIngredient/$recipe_id');
     var response = await http.get(
       url,
@@ -277,7 +280,11 @@ class _SearchState extends State<Search> {
     enforceSearch();
 */
     setState(() {
-      recipeViewCount = 10;
+      if (newRecipeList.length < 10) {
+        recipeViewCount = newRecipeList.length;
+      } else {
+        recipeViewCount = 10;
+      }
     });
 
     setState(() {
@@ -307,14 +314,16 @@ class _SearchState extends State<Search> {
   void incrementViewCount() async {
     await Future.delayed(const Duration(milliseconds: 250));
     // TODO: change depending on whether length is < 10 more
-    if (recipeViewCount + 10 > (newRecipeList.length))
+    if (recipeViewCount + 10 > (newRecipeList.length)) {
       setState(() {
         recipeViewCount += (newRecipeList.length - recipeViewCount);
       });
-    else
+    }
+    else {
       setState(() {
         recipeViewCount += 10;
       });
+    }
   }
 
   @override
@@ -325,41 +334,49 @@ class _SearchState extends State<Search> {
         child: Center(
           child: Column(
             children: [
-              Row(
-                children: [
-                  SizedBox(
-                    height: 100,
-                    width: 290,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 48, 0, 0),
-                      child: TextField(
-                        controller: wordSearch,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: "Search",
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0,0,0,16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Column(
+                      children: [
+                        SizedBox(
+                          height: 100,
+                          width: 282,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 48, 0, 0),
+                            child: TextField(
+                              controller: wordSearch,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                labelText: "Search",
+                              ),
+                            ),
+                          ),
                         ),
+                        const Padding(
+                          padding: EdgeInsets.fromLTRB(0, 8, 0, 0),
+                          child: SearchBar(),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.fromLTRB(0, 8, 0, 0),
+                          child: TagSearchBar(),
+                        ),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 0, 8, 64),
+                      child: IconButton(
+                        icon: const Icon(Icons.search),
+                        onPressed: () async {
+                          //await widget.searchMethod();
+                          await handleSearch();
+                        },
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 48, 0, 0),
-                    child: IconButton(
-                      icon: const Icon(Icons.search),
-                      onPressed: () async {
-                        //await widget.searchMethod();
-                        await handleSearch();
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              const Padding(
-                padding: EdgeInsets.fromLTRB(0, 8, 62, 0),
-                child: SearchBar(),
-              ),
-              const Padding(
-                padding: EdgeInsets.fromLTRB(0, 8, 62, 0),
-                child: TagSearchBar(),
+                  ],
+                ),
               ),
               searching
                   ? const Padding(
@@ -618,8 +635,8 @@ class _RecipeCardState extends State<RecipeCard> {
 
     setState(() {
       authorName = data['user_username'];
-      authorBio = data['user_bio'];
-      authorPicture = data['user_profile_picture'];
+      authorBio = data['user_bio'] ?? "";
+      authorPicture = data['user_profile_picture'] ?? "";
     });
     print(authorPicture);
     print(globals.savedRecipes);
@@ -637,19 +654,37 @@ class _RecipeCardState extends State<RecipeCard> {
     bool isVegan = false;
     bool isGlutenFree = false;
 
-    Map<String, dynamic> ingredients = recipeIngredients.firstWhere(
-        (element) => element['recipe_id'] == widget.recipeInfo['recipe_id'],
-        orElse: () => {});
+    var tempIngredients = newRecipeList.where((element) => element['recipe_id'] == widget.recipeInfo['recipe_id']).first['ingredients'];
+
+    int index = 0;
+    Map<String, dynamic> ingredients = {};
+    ingredients['recipe_id'] = widget.recipeInfo['recipe_id'];
+
+    var tempMap = {};
+    for (var ingredient in tempIngredients) {
+      var tempInfo = {};
+      tempInfo['ingredient_name'] = ingredient['ingredient_name'];
+      tempInfo['portion'] = ingredient['portion'];
+      tempMap[index] = tempInfo;
+
+      index++;
+    }
+
+    ingredients['ingredients'] = tempMap;
 
     Map<String, dynamic> tempTags = recipeTags.firstWhere(
         (element) => element['id'] == widget.recipeInfo['recipe_id'],
         orElse: () => {});
-    if (tempTags.isNotEmpty) {
-      if (tempTags['tags'].contains('vegan')) {
+    
+    var tags = newRecipeList.where((element) => element['recipe_id'] == widget.recipeInfo['recipe_id']).first['tags'];
+    tags = tags.map((tag) => tag['tag_name']).toList();
+    
+    if (tags.isNotEmpty) {
+      if (tags.contains('vegan')) {
         isVegan = true;
       }
 
-      if (tempTags['tags'].contains('gluten-free')) {
+      if (tags.contains('gluten-free')) {
         isGlutenFree = true;
       }
     }
