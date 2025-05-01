@@ -26,6 +26,7 @@ class Recipe extends Model
         'recipe_yield',
         'recipe_directions',
 	'recipe_image',
+	'is_public'
     ];
 
     //protected $appends = ['liked'];

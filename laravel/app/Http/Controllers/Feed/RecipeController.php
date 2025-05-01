@@ -46,6 +46,7 @@ class RecipeController extends Controller
             'recipe_directions' => $request->recipe_directions,
             'user_user_id' => auth()->id(),
 	    'recipe_image' => $imagePath,
+	    'is_public' => $request->is_public,
         ]);
 
         return response([
