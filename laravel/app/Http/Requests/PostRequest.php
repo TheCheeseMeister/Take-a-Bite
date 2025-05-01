@@ -28,12 +28,13 @@ class PostRequest extends FormRequest
             'cook_time' => 'required|string',
             'prep_time' => 'required|string',
             'total_time' => 'required|string',
-            'recipe_description' => 'string',
+            'recipe_description' => 'nullable|string',
             'recipe_category' => 'string',
             'recipe_servings' => 'required|string',
             'recipe_yield' => 'required|string',
             'recipe_directions' => 'required|string',
 	    'recipe_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-        ];
+            'is_public' => 'boolean',
+	];
     }
 }

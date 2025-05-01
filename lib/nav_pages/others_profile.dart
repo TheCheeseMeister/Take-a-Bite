@@ -10,8 +10,8 @@ import 'package:take_a_bite/globals.dart' as globals;
 
 String tempBio = "";
 
-class Profile extends StatefulWidget {
-  const Profile({
+class OthersProfile extends StatefulWidget {
+  const OthersProfile({
     Key? key,
     //required this.profileImage,
     required this.displayName,
@@ -19,6 +19,9 @@ class Profile extends StatefulWidget {
     required this.followers,
     required this.recipes,
     required this.bio,
+    required this.profilePicture,
+    required this.createdRecipes,
+    required this.savedRecipes,
   }) : super(key: key);
   
   //final String profileImage;
@@ -26,13 +29,16 @@ class Profile extends StatefulWidget {
   final String username;
   final int followers;
   final int recipes;
+  final String? profilePicture;
   final String bio;
+  final List<dynamic> createdRecipes;
+  final List<dynamic> savedRecipes;
 
   @override
-  State<Profile> createState() => _ProfileState();
+  State<OthersProfile> createState() => _OthersProfileState();
 }
 
-class _ProfileState extends State<Profile> {
+class _OthersProfileState extends State<OthersProfile> {
   bool update = true;
   @override
   Widget build(BuildContext context) {
@@ -47,12 +53,13 @@ class _ProfileState extends State<Profile> {
                 username: widget.username,
                 followers: widget.followers,
                 recipes: widget.recipes,
+                profilePicture: widget.profilePicture,
               ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 36, 0, 0),
               child: ProfileDescription(
-                bio: tempBio,
+                bio: widget.bio,
               ),
             ),
             const Padding(
@@ -64,7 +71,7 @@ class _ProfileState extends State<Profile> {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-              child: RecipeList(update: update),
+              child: RecipeList(update: update, createdRecipes: widget.createdRecipes, authorName: widget.displayName, authorBio: widget.bio, authorPicture: widget.profilePicture, savedRecipes: widget.savedRecipes),
             ),
           ],
         ),
@@ -81,12 +88,14 @@ class ProfileHead extends StatefulWidget {
     required this.username,
     required this.followers,
     required this.recipes,
+    required this.profilePicture,
   });
   
   final String displayName;
   final String username;
   final int followers;
   final int recipes;
+  final String? profilePicture;
 
   @override
   State<ProfileHead> createState() => _ProfileHeadState();
@@ -99,9 +108,9 @@ class _ProfileHeadState extends State<ProfileHead> {
 
     String image = "";
 
-    if (globals.user['user_profile_picture'] != null) {
+    if (widget.profilePicture != null) {
       setState(() {
-        image = globals.user['user_profile_picture'];
+        image = widget.profilePicture!;
       });
     }
 
@@ -143,7 +152,7 @@ class _ProfileHeadState extends State<ProfileHead> {
           child: CircleAvatar(
             radius: 50,
             backgroundColor: Colors.white,
-            child: Text("${globals.user['user_username'][0]}",
+            child: Text("${widget.displayName[0]}",
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                         color: Colors.black,
@@ -183,7 +192,7 @@ class _ProfileHeadState extends State<ProfileHead> {
                 fontSize: 13,
               ),
             ),*/
-            TextButton(
+            /*TextButton(
               onPressed: () async {
                 await PersistentNavBarNavigator.pushNewScreenWithRouteSettings(
                   context,
@@ -204,7 +213,7 @@ class _ProfileHeadState extends State<ProfileHead> {
                   color: Colors.black,
                 ),
               ),
-            ),
+            ),*/
           ],
         ),
       ],
@@ -223,30 +232,39 @@ class ProfileDescription extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: globals.userBio,
-      builder: (context, bio, _) =>
-        Container(
-          constraints: const BoxConstraints(minWidth: 250, maxWidth: 250),
-          child: Text(
-            //"Cooking Legend.\nSeeking cheese recipes night and day.\n#CheeseLovers25",
-            //bio,
-            bio == ""
-            ? "No bio set."
-            : bio,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ),
+    return Container(
+      constraints: const BoxConstraints(minWidth: 250, maxWidth: 250),
+      child: Text(
+        //"Cooking Legend.\nSeeking cheese recipes night and day.\n#CheeseLovers25",
+        //bio,
+        bio == ""
+        ? "No bio set."
+        : bio,
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
     );
   }
 }
 
 // Will list created or saved recipes depending on which is selected. Defaults to created.
 class RecipeList extends StatefulWidget {
-  const RecipeList({super.key, required this.update});
+  const RecipeList({
+    super.key,
+    required this.update,
+    required this.createdRecipes,
+    required this.authorName,
+    required this.authorBio,
+    required this.authorPicture,
+    required this.savedRecipes,
+  });
 
   // fake update to refresh page
   final bool update;
+  final List<dynamic> createdRecipes;
+  final List<dynamic> savedRecipes;
+  final String authorName;
+  final String? authorBio;
+  final String? authorPicture;
 
   @override
   State<RecipeList> createState() => _RecipeListState();
@@ -306,20 +324,21 @@ class _RecipeListState extends State<RecipeList> {
                   childAspectRatio: 1,
                   shrinkWrap: true,
                   crossAxisCount: 3,
-                  children: globals.createdRecipes.asMap().entries.map((recipe) {
+                  children: widget.createdRecipes.asMap().entries.map((recipe) {
                     int index = recipe.key;
                     var item = recipe.value;
-                    return ProfileRecipe(index: index+1, recipe: item, isCreated: true);
+                    return ProfileRecipe(index: index+1, recipe: item, authorName: widget.authorName, authorBio: widget.authorBio, authorPicture: widget.authorPicture);
                   }).toList().reversed.toList(),
                 ),
                 // Second tab: Saved Recipes
-                GridView.count(
+                GridView.count( 
+                  childAspectRatio: 1,
                   shrinkWrap: true,
                   crossAxisCount: 3,
-                  children: globals.savedRecipes.asMap().entries.map((recipe) {
-                      int index = recipe.key;
-                      var item = recipe.value;
-                      return ProfileRecipe(index: index+1, recipe: item, isCreated: false);
+                  children: widget.savedRecipes.asMap().entries.map((recipe) {
+                    int index = recipe.key;
+                    var item = recipe.value;
+                    return ProfileRecipe(index: index+1, recipe: item, authorName: widget.authorName, authorBio: widget.authorBio, authorPicture: widget.authorPicture);
                   }).toList().reversed.toList(),
                 ),
               ],
@@ -333,11 +352,20 @@ class _RecipeListState extends State<RecipeList> {
 
 // Created/Saved Recipes
 class ProfileRecipe extends StatefulWidget {
-  const ProfileRecipe({super.key, required this.index, required this.recipe, required this.isCreated});
+  ProfileRecipe({
+    super.key,
+    required this.index,
+    required this.recipe,
+    required this.authorName,
+    required this.authorBio,
+    required this.authorPicture,
+  });
 
   final Map<String, dynamic> recipe; // recipeInfo
   final int index; 
-  final bool isCreated;
+  final String authorName;
+  final String? authorBio;
+  final String? authorPicture;
 
   @override
   State<ProfileRecipe> createState() => _ProfileRecipeState();
@@ -412,22 +440,6 @@ class _ProfileRecipeState extends State<ProfileRecipe> {
     
     Image? image = widget.recipe['recipe_image'] == null ? null : Image.network(widget.recipe['recipe_image'], width: double.infinity, height: 100, fit: BoxFit.cover);
 
-    print(widget.recipe);
-
-    Future<Map<String, dynamic>> getUser(int user_id) async {
-      var url = Uri.http('3.93.61.3', '/api/feed/getUser/$user_id');
-      var response = await http.get(url,
-          headers: {
-            "Authorization": 'Bearer ${globals.token}',
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-      );
-      final data = jsonDecode(response.body)['user'];
-      
-      return data;
-    }
-
     return FractionallySizedBox(
       widthFactor: 0.9,
       child: InkWell(
@@ -445,44 +457,22 @@ class _ProfileRecipeState extends State<ProfileRecipe> {
 
           if (!context.mounted) return;
 
-          if (widget.isCreated) {
-            PersistentNavBarNavigator.pushNewScreenWithRouteSettings(
-              context,
-              settings: const RouteSettings(),
-              screen: RecipePage(
-                  recipeInfo: widget.recipe,
-                  ingredients: ingredients,
-                  image: widget.recipe['recipe_image'],
-                  isVegan: isVegan,
-                  isGlutenFree: isGlutenFree,
-                  authorName: globals.user['user_username'],
-                  authorBio: globals.userBio.value,
-                  authorPicture: globals.user['user_profile_picture'],
-                  index: widget.index),
-              withNavBar: true,
-              pageTransitionAnimation: PageTransitionAnimation.fade,
-            );
-          } else {
-            Map<String, dynamic> creator = await getUser(widget.recipe['user_user_id']);
-            print(ingredients);
-            PersistentNavBarNavigator.pushNewScreenWithRouteSettings(
-              context,
-              settings: const RouteSettings(),
-              screen: RecipePage(
-                  recipeInfo: widget.recipe,
-                  ingredients: ingredients,
-                  image: widget.recipe['recipe_image'],
-                  isVegan: isVegan,
-                  isGlutenFree: isGlutenFree,
-                  authorName: creator['user_username'],
-                  authorBio: creator['user_bio'] ?? "",
-                  authorPicture: creator['user_profile_picture'] ?? "",
-                  index: widget.index),
-              withNavBar: true,
-              pageTransitionAnimation: PageTransitionAnimation.fade,
-            );
-          }
-          
+          PersistentNavBarNavigator.pushNewScreenWithRouteSettings(
+            context,
+            settings: const RouteSettings(),
+            screen: RecipePage(
+                recipeInfo: widget.recipe,
+                ingredients: ingredients,
+                image: widget.recipe['recipe_image'],
+                isVegan: isVegan,
+                isGlutenFree: isGlutenFree,
+                authorName: widget.authorName, //globals.user['user_username'],
+                authorBio: widget.authorBio, //globals.userBio.value,
+                authorPicture: widget.authorPicture, //globals.user['user_profile_picture'],
+                index: widget.index),
+            withNavBar: true,
+            pageTransitionAnimation: PageTransitionAnimation.fade,
+          );
         },
         child: Column(
           children: [

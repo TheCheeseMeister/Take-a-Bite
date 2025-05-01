@@ -26,6 +26,7 @@ class Recipe extends Model
         'recipe_yield',
         'recipe_directions',
 	'recipe_image',
+	'is_public'
     ];
 
     //protected $appends = ['liked'];
@@ -55,6 +56,16 @@ class Recipe extends Model
     {
         return $this->hasMany(Comment::class);
 
+    }
+
+    public function ingredients(): HasMany
+    {
+	return $this->hasMany(RecipeIngredients::class, 'ri_recipe_id', 'recipe_id');
+    }
+
+    public function tags(): HasMany
+    {
+	return $this->hasMany(TagRecipe::class, 'recipe_id', 'recipe_id');
     }
 /*
     public function getLikedAttribute(): bool

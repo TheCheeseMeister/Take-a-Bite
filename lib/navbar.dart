@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:take_a_bite/globals.dart' as globals;
 import 'package:take_a_bite/nav_pages/create_recipe.dart';
 import 'package:take_a_bite/nav_pages/search.dart';
 import 'package:take_a_bite/nav_pages/meal_plan.dart';
@@ -26,26 +30,91 @@ class _NavBarState extends State<NavBar> {
   final int recipes = 0;
   final String bio = "Cooking Legend.\nSeeking cheese recipes night and day.\n#CheeseLovers25";
 
-
   @override
   Widget build(BuildContext context) {
+    var mealPlanKey = UniqueKey();
+
+    Future<List<dynamic>> getCreatedRecipes(int user_id) async {
+      var url = Uri.http('3.93.61.3', '/api/feed/userRecipes/$user_id');
+      var response = await http.get(url,
+          headers: {
+            "Authorization": 'Bearer ${globals.token}',
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+      );
+      final data = jsonDecode(response.body)['user_recipes'];
+      return data;
+    }
+
+    Future<void> groupPlansByDate() async {
+      final Map<String, List<Map<String, dynamic>>> grouped = {};
+      if (globals.plans!.isEmpty) {
+        setState(() {globals.datedPlans = {};});
+        return;
+      }
+
+      for (var plan in globals.plans!) {
+        String date = plan['plan']['date_to_make'];
+
+        if (grouped.containsKey(date)) {
+          grouped[date]!.add(plan);
+        } else {
+          grouped[date] = [plan];
+        }
+      }
+
+      setState(() {globals.datedPlans = grouped;});
+    }
+
+    Future<void> refreshMealPlans() async {
+      var url = Uri.http('3.93.61.3', '/api/feed/mealPlanLink/${globals.user['user_id']}');
+      var response = await http.get(
+        url,
+        headers: {
+          "Authorization": 'Bearer ${globals.token}',
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+      );
+      
+      final data = jsonDecode(response.body)['plans'];
+      
+      setState(() {globals.plans = data;});
+
+      await groupPlansByDate();
+    }
+    
     return PersistentTabView(
       context,
       controller: _controller,
       screens: [
         const Search(),
-        const MealPlan(),
+        MealPlan(
+          key: mealPlanKey,
+        ),
         const CreateRecipe(),
         Profile(
-          profileImage: profileImage,
-          displayName: displayName,
-          username: username,
+          //profileImage: globals.user['user_profile_picture'],
+          displayName: globals.user['user_username'],
+          username: "",
           followers: followers,
           recipes: recipes,
-          bio: bio,
+          bio: globals.userBio.value,
         ),
         const Settings(),
       ],
+      onItemSelected: (index) async {
+        if (index == 3) {
+          int user_id = globals.user['user_id'];
+          List<dynamic> tempCreated = await getCreatedRecipes(user_id);
+          setState(() {globals.createdRecipes = tempCreated;});
+        }
+        if (index == 1) {
+          await refreshMealPlans();
+          setState(() {mealPlanKey = UniqueKey();});
+        }
+      },
       items: [
         PersistentBottomNavBarItem(
           icon: const Icon(Icons.search),
