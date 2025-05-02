@@ -109,7 +109,7 @@ class _RecipePageState extends State<RecipePage> {
     String cookTime = widget.recipeInfo['cook_time'];
     String servingSize = widget.recipeInfo['recipe_servings'];
     String instructions = widget.recipeInfo['recipe_directions'];
-    String subtitle = widget.recipeInfo['recipe_description'];
+    String subtitle = widget.recipeInfo['recipe_description'] ?? "No Description.";
 
     timeDilation = 0.5;
 
@@ -659,6 +659,8 @@ class _RecipeCreatorState extends State<RecipeCreator> {
                   } else {
                     List<dynamic> tempSaved =
                         await getSavedRecipes(widget.authorId);
+                    
+                    tempCreated = tempCreated.where((recipe) => recipe['is_public'] == 0).toList();
 
                     PersistentNavBarNavigator.pushNewScreenWithRouteSettings(
                       context,

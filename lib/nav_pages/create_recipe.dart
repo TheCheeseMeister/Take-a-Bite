@@ -44,6 +44,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
   String? testImageUrl;
 
   bool portionValidate = true;
+  bool private = false;
 
   //Map<String, dynamic> tempIngredient = {};
   Map<String, dynamic> tempIngredient = {};
@@ -87,7 +88,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
       request.fields['recipe_servings'] = recipe_servings;
       request.fields['recipe_yield'] = "NA";
       request.fields['recipe_directions'] = recipe_directions;
-      request.fields['is_public'] = 1.toString(); // temp for no public/private option
+      request.fields['is_public'] = private ? 1.toString() : 0.toString();
 
       // Resize file
       if (selectedImage != null) {
@@ -561,6 +562,24 @@ class _CreateRecipeState extends State<CreateRecipe> {
                       }),
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0,0,8,0),
+                    child: Switch(
+                      value: private,
+                      activeColor: Colors.blue,
+                      onChanged: (bool value) {
+                        setState(() {private = value;});
+                        print(private);
+                      }
+                    ),
+                  ),
+                  Text(
+                    private ? "Private" : "Public",
+                    style: const TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
                 ],
               ),
               const SizedBox(height: 16),
