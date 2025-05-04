@@ -34,11 +34,11 @@ class _CreateRecipeState extends State<CreateRecipe> {
   final servingSizeController = TextEditingController();
   final portionController = TextEditingController();
   final instructionsController = TextEditingController();
-  
+
   bool isVegan = false;
   bool isGlutenFree = false;
 
-  File ? selectedImage;
+  File? selectedImage;
 
   bool testLoading = false;
   String? testImageUrl;
@@ -54,7 +54,16 @@ class _CreateRecipeState extends State<CreateRecipe> {
   // Image selector somewhere??
   @override
   Widget build(BuildContext context) {
-    Future<http.Response> storeRecipe(String recipe_name, String cook_time, String prep_time, String recipe_description, String recipe_category, String recipe_servings, String recipe_yield, String recipe_directions, int user_user_id) async {
+    Future<http.Response> storeRecipe(
+        String recipe_name,
+        String cook_time,
+        String prep_time,
+        String recipe_description,
+        String recipe_category,
+        String recipe_servings,
+        String recipe_yield,
+        String recipe_directions,
+        int user_user_id) async {
       // Store Recipe
       var url = Uri.http('3.93.61.3', '/api/feed/store');
       /*var response = await http.post(
@@ -97,9 +106,11 @@ class _CreateRecipeState extends State<CreateRecipe> {
 
         img.Image resized = img.copyResize(originalImage!, width: 800);
         final resizedBytes = img.encodeJpg(resized, quality: 80);
-        final resizedImage = File(selectedImage!.path)..writeAsBytesSync(resizedBytes);
+        final resizedImage = File(selectedImage!.path)
+          ..writeAsBytesSync(resizedBytes);
 
-        var file = await http.MultipartFile.fromPath('image', resizedImage.path);
+        var file =
+            await http.MultipartFile.fromPath('image', resizedImage.path);
         request.files.add(file);
       }
 
@@ -114,40 +125,60 @@ class _CreateRecipeState extends State<CreateRecipe> {
 
     Future<http.Response> storeRecipeTag(int tags_id, int recipe_id) async {
       var url = Uri.http('3.93.61.3', '/api/feed/tagRecipe/store');
-      var response = await http.post(
-        url, headers: {"Authorization": 'Bearer ${globals.token}', "Content-Type": "application/json", "Accept": "application/json"},
-        body: jsonEncode({
-          'tags_id': tags_id,
-          'recipe_id': recipe_id}) // ingredients_id should be recipe_id
-      );
+      var response = await http.post(url,
+          headers: {
+            "Authorization": 'Bearer ${globals.token}',
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: jsonEncode({
+            'tags_id': tags_id,
+            'recipe_id': recipe_id
+          }) // ingredients_id should be recipe_id
+          );
       return response;
     }
 
-    Future<http.Response> storeRecipeIngredient(int ri_recipe_id, int ri_ingredient_id, ri_ingredient_measurement) async {
+    Future<http.Response> storeRecipeIngredient(int ri_recipe_id,
+        int ri_ingredient_id, ri_ingredient_measurement) async {
       var url = Uri.http('3.93.61.3', 'api/feed/recipeIngredient/store');
-      var response = await http.post(
-        url, headers: {"Authorization": 'Bearer ${globals.token}', "Content-Type": "application/json", "Accept": "application/json"},
-        body: jsonEncode({
-          'recipe_id': ri_recipe_id,
-          'ingredient_id': ri_ingredient_id,
-          'ingredient_measurement': ri_ingredient_measurement})
-      );
+      var response = await http.post(url,
+          headers: {
+            "Authorization": 'Bearer ${globals.token}',
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: jsonEncode({
+            'recipe_id': ri_recipe_id,
+            'ingredient_id': ri_ingredient_id,
+            'ingredient_measurement': ri_ingredient_measurement
+          }));
       return response;
     }
-    
+
     Future imageFromGallery() async {
-      final returnedImage = await ImagePicker().pickImage(source: ImageSource.gallery);
+      final returnedImage =
+          await ImagePicker().pickImage(source: ImageSource.gallery);
 
       if (returnedImage == null) return;
-      setState(() {selectedImage = File(returnedImage!.path);});
+      setState(() {
+        selectedImage = File(returnedImage!.path);
+      });
     }
 
     Future<void> testGetImage(int recipe_id) async {
-      setState(() {testLoading = true;});
+      setState(() {
+        testLoading = true;
+      });
 
       var url = Uri.http('3.93.61.3', 'api/feed/store/$recipe_id');
       var response = await http.get(
-        url, headers: {"Authorization": 'Bearer ${globals.token}', "Content-Type": "application/json", "Accept": "application/json"},
+        url,
+        headers: {
+          "Authorization": 'Bearer ${globals.token}',
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
       );
 
       print(response.statusCode);
@@ -158,10 +189,14 @@ class _CreateRecipeState extends State<CreateRecipe> {
         print(data);
         print(retreivedUrl);
 
-        setState(() {testImageUrl = retreivedUrl;});
+        setState(() {
+          testImageUrl = retreivedUrl;
+        });
       }
 
-      setState(() {testLoading = false;});
+      setState(() {
+        testLoading = false;
+      });
     }
 
     return Scaffold(
@@ -171,510 +206,544 @@ class _CreateRecipeState extends State<CreateRecipe> {
           padding: const EdgeInsets.fromLTRB(0, 48, 0, 0),
           child: Form(
             key: formKey,
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-              const Padding(
-                padding: EdgeInsets.fromLTRB(0, 24, 0, 4),
-                child: Text(
-                  "Create a Recipe",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              const Text(
-                "Enter the Recipe's information below",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w300,
-                ),
-              ),
-              const Divider(
-                indent: 50,
-                endIndent: 50,
-              ),
-              // Image Picker
-              selectedImage != null
-              ? Image.file(selectedImage!)
-              : Text("No Image selected yet"),
-              TextButton(
-                onPressed: () {
-                  imageFromGallery();
-                },
-                child: Text("Select an image"),
-              ),
-              // Title of Recipe
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
-                child: FractionallySizedBox(
-                  widthFactor: 0.8,
-                  child: TextFormField(
-                      controller: titleController,
-                      textCapitalization: TextCapitalization.sentences,
-                      decoration: const InputDecoration(
-                        labelText: "Title *",
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (String? value) {
-                        return (value == null || value.isEmpty)
-                            ? "Required"
-                            : value.length < 2
-                                ? "Recipe title should min 2 characters."
-                                : null;
-                      }),
-                ),
-              ),
-              // Subtitle/text
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
-                child: FractionallySizedBox(
-                  widthFactor: 0.8,
-                  child: TextFormField(
-                      controller: subtitleController,
-                      textCapitalization: TextCapitalization.sentences,
-                      keyboardType: TextInputType.multiline,
-                      minLines: 1,
-                      maxLines: 5,
-                      decoration: const InputDecoration(
-                        labelText: "Subtitle",
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (String? value) {
-                        return null;
-                      }),
-                ),
-              ),
-              // Ingredients display (proportions too)
-              ingredients.isEmpty
-                  ? const Padding(
-                      padding: EdgeInsets.fromLTRB(0, 16, 0, 16),
-                      child: Text(
-                        "No Ingredients Selected",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    )
-                  : Padding(
-                    padding: const EdgeInsets.fromLTRB(0,0,0,16),
-                    child: ListView(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        children: ingredients.map((ingredient) {
-                          var tempInfo = ingredient.ingredientInfo;
-                          var tempPortion = ingredient.portion;
-                          return FractionallySizedBox(
-                            widthFactor: 0.8,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
-                              child: Card(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(tempInfo["ingredient_name"]),
-                                      //Text("Temp portion display"),
-                                      Text(tempPortion),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                  ),
-              // Ingredient input
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(
-                    width: 150,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                      child: DropdownSearch<String>(
-                        items: (filter, s) => globals.ingredientsList
-                            .map<String>(
-                                (ingredient) => ingredient['ingredient_name'])
-                            .toList(),
-                        compareFn: (i, s) => i == s,
-                        onChanged: (String? item) {
-                          // TODO: add httprequest to search for recipes with selected items
-                          if (item != null) {
-                            var ingredientInfo = globals.ingredientsList
-                                .firstWhere((ingredient) =>
-                                    ingredient['ingredient_name'] == item);
-                            setState(() {
-                              tempIngredient = ingredientInfo;
-                            });
-                            print(tempIngredient);
-                          }
-                        },
-                        decoratorProps: const DropDownDecoratorProps(
-                          decoration: InputDecoration(
-                            labelText: "Ingredient",
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(0, 24, 0, 4),
+                    child: Text(
+                      "Create a Recipe",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  const Text(
+                    "Enter the Recipe's information below",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w300,
+                    ),
+                  ),
+                  const Divider(
+                    indent: 50,
+                    endIndent: 50,
+                  ),
+                  // Image Picker
+                  selectedImage != null
+                      ? Image.file(selectedImage!)
+                      : Text("No Image selected yet"),
+                  TextButton(
+                    onPressed: () {
+                      imageFromGallery();
+                    },
+                    child: Text("Select an image"),
+                  ),
+                  // Title of Recipe
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
+                    child: FractionallySizedBox(
+                      widthFactor: 0.8,
+                      child: TextFormField(
+                          controller: titleController,
+                          textCapitalization: TextCapitalization.sentences,
+                          decoration: const InputDecoration(
+                            labelText: "Title *",
                             border: OutlineInputBorder(),
                           ),
-                        ),
-                        popupProps: PopupProps.menu(
-                          menuProps: const MenuProps(
-                              backgroundColor:
-                                  Color.fromARGB(255, 255, 255, 255)),
-                          showSearchBox: true,
-                          constraints:
-                              const BoxConstraints(maxWidth: 500, maxHeight: 200),
-                          itemBuilder: (context, item, isDisabled, isSelected) {
-                            return Padding(
-                              padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(item.toString()),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
+                          validator: (String? value) {
+                            return (value == null || value.isEmpty)
+                                ? "Required"
+                                : value.length < 2
+                                    ? "Recipe title should min 2 characters."
+                                    : null;
+                          }),
                     ),
                   ),
-                  SizedBox(
-                    width: 100,
-                    child: TextFormField(
-                        controller: portionController,
-                        textCapitalization: TextCapitalization.sentences,
-                        decoration: const InputDecoration(
-                          labelText: "Portion *",
-                          border: OutlineInputBorder(),
+                  // Subtitle/text
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
+                    child: FractionallySizedBox(
+                      widthFactor: 0.8,
+                      child: TextFormField(
+                          controller: subtitleController,
+                          textCapitalization: TextCapitalization.sentences,
+                          keyboardType: TextInputType.multiline,
+                          minLines: 1,
+                          maxLines: 5,
+                          decoration: const InputDecoration(
+                            labelText: "Subtitle",
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (String? value) {
+                            return null;
+                          }),
+                    ),
+                  ),
+                  // Ingredients display (proportions too)
+                  ingredients.isEmpty
+                      ? const Padding(
+                          padding: EdgeInsets.fromLTRB(0, 16, 0, 16),
+                          child: Text(
+                            "No Ingredients Selected",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
+                          child: ListView(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            children: ingredients.map((ingredient) {
+                              var tempInfo = ingredient.ingredientInfo;
+                              var tempPortion = ingredient.portion;
+                              return FractionallySizedBox(
+                                widthFactor: 0.8,
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(0, 0, 0, 8),
+                                  child: Card(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(tempInfo["ingredient_name"]),
+                                          //Text("Temp portion display"),
+                                          Text(tempPortion),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
                         ),
-                        validator: (String? value) {
-                          return null;
-                          /*return (value == null || value.isEmpty)
+                  // Ingredient input
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      SizedBox(
+                        width: 150,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                          child: DropdownSearch<String>(
+                            items: (filter, s) => globals.ingredientsList
+                                .map<String>((ingredient) =>
+                                    ingredient['ingredient_name'])
+                                .toList(),
+                            compareFn: (i, s) => i == s,
+                            onChanged: (String? item) {
+                              // TODO: add httprequest to search for recipes with selected items
+                              if (item != null) {
+                                var ingredientInfo = globals.ingredientsList
+                                    .firstWhere((ingredient) =>
+                                        ingredient['ingredient_name'] == item);
+                                setState(() {
+                                  tempIngredient = ingredientInfo;
+                                });
+                                print(tempIngredient);
+                              }
+                            },
+                            decoratorProps: const DropDownDecoratorProps(
+                              decoration: InputDecoration(
+                                labelText: "Ingredient",
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                            popupProps: PopupProps.menu(
+                              menuProps: const MenuProps(
+                                  backgroundColor:
+                                      Color.fromARGB(255, 255, 255, 255)),
+                              showSearchBox: true,
+                              constraints: const BoxConstraints(
+                                  maxWidth: 500, maxHeight: 200),
+                              itemBuilder:
+                                  (context, item, isDisabled, isSelected) {
+                                return Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(item.toString()),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 100,
+                        child: TextFormField(
+                            controller: portionController,
+                            textCapitalization: TextCapitalization.sentences,
+                            decoration: const InputDecoration(
+                              labelText: "Portion *",
+                              border: OutlineInputBorder(),
+                            ),
+                            validator: (String? value) {
+                              return null;
+                              /*return (value == null || value.isEmpty)
                               ? "Required"
                               : null;*/
-                        }),
+                            }),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              if (portionValidate == false) const Padding(
-                padding: EdgeInsets.fromLTRB(0,16,0,8),
-                child: Text("All fields of ingredient should be filled.", style: TextStyle(color: Colors.red)),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0,8,0,16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 8, 8, 8),
-                      child: TextButton(
-                        onPressed: () {
-                          if (tempIngredient.isNotEmpty && portionController.text != "") {
-                            Ingredient temp = Ingredient(ingredientInfo: tempIngredient, portion: portionController.text);
-                            setState(() {
-                              ingredients.add(temp);
-                              portionValidate = true;
-                              portionController.text = "";
-                            });
-                          } else {
-                            setState(() {portionValidate = false;});
-                          }
-                        },
-                        style: FilledButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(255, 129, 214, 131),
-                        ),
-                        child: const Text(
-                          "Add Ingredient",
-                          style: TextStyle(
-                            color: Color.fromARGB(255, 0, 0, 0),
-                          ),
-                        ),
-                      ),
+                  if (portionValidate == false)
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(0, 16, 0, 8),
+                      child: Text("All fields of ingredient should be filled.",
+                          style: TextStyle(color: Colors.red)),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
-                      child: TextButton(
-                        onPressed: () {
-                          setState(() {
-                            ingredients = [];
-                            portionValidate = true;
-                          });
-                        },
-                        style: FilledButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(255, 255, 106, 106),
-                        ),
-                        child: const Text(
-                          "Clear Ingredients",
-                          style: TextStyle(
-                            color: Color.fromARGB(255, 0, 0, 0),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Prep Time
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
-                child: FractionallySizedBox(
-                  widthFactor: 0.4,
-                  child: TextFormField(
-                      controller: prepController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: "Prep Time (mins) *",
-                        labelStyle: TextStyle(
-                          fontSize: 12,
-                        ),
-                        border: OutlineInputBorder(),
-                      ),
-                      style: const TextStyle(
-                          //fontSize: 16,
-                          ),
-                      validator: (String? value) {
-                        return (value == null || value.isEmpty)
-                            ? "Required."
-                            : null;
-                      }),
-                ),
-              ),
-              // Cook Time
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
-                child: FractionallySizedBox(
-                  widthFactor: 0.4,
-                  child: TextFormField(
-                      controller: cookController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: "Cook Time (mins) *",
-                        border: OutlineInputBorder(),
-                        labelStyle: TextStyle(
-                          fontSize: 12,
-                        ),
-                      ),
-                      validator: (String? value) {
-                        return (value == null || value.isEmpty)
-                            ? "Required."
-                            : null;
-                      }),
-                ),
-              ),
-              // Serving Size
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
-                child: FractionallySizedBox(
-                  widthFactor: 0.4,
-                  child: TextFormField(
-                      controller: servingSizeController,
-                      keyboardType: TextInputType.text,
-                      decoration: const InputDecoration(
-                        labelText: "Serving Size *",
-                        border: OutlineInputBorder(),
-                        labelStyle: TextStyle(
-                          fontSize: 12,
-                        ),
-                      ),
-                      validator: (String? value) {
-                        return (value == null || value.isEmpty)
-                            ? "Required."
-                            : null;
-                      }),
-                ),
-              ),
-              // Instructions
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
-                child: FractionallySizedBox(
-                  widthFactor: 0.8,
-                  child: TextFormField(
-                      controller: instructionsController,
-                      keyboardType: TextInputType.multiline,
-                      minLines: 1,
-                      maxLines: 5,
-                      textCapitalization: TextCapitalization.sentences,
-                      decoration: const InputDecoration(
-                        labelText: "Instructions *",
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (String? value) {
-                        return (value == null || value.isEmpty)
-                            ? "Required"
-                            : null;
-                      }),
-                ),
-              ),
-              // Dietary Tags (Vegan, Gluten-Free for now) (24 and 154 respectively in tags table, hard coded for now)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: CheckboxListTile(
-                      title: const Text("Vegan"),
-                      controlAffinity: ListTileControlAffinity.leading,
-                      checkColor: Colors.black,
-                      value: isVegan,
-                      onChanged: (bool? value) {
-                        setState(() {isVegan = value!;});
-                      },
-                      fillColor: WidgetStateColor.resolveWith(
-                        (Set<WidgetState> states) {
-                          const Set<WidgetState> interactiveStates = <WidgetState>{
-                            WidgetState.pressed,
-                            WidgetState.hovered,
-                            WidgetState.focused,
-                            WidgetState.selected,
-                          };
-                    
-                          if (states.any(interactiveStates.contains)) {
-                            return Colors.blue;
-                          }
-                          return const Color.fromARGB(255, 255, 255, 255);
-                      }),
-                    ),
-                  ),
-                  Expanded(
-                    child: CheckboxListTile(
-                      title: const Text("Gluten Free"),
-                      controlAffinity: ListTileControlAffinity.leading,
-                      checkColor: Colors.black,
-                      value: isGlutenFree,
-                      onChanged: (bool? value) {
-                        setState(() {isGlutenFree = value!;});
-                      },
-                      fillColor: WidgetStateColor.resolveWith(
-                        (Set<WidgetState> states) {
-                          const Set<WidgetState> interactiveStates = <WidgetState>{
-                            WidgetState.pressed,
-                            WidgetState.hovered,
-                            WidgetState.focused,
-                            WidgetState.selected,
-                          };
-                    
-                          if (states.any(interactiveStates.contains)) {
-                            return Colors.blue;
-                          }
-                          return const Color.fromARGB(255, 255, 255, 255);
-                      }),
-                    ),
-                  ),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(0,0,8,0),
-                    child: Switch(
-                      value: private,
-                      activeColor: Colors.blue,
-                      onChanged: (bool value) {
-                        setState(() {private = value;});
-                        print(private);
-                      }
+                    padding: const EdgeInsets.fromLTRB(0, 8, 0, 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 8, 8, 8),
+                          child: TextButton(
+                            onPressed: () {
+                              if (tempIngredient.isNotEmpty &&
+                                  portionController.text != "") {
+                                Ingredient temp = Ingredient(
+                                    ingredientInfo: tempIngredient,
+                                    portion: portionController.text);
+                                setState(() {
+                                  ingredients.add(temp);
+                                  portionValidate = true;
+                                  portionController.text = "";
+                                });
+                              } else {
+                                setState(() {
+                                  portionValidate = false;
+                                });
+                              }
+                            },
+                            style: FilledButton.styleFrom(
+                              backgroundColor:
+                                  const Color.fromARGB(255, 129, 214, 131),
+                            ),
+                            child: const Text(
+                              "Add Ingredient",
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 0, 0, 0),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+                          child: TextButton(
+                            onPressed: () {
+                              setState(() {
+                                ingredients = [];
+                                portionValidate = true;
+                              });
+                            },
+                            style: FilledButton.styleFrom(
+                              backgroundColor:
+                                  const Color.fromARGB(255, 255, 106, 106),
+                            ),
+                            child: const Text(
+                              "Clear Ingredients",
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 0, 0, 0),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  Text(
-                    private ? "Private" : "Public",
-                    style: const TextStyle(
-                      fontSize: 16,
+                  // Prep Time
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
+                    child: FractionallySizedBox(
+                      widthFactor: 0.4,
+                      child: TextFormField(
+                          controller: prepController,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            labelText: "Prep Time (mins) *",
+                            labelStyle: TextStyle(
+                              fontSize: 12,
+                            ),
+                            border: OutlineInputBorder(),
+                          ),
+                          style: const TextStyle(
+                              //fontSize: 16,
+                              ),
+                          validator: (String? value) {
+                            return (value == null || value.isEmpty)
+                                ? "Required."
+                                : null;
+                          }),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                ],
-              ),
-              const SizedBox(height: 16),
-              // Create/Submit Button
-              ElevatedButton(
-                onPressed: () async {
-                  if (formKey.currentState!.validate()) {
-                    // STORE RECIPE //
-                    //------------------------------------------//
-                    // recipe_name = titleController.text
-                    // cook_time = cookController.text
-                    // prep_time = prepController.text
-                    // recipe_description = subtitleController.text
-                    // recipe_category = "N/A"
-                    // recipe_servings = servingSizeController.text
-                    // recipe_yield = "N/A"
-                    // recipe_directions = instructionsController.text
-                    // user_user_id = globals.user["user_id"]
-                    //------------------------------------------//
-                    http.Response storeRecipeResponse = await storeRecipe(
-                      titleController.text,
-                      cookController.text,
-                      prepController.text,
-                      subtitleController.text,
-                      "N/A",
-                      servingSizeController.text,
-                      "N/A",
-                      instructionsController.text,
-                      globals.user["user_id"]
-                    );
+                  // Cook Time
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
+                    child: FractionallySizedBox(
+                      widthFactor: 0.4,
+                      child: TextFormField(
+                          controller: cookController,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            labelText: "Cook Time (mins) *",
+                            border: OutlineInputBorder(),
+                            labelStyle: TextStyle(
+                              fontSize: 12,
+                            ),
+                          ),
+                          validator: (String? value) {
+                            return (value == null || value.isEmpty)
+                                ? "Required."
+                                : null;
+                          }),
+                    ),
+                  ),
+                  // Serving Size
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
+                    child: FractionallySizedBox(
+                      widthFactor: 0.4,
+                      child: TextFormField(
+                          controller: servingSizeController,
+                          keyboardType: TextInputType.text,
+                          decoration: const InputDecoration(
+                            labelText: "Serving Size *",
+                            border: OutlineInputBorder(),
+                            labelStyle: TextStyle(
+                              fontSize: 12,
+                            ),
+                          ),
+                          validator: (String? value) {
+                            return (value == null || value.isEmpty)
+                                ? "Required."
+                                : null;
+                          }),
+                    ),
+                  ),
+                  // Instructions
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
+                    child: FractionallySizedBox(
+                      widthFactor: 0.8,
+                      child: TextFormField(
+                          controller: instructionsController,
+                          keyboardType: TextInputType.multiline,
+                          minLines: 1,
+                          maxLines: 5,
+                          textCapitalization: TextCapitalization.sentences,
+                          decoration: const InputDecoration(
+                            labelText: "Instructions *",
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (String? value) {
+                            return (value == null || value.isEmpty)
+                                ? "Required"
+                                : null;
+                          }),
+                    ),
+                  ),
+                  // Dietary Tags (Vegan, Gluten-Free for now) (24 and 154 respectively in tags table, hard coded for now)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: CheckboxListTile(
+                          title: const Text("Vegan"),
+                          controlAffinity: ListTileControlAffinity.leading,
+                          checkColor: Colors.black,
+                          value: isVegan,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              isVegan = value!;
+                            });
+                          },
+                          fillColor: WidgetStateColor.resolveWith(
+                              (Set<WidgetState> states) {
+                            const Set<WidgetState> interactiveStates =
+                                <WidgetState>{
+                              WidgetState.pressed,
+                              WidgetState.hovered,
+                              WidgetState.focused,
+                              WidgetState.selected,
+                            };
 
-                    // STORE TAG RECIPE LINK //
-                    //------------------------------------------//
-                    // * Note: request for each tag
-                    // tags_id = 24 or 154, hardcoded for now
-                    // recipe_id = response["recipe_id"] from storing recipe
-                    //------------------------------------------//
-                    print("here?");
-                    print(storeRecipeResponse.statusCode);
-                    print(jsonDecode(storeRecipeResponse.body));
-                    int recipe_id = jsonDecode(storeRecipeResponse.body)['message']['recipe_id'];
+                            if (states.any(interactiveStates.contains)) {
+                              return Colors.blue;
+                            }
+                            return const Color.fromARGB(255, 255, 255, 255);
+                          }),
+                        ),
+                      ),
+                      Expanded(
+                        child: CheckboxListTile(
+                          title: const Text("Gluten Free"),
+                          controlAffinity: ListTileControlAffinity.leading,
+                          checkColor: Colors.black,
+                          value: isGlutenFree,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              isGlutenFree = value!;
+                            });
+                          },
+                          fillColor: WidgetStateColor.resolveWith(
+                              (Set<WidgetState> states) {
+                            const Set<WidgetState> interactiveStates =
+                                <WidgetState>{
+                              WidgetState.pressed,
+                              WidgetState.hovered,
+                              WidgetState.focused,
+                              WidgetState.selected,
+                            };
 
-                    print(recipe_id);
-                    print(recipe_id.runtimeType);
-                    
-                    http.Response? veganResponse;
-                    http.Response? glutenResponse;
+                            if (states.any(interactiveStates.contains)) {
+                              return Colors.blue;
+                            }
+                            return const Color.fromARGB(255, 255, 255, 255);
+                          }),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+                            child: Switch(
+                                value: private,
+                                activeColor: Colors.blue,
+                                onChanged: (bool value) {
+                                  setState(() {
+                                    private = value;
+                                  });
+                                  print(private);
+                                }),
+                          ),
+                          Text(
+                            private ? "Private" : "Public",
+                            style: const TextStyle(
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 32),
+                      ElevatedButton(
+                        onPressed: () async {
+                          if (formKey.currentState!.validate()) {
+                            // STORE RECIPE //
+                            //------------------------------------------//
+                            // recipe_name = titleController.text
+                            // cook_time = cookController.text
+                            // prep_time = prepController.text
+                            // recipe_description = subtitleController.text
+                            // recipe_category = "N/A"
+                            // recipe_servings = servingSizeController.text
+                            // recipe_yield = "N/A"
+                            // recipe_directions = instructionsController.text
+                            // user_user_id = globals.user["user_id"]
+                            //------------------------------------------//
+                            http.Response storeRecipeResponse =
+                                await storeRecipe(
+                                    titleController.text,
+                                    cookController.text,
+                                    prepController.text,
+                                    subtitleController.text,
+                                    "N/A",
+                                    servingSizeController.text,
+                                    "N/A",
+                                    instructionsController.text,
+                                    globals.user["user_id"]);
 
-                    if (isVegan) {
-                      veganResponse = await storeRecipeTag(24, recipe_id);
-                    }
+                            // STORE TAG RECIPE LINK //
+                            //------------------------------------------//
+                            // * Note: request for each tag
+                            // tags_id = 24 or 154, hardcoded for now
+                            // recipe_id = response["recipe_id"] from storing recipe
+                            //------------------------------------------//
+                            print("here?");
+                            print(storeRecipeResponse.statusCode);
+                            print(jsonDecode(storeRecipeResponse.body));
+                            int recipe_id =
+                                jsonDecode(storeRecipeResponse.body)['message']
+                                    ['recipe_id'];
 
-                    if (isGlutenFree) {
-                      glutenResponse = await storeRecipeTag(154, recipe_id);
-                    }
+                            print(recipe_id);
+                            print(recipe_id.runtimeType);
 
-                    if (glutenResponse?.statusCode == 422) {
-                      final data = jsonDecode(glutenResponse!.body);
-                      print('Validation errors: ${data['errors']}');
-                    }
+                            http.Response? veganResponse;
+                            http.Response? glutenResponse;
 
-                    List<http.Response> ingredientResponses = [];
+                            if (isVegan) {
+                              veganResponse =
+                                  await storeRecipeTag(24, recipe_id);
+                            }
 
-                    // STORE RECIPE INGREDIENTS //
-                    //------------------------------------------//
-                    // * Note: request for each ingredient
-                    // ri_recipe_id = response["recipe_id"] from storing recipe
-                    // ri_ingredient_id = ingredient.ingredientInfo["ingredient_id"]
-                    // ri_ingredient_measurement = ingredient.portion
-                    //------------------------------------------//
-                    for (Ingredient ingredient in ingredients) {
-                      int ingredient_id = ingredient.ingredientInfo["ingredient_id"];
-                      http.Response response = await storeRecipeIngredient(recipe_id, ingredient_id, ingredient.portion);
-                      
-                      if (response.statusCode == 422) {
-                        final data = jsonDecode(response.body);
-                        print('Validation errors: ${data['errors']}');
-                      }
-                      
-                      ingredientResponses.add(response);
-                    }
+                            if (isGlutenFree) {
+                              glutenResponse =
+                                  await storeRecipeTag(154, recipe_id);
+                            }
 
-                    // Success Dialog
-                    showDialog<String>(
-                      context: context,
-                      builder: (BuildContext context) => Dialog(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text("Recipe successfully created!"),
-                              const SizedBox(height: 15),
-                              /*const Text("Status Codes:"),
+                            if (glutenResponse?.statusCode == 422) {
+                              final data = jsonDecode(glutenResponse!.body);
+                              print('Validation errors: ${data['errors']}');
+                            }
+
+                            List<http.Response> ingredientResponses = [];
+
+                            // STORE RECIPE INGREDIENTS //
+                            //------------------------------------------//
+                            // * Note: request for each ingredient
+                            // ri_recipe_id = response["recipe_id"] from storing recipe
+                            // ri_ingredient_id = ingredient.ingredientInfo["ingredient_id"]
+                            // ri_ingredient_measurement = ingredient.portion
+                            //------------------------------------------//
+                            for (Ingredient ingredient in ingredients) {
+                              int ingredient_id =
+                                  ingredient.ingredientInfo["ingredient_id"];
+                              http.Response response =
+                                  await storeRecipeIngredient(recipe_id,
+                                      ingredient_id, ingredient.portion);
+
+                              if (response.statusCode == 422) {
+                                final data = jsonDecode(response.body);
+                                print('Validation errors: ${data['errors']}');
+                              }
+
+                              ingredientResponses.add(response);
+                            }
+
+                            // Success Dialog
+                            showDialog<String>(
+                              context: context,
+                              builder: (BuildContext context) => Dialog(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Text(
+                                          "Recipe successfully created!"),
+                                      const SizedBox(height: 15),
+                                      /*const Text("Status Codes:"),
                               Text("Store Recipe - Status: ${storeRecipeResponse.statusCode}"),
                               isVegan
                               ? Text("Recipe Vegan - Status: ${veganResponse?.statusCode}")
@@ -689,29 +758,34 @@ class _CreateRecipeState extends State<CreateRecipe> {
                                   return Text("Ingredient Response - ${response.statusCode}");
                                 }).toList(),
                               ),*/
-                              /*const Text("Current Values:"),
+                                      /*const Text("Current Values:"),
                               Text("Title: ${titleController.text}"),
                               Text("Subtitle: ${subtitleController.text}"),
                               Text("Prep Time: ${prepController.text}"),
                               Text("Cook Time: ${cookController.text}"),
                               Text("Serving Size: ${servingSizeController.text}"),*/
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: const Text("Close"),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text("Close"),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                            ],
-                          ),
-                        ),
+                            );
+                          }
+                        },
+                        child: const Text("Submit"),
                       ),
-                    );
-                  }
-                },
-                child: const Text("Submit"),
-              ),
-              const SizedBox(height: 16),
-              /*if (testLoading) CircularProgressIndicator(),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  // Create/Submit Button
+
+                  const SizedBox(height: 16),
+                  /*if (testLoading) CircularProgressIndicator(),
               if (testImageUrl != null) Image.network(testImageUrl!)
               else if (!testLoading) Text("No image loaded"),
               TextButton(
@@ -720,7 +794,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                 },
                 child: Text("Press me to load test url!"),
               ),*/
-            ]),
+                ]),
           ),
         ),
       ),

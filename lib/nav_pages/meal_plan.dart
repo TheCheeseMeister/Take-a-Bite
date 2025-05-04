@@ -19,34 +19,32 @@ class MealPlan extends StatelessWidget {
   Widget build(BuildContext context) {
     return
         //body: Center(child: Text("Meal Plan Page")),
-        DefaultTabController(
-      length: 2,
-      initialIndex: 0,
-      child: Scaffold(
-        appBar: AppBar(
-          bottom: const TabBar(
-            // title moves it higher, bottom looks neater
-            tabs: [
-              // Represents week planner
-              Padding(
-                padding: EdgeInsets.fromLTRB(0, 16, 0, 16),
-                child: Icon(Icons.shopping_cart),
-              ),
-              // Represents ingredient list
-              Padding(
-                padding: EdgeInsets.fromLTRB(0, 16, 0, 16),
-                child: Icon(Icons.egg),
-              ),
+        Scaffold(
+      /*appBar: AppBar(
+            bottom: const TabBar(
+              // title moves it higher, bottom looks neater
+              tabs: [
+                // Represents week planner
+                Padding(
+                  padding: EdgeInsets.fromLTRB(0, 16, 0, 16),
+                  child: Icon(Icons.shopping_cart),
+                ),
+                // Represents ingredient list
+                Padding(
+                  padding: EdgeInsets.fromLTRB(0, 16, 0, 16),
+                  child: Icon(Icons.egg),
+                ),
+              ],
+            ),
+          ),*/
+      body: ShoppingList(
+          p_update: globals
+              .plans), /*TabBarView(
+            children: [
+              ShoppingList(p_update: globals.plans),
+              Text("Ingredients List"),
             ],
-          ),
-        ),
-        body: TabBarView(
-          children: [
-            ShoppingList(p_update: globals.plans),
-            Text("Ingredients List"),
-          ],
-        ),
-      ),
+          ),*/
     );
   }
 }
@@ -233,724 +231,749 @@ class _ShoppingListState extends State<ShoppingList> {
   @override
   Widget build(BuildContext context) {
     List<dynamic>? updating = widget.p_update; // again to force it
-    return Stack(alignment: Alignment.topCenter, children: [
-      Align(
-        alignment: Alignment.topRight,
-        child: Padding(
-            padding: const EdgeInsets.fromLTRB(0, 24, 16, 0),
-            child: IconButton(
-              onPressed: () async {
-                await refreshCreatedRecipes();
-                await refreshSavedRecipes();
+    return Column(
+      children: [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Padding(
+            padding: EdgeInsets.fromLTRB(130, 72, 0, 0),
+            child: Text(
+              "Meal Plans",
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          Padding(
+              padding: const EdgeInsets.fromLTRB(64, 56, 16, 0),
+              child: IconButton(
+                onPressed: () async {
+                  await refreshCreatedRecipes();
+                  await refreshSavedRecipes();
 
-                // Created and Saved Recipes put together for Dropdown
-                List<dynamic> combinedRecipes = [
-                  ...globals.createdRecipes,
-                  ...globals.savedRecipes
-                ];
+                  // Created and Saved Recipes put together for Dropdown
+                  List<dynamic> combinedRecipes = [
+                    ...globals.createdRecipes,
+                    ...globals.savedRecipes
+                  ];
 
-                setState(() {
-                  currTime = DateTime.now().toString().split(" ")[0];
-                });
+                  setState(() {
+                    currTime = DateTime.now().toString().split(" ")[0];
+                  });
 
-                if (!context.mounted) return;
+                  if (!context.mounted) return;
 
-                List<String> temp = currTime.split("-");
-                String title = "${temp[1]}/${temp[2]}/${temp[0]}";
+                  List<String> temp = currTime.split("-");
+                  String title = "${temp[1]}/${temp[2]}/${temp[0]}";
 
-                setState(() {
-                  breakfast.clear();
-                  lunch.clear();
-                  dinner.clear();
-                  snack.clear();
-                });
+                  setState(() {
+                    breakfast.clear();
+                    lunch.clear();
+                    dinner.clear();
+                    snack.clear();
+                  });
 
-                print(breakfast);
+                  print(breakfast);
 
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    String selectedDate =
-                        DateTime.now().toString().split(" ")[0];
-                    return StatefulBuilder(
-                      builder: (context, setState) {
-                        Future<void> openCalendar() async {
-                          final DateTime? pickedDate = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime.now()
-                                  .add(const Duration(days: 365)));
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      String selectedDate =
+                          DateTime.now().toString().split(" ")[0];
+                      return StatefulBuilder(
+                        builder: (context, setState) {
+                          Future<void> openCalendar() async {
+                            final DateTime? pickedDate = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime.now(),
+                                lastDate: DateTime.now()
+                                    .add(const Duration(days: 365)));
 
-                          String date = pickedDate.toString().split(" ")[0];
-                          setState(() {
-                            selectedDate = date;
-                          });
-                          print(selectedDate);
-                        }
+                            String date = pickedDate.toString().split(" ")[0];
+                            setState(() {
+                              selectedDate = date;
+                            });
+                            print(selectedDate);
+                          }
 
-                        return Dialog(
-                          child: SingleChildScrollView(
-                            child: FractionallySizedBox(
-                              widthFactor: 0.9,
-                              child: Column(
-                                //mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const SizedBox(height: 36),
-                                  const Text(
-                                    //"Meal Plan - $title",
-                                    "Meal Plan",
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500,
+                          return Dialog(
+                            child: SingleChildScrollView(
+                              child: FractionallySizedBox(
+                                widthFactor: 0.9,
+                                child: Column(
+                                  //mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const SizedBox(height: 36),
+                                    const Text(
+                                      //"Meal Plan - $title",
+                                      "Meal Plan",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 36),
-                                  //Text("Selected Date: $selectedDate"),
-                                  RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        const TextSpan(
-                                          text: "Selected Date: ",
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.w500,
+                                    const SizedBox(height: 36),
+                                    //Text("Selected Date: $selectedDate"),
+                                    RichText(
+                                      text: TextSpan(
+                                        children: [
+                                          const TextSpan(
+                                            text: "Selected Date: ",
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.w500,
+                                            ),
                                           ),
-                                        ),
-                                        TextSpan(
-                                          text: selectedDate,
-                                          style: const TextStyle(
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.w400,
+                                          TextSpan(
+                                            text: selectedDate,
+                                            style: const TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.w400,
+                                            ),
                                           ),
+                                        ],
+                                      ),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        openCalendar();
+                                      },
+                                      child: Text("Select Date"),
+                                    ),
+                                    const SizedBox(height: 24),
+                                    DropdownSearch<String>.multiSelection(
+                                      dropdownBuilder: (context, breakfast) {
+                                        return Wrap(
+                                          children: breakfast
+                                              .map(
+                                                (item) => Chip(
+                                                  label: Text(
+                                                    item,
+                                                    style:
+                                                        TextStyle(fontSize: 14),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    softWrap: true,
+                                                  ),
+                                                  deleteIcon:
+                                                      const Icon(Icons.clear),
+                                                  onDeleted: () {
+                                                    setState(() {
+                                                      breakfast.remove(item);
+                                                    });
+                                                    print(breakfast);
+                                                  },
+                                                ),
+                                              )
+                                              .toList(),
+                                        );
+                                      },
+                                      selectedItems: breakfast,
+                                      items: (filter, s) => combinedRecipes
+                                          .map<String>(
+                                              (recipe) => recipe['recipe_name'])
+                                          .toList(),
+                                      compareFn: (i, s) => i == s,
+                                      onChanged: (List<String> selectedItems) {
+                                        setState(() {
+                                          breakfast = selectedItems;
+                                        });
+                                      },
+                                      decoratorProps:
+                                          const DropDownDecoratorProps(
+                                        decoration: InputDecoration(
+                                          labelText: "Breakfast",
+                                          border: OutlineInputBorder(),
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      openCalendar();
-                                    },
-                                    child: Text("Select Date"),
-                                  ),
-                                  const SizedBox(height: 24),
-                                  DropdownSearch<String>.multiSelection(
-                                    dropdownBuilder: (context, breakfast) {
-                                      return Wrap(
-                                        children: breakfast
-                                            .map(
-                                              (item) => Chip(
-                                                label: Text(
-                                                  item,
-                                                  style:
-                                                      TextStyle(fontSize: 14),
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  softWrap: true,
-                                                ),
-                                                deleteIcon:
-                                                    const Icon(Icons.clear),
-                                                onDeleted: () {
-                                                  setState(() {
-                                                    breakfast.remove(item);
-                                                  });
-                                                  print(breakfast);
-                                                },
-                                              ),
-                                            )
-                                            .toList(),
-                                      );
-                                    },
-                                    selectedItems: breakfast,
-                                    items: (filter, s) => combinedRecipes
-                                        .map<String>(
-                                            (recipe) => recipe['recipe_name'])
-                                        .toList(),
-                                    compareFn: (i, s) => i == s,
-                                    onChanged: (List<String> selectedItems) {
-                                      setState(() {
-                                        breakfast = selectedItems;
-                                      });
-                                    },
-                                    decoratorProps:
-                                        const DropDownDecoratorProps(
-                                      decoration: InputDecoration(
-                                        labelText: "Breakfast",
-                                        border: OutlineInputBorder(),
+                                      ),
+                                      popupProps: PopupPropsMultiSelection.menu(
+                                        menuProps: const MenuProps(
+                                            backgroundColor: Color.fromARGB(
+                                                255, 255, 255, 255)),
+                                        showSearchBox: true,
+                                        constraints: const BoxConstraints(
+                                            maxWidth: 600, maxHeight: 200),
+                                        itemBuilder: (context, item, isDisabled,
+                                            isSelected) {
+                                          return Padding(
+                                            padding: const EdgeInsets.fromLTRB(
+                                                8.0, 0, 0, 0),
+                                            child: Text(item.toString()),
+                                          );
+                                        },
                                       ),
                                     ),
-                                    popupProps: PopupPropsMultiSelection.menu(
-                                      menuProps: const MenuProps(
-                                          backgroundColor: Color.fromARGB(
-                                              255, 255, 255, 255)),
-                                      showSearchBox: true,
-                                      constraints: const BoxConstraints(
-                                          maxWidth: 600, maxHeight: 200),
-                                      itemBuilder: (context, item, isDisabled,
-                                          isSelected) {
-                                        return Padding(
-                                          padding: const EdgeInsets.fromLTRB(
-                                              8.0, 0, 0, 0),
-                                          child: Text(item.toString()),
+                                    const SizedBox(
+                                      height: 16,
+                                    ),
+                                    DropdownSearch<String>.multiSelection(
+                                      dropdownBuilder: (context, lunch) {
+                                        return Wrap(
+                                          children: lunch
+                                              .map(
+                                                (item) => Chip(
+                                                  label: Text(
+                                                    item,
+                                                    style:
+                                                        TextStyle(fontSize: 14),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    softWrap: true,
+                                                  ),
+                                                  deleteIcon:
+                                                      const Icon(Icons.clear),
+                                                  onDeleted: () {
+                                                    setState(() {
+                                                      lunch.remove(item);
+                                                    });
+                                                  },
+                                                ),
+                                              )
+                                              .toList(),
                                         );
                                       },
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    height: 16,
-                                  ),
-                                  DropdownSearch<String>.multiSelection(
-                                    dropdownBuilder: (context, lunch) {
-                                      return Wrap(
-                                        children: lunch
-                                            .map(
-                                              (item) => Chip(
-                                                label: Text(
-                                                  item,
-                                                  style:
-                                                      TextStyle(fontSize: 14),
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  softWrap: true,
-                                                ),
-                                                deleteIcon:
-                                                    const Icon(Icons.clear),
-                                                onDeleted: () {
-                                                  setState(() {
-                                                    lunch.remove(item);
-                                                  });
-                                                },
-                                              ),
-                                            )
-                                            .toList(),
-                                      );
-                                    },
-                                    selectedItems: lunch,
-                                    items: (filter, s) => combinedRecipes
-                                        .map<String>(
-                                            (recipe) => recipe['recipe_name'])
-                                        .toList(),
-                                    compareFn: (i, s) => i == s,
-                                    onChanged: (List<String> selectedItems) {
-                                      setState(() {
-                                        lunch = selectedItems;
-                                      });
-                                    },
-                                    decoratorProps:
-                                        const DropDownDecoratorProps(
-                                      decoration: InputDecoration(
-                                        labelText: "Lunch",
-                                        border: OutlineInputBorder(),
+                                      selectedItems: lunch,
+                                      items: (filter, s) => combinedRecipes
+                                          .map<String>(
+                                              (recipe) => recipe['recipe_name'])
+                                          .toList(),
+                                      compareFn: (i, s) => i == s,
+                                      onChanged: (List<String> selectedItems) {
+                                        setState(() {
+                                          lunch = selectedItems;
+                                        });
+                                      },
+                                      decoratorProps:
+                                          const DropDownDecoratorProps(
+                                        decoration: InputDecoration(
+                                          labelText: "Lunch",
+                                          border: OutlineInputBorder(),
+                                        ),
+                                      ),
+                                      popupProps: PopupPropsMultiSelection.menu(
+                                        menuProps: const MenuProps(
+                                            backgroundColor: Color.fromARGB(
+                                                255, 255, 255, 255)),
+                                        showSearchBox: true,
+                                        constraints: const BoxConstraints(
+                                            maxWidth: 500, maxHeight: 200),
+                                        itemBuilder: (context, item, isDisabled,
+                                            isSelected) {
+                                          return Padding(
+                                            padding: const EdgeInsets.fromLTRB(
+                                                8.0, 0, 0, 0),
+                                            child: Text(item.toString()),
+                                          );
+                                        },
                                       ),
                                     ),
-                                    popupProps: PopupPropsMultiSelection.menu(
-                                      menuProps: const MenuProps(
-                                          backgroundColor: Color.fromARGB(
-                                              255, 255, 255, 255)),
-                                      showSearchBox: true,
-                                      constraints: const BoxConstraints(
-                                          maxWidth: 500, maxHeight: 200),
-                                      itemBuilder: (context, item, isDisabled,
-                                          isSelected) {
-                                        return Padding(
-                                          padding: const EdgeInsets.fromLTRB(
-                                              8.0, 0, 0, 0),
-                                          child: Text(item.toString()),
+                                    const SizedBox(
+                                      height: 16,
+                                    ),
+                                    DropdownSearch<String>.multiSelection(
+                                      dropdownBuilder: (context, dinner) {
+                                        return Wrap(
+                                          children: dinner
+                                              .map(
+                                                (item) => Chip(
+                                                  label: Text(
+                                                    item,
+                                                    style:
+                                                        TextStyle(fontSize: 14),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    softWrap: true,
+                                                  ),
+                                                  deleteIcon:
+                                                      const Icon(Icons.clear),
+                                                  onDeleted: () {
+                                                    setState(() {
+                                                      dinner.remove(item);
+                                                    });
+                                                  },
+                                                ),
+                                              )
+                                              .toList(),
                                         );
                                       },
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    height: 16,
-                                  ),
-                                  DropdownSearch<String>.multiSelection(
-                                    dropdownBuilder: (context, dinner) {
-                                      return Wrap(
-                                        children: dinner
-                                            .map(
-                                              (item) => Chip(
-                                                label: Text(
-                                                  item,
-                                                  style:
-                                                      TextStyle(fontSize: 14),
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  softWrap: true,
-                                                ),
-                                                deleteIcon:
-                                                    const Icon(Icons.clear),
-                                                onDeleted: () {
-                                                  setState(() {
-                                                    dinner.remove(item);
-                                                  });
-                                                },
-                                              ),
-                                            )
-                                            .toList(),
-                                      );
-                                    },
-                                    selectedItems: dinner,
-                                    items: (filter, s) => combinedRecipes
-                                        .map<String>(
-                                            (recipe) => recipe['recipe_name'])
-                                        .toList(),
-                                    compareFn: (i, s) => i == s,
-                                    onChanged: (List<String> selectedItems) {
-                                      setState(() {
-                                        dinner = selectedItems;
-                                      });
-                                    },
-                                    decoratorProps:
-                                        const DropDownDecoratorProps(
-                                      decoration: InputDecoration(
-                                        labelText: "Dinner",
-                                        border: OutlineInputBorder(),
+                                      selectedItems: dinner,
+                                      items: (filter, s) => combinedRecipes
+                                          .map<String>(
+                                              (recipe) => recipe['recipe_name'])
+                                          .toList(),
+                                      compareFn: (i, s) => i == s,
+                                      onChanged: (List<String> selectedItems) {
+                                        setState(() {
+                                          dinner = selectedItems;
+                                        });
+                                      },
+                                      decoratorProps:
+                                          const DropDownDecoratorProps(
+                                        decoration: InputDecoration(
+                                          labelText: "Dinner",
+                                          border: OutlineInputBorder(),
+                                        ),
+                                      ),
+                                      popupProps: PopupPropsMultiSelection.menu(
+                                        menuProps: const MenuProps(
+                                            backgroundColor: Color.fromARGB(
+                                                255, 255, 255, 255)),
+                                        showSearchBox: true,
+                                        constraints: const BoxConstraints(
+                                            maxWidth: 500, maxHeight: 200),
+                                        itemBuilder: (context, item, isDisabled,
+                                            isSelected) {
+                                          return Padding(
+                                            padding: const EdgeInsets.fromLTRB(
+                                                8.0, 0, 0, 0),
+                                            child: Text(item.toString()),
+                                          );
+                                        },
                                       ),
                                     ),
-                                    popupProps: PopupPropsMultiSelection.menu(
-                                      menuProps: const MenuProps(
-                                          backgroundColor: Color.fromARGB(
-                                              255, 255, 255, 255)),
-                                      showSearchBox: true,
-                                      constraints: const BoxConstraints(
-                                          maxWidth: 500, maxHeight: 200),
-                                      itemBuilder: (context, item, isDisabled,
-                                          isSelected) {
-                                        return Padding(
-                                          padding: const EdgeInsets.fromLTRB(
-                                              8.0, 0, 0, 0),
-                                          child: Text(item.toString()),
+                                    const SizedBox(
+                                      height: 16,
+                                    ),
+                                    DropdownSearch<String>.multiSelection(
+                                      dropdownBuilder: (context, snack) {
+                                        return Wrap(
+                                          children: snack
+                                              .map(
+                                                (item) => Chip(
+                                                  label: Text(
+                                                    item,
+                                                    style:
+                                                        TextStyle(fontSize: 14),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    softWrap: true,
+                                                  ),
+                                                  deleteIcon:
+                                                      const Icon(Icons.clear),
+                                                  onDeleted: () {
+                                                    setState(() {
+                                                      snack.remove(item);
+                                                    });
+                                                  },
+                                                ),
+                                              )
+                                              .toList(),
                                         );
                                       },
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    height: 16,
-                                  ),
-                                  DropdownSearch<String>.multiSelection(
-                                    dropdownBuilder: (context, snack) {
-                                      return Wrap(
-                                        children: snack
-                                            .map(
-                                              (item) => Chip(
-                                                label: Text(
-                                                  item,
-                                                  style:
-                                                      TextStyle(fontSize: 14),
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  softWrap: true,
-                                                ),
-                                                deleteIcon:
-                                                    const Icon(Icons.clear),
-                                                onDeleted: () {
-                                                  setState(() {
-                                                    snack.remove(item);
-                                                  });
-                                                },
-                                              ),
-                                            )
-                                            .toList(),
-                                      );
-                                    },
-                                    items: (filter, s) => combinedRecipes
-                                        .map<String>(
-                                            (recipe) => recipe['recipe_name'])
-                                        .toList(),
-                                    compareFn: (i, s) => i == s,
-                                    onChanged: (List<String> selectedItems) {
-                                      setState(() {
-                                        snack = selectedItems;
-                                      });
-                                    },
-                                    decoratorProps:
-                                        const DropDownDecoratorProps(
-                                      decoration: InputDecoration(
-                                        labelText: "Snack",
-                                        border: OutlineInputBorder(),
+                                      items: (filter, s) => combinedRecipes
+                                          .map<String>(
+                                              (recipe) => recipe['recipe_name'])
+                                          .toList(),
+                                      compareFn: (i, s) => i == s,
+                                      onChanged: (List<String> selectedItems) {
+                                        setState(() {
+                                          snack = selectedItems;
+                                        });
+                                      },
+                                      decoratorProps:
+                                          const DropDownDecoratorProps(
+                                        decoration: InputDecoration(
+                                          labelText: "Snack",
+                                          border: OutlineInputBorder(),
+                                        ),
+                                      ),
+                                      popupProps: PopupPropsMultiSelection.menu(
+                                        menuProps: const MenuProps(
+                                            backgroundColor: Color.fromARGB(
+                                                255, 255, 255, 255)),
+                                        showSearchBox: true,
+                                        constraints: const BoxConstraints(
+                                            maxWidth: 500, maxHeight: 200),
+                                        itemBuilder: (context, item, isDisabled,
+                                            isSelected) {
+                                          return Padding(
+                                            padding: const EdgeInsets.fromLTRB(
+                                                8.0, 0, 0, 0),
+                                            child: Text(item.toString()),
+                                          );
+                                        },
                                       ),
                                     ),
-                                    popupProps: PopupPropsMultiSelection.menu(
-                                      menuProps: const MenuProps(
-                                          backgroundColor: Color.fromARGB(
-                                              255, 255, 255, 255)),
-                                      showSearchBox: true,
-                                      constraints: const BoxConstraints(
-                                          maxWidth: 500, maxHeight: 200),
-                                      itemBuilder: (context, item, isDisabled,
-                                          isSelected) {
-                                        return Padding(
-                                          padding: const EdgeInsets.fromLTRB(
-                                              8.0, 0, 0, 0),
-                                          child: Text(item.toString()),
-                                        );
-                                      },
+                                    const SizedBox(
+                                      height: 36,
                                     ),
-                                  ),
-                                  const SizedBox(
-                                    height: 36,
-                                  ),
-                                  // insert text for validation; needs at least one recipe selected.
-                                  ElevatedButton(
-                                    onPressed: () async {
-                                      List<dynamic> times =
-                                          await createMealPlan(selectedDate);
+                                    // insert text for validation; needs at least one recipe selected.
+                                    ElevatedButton(
+                                      onPressed: () async {
+                                        List<dynamic> times =
+                                            await createMealPlan(selectedDate);
 
-                                      int breakfast_id =
-                                          times[0]['plan']['meal_plan_id'];
-                                      int lunch_id =
-                                          times[1]['plan']['meal_plan_id'];
-                                      int dinner_id =
-                                          times[2]['plan']['meal_plan_id'];
-                                      int snack_id =
-                                          times[3]['plan']['meal_plan_id'];
+                                        int breakfast_id =
+                                            times[0]['plan']['meal_plan_id'];
+                                        int lunch_id =
+                                            times[1]['plan']['meal_plan_id'];
+                                        int dinner_id =
+                                            times[2]['plan']['meal_plan_id'];
+                                        int snack_id =
+                                            times[3]['plan']['meal_plan_id'];
 
-                                      /*print(breakfast_id);
-                                        print(lunch_id);
-                                        print(dinner_id);
-                                        print(snack_id);*/
+                                        /*print(breakfast_id);
+                                      print(lunch_id);
+                                      print(dinner_id);
+                                      print(snack_id);*/
 
-                                      for (var recipe in breakfast) {
-                                        var tempRecipeInfo =
-                                            combinedRecipes.firstWhere((r) =>
-                                                r['recipe_name'] == recipe);
-                                        int recipe_id =
-                                            tempRecipeInfo['recipe_id'];
-                                        await createMealPlanLink(
-                                            globals.user['user_id'],
-                                            recipe_id,
-                                            breakfast_id);
-                                      }
+                                        for (var recipe in breakfast) {
+                                          var tempRecipeInfo =
+                                              combinedRecipes.firstWhere((r) =>
+                                                  r['recipe_name'] == recipe);
+                                          int recipe_id =
+                                              tempRecipeInfo['recipe_id'];
+                                          await createMealPlanLink(
+                                              globals.user['user_id'],
+                                              recipe_id,
+                                              breakfast_id);
+                                        }
 
-                                      for (var recipe in lunch) {
-                                        var tempRecipeInfo =
-                                            combinedRecipes.firstWhere((r) =>
-                                                r['recipe_name'] == recipe);
-                                        int recipe_id =
-                                            tempRecipeInfo['recipe_id'];
-                                        await createMealPlanLink(
-                                            globals.user['user_id'],
-                                            recipe_id,
-                                            lunch_id);
-                                      }
+                                        for (var recipe in lunch) {
+                                          var tempRecipeInfo =
+                                              combinedRecipes.firstWhere((r) =>
+                                                  r['recipe_name'] == recipe);
+                                          int recipe_id =
+                                              tempRecipeInfo['recipe_id'];
+                                          await createMealPlanLink(
+                                              globals.user['user_id'],
+                                              recipe_id,
+                                              lunch_id);
+                                        }
 
-                                      for (var recipe in dinner) {
-                                        var tempRecipeInfo =
-                                            combinedRecipes.firstWhere((r) =>
-                                                r['recipe_name'] == recipe);
-                                        int recipe_id =
-                                            tempRecipeInfo['recipe_id'];
-                                        await createMealPlanLink(
-                                            globals.user['user_id'],
-                                            recipe_id,
-                                            dinner_id);
-                                      }
+                                        for (var recipe in dinner) {
+                                          var tempRecipeInfo =
+                                              combinedRecipes.firstWhere((r) =>
+                                                  r['recipe_name'] == recipe);
+                                          int recipe_id =
+                                              tempRecipeInfo['recipe_id'];
+                                          await createMealPlanLink(
+                                              globals.user['user_id'],
+                                              recipe_id,
+                                              dinner_id);
+                                        }
 
-                                      for (var recipe in snack) {
-                                        var tempRecipeInfo =
-                                            combinedRecipes.firstWhere((r) =>
-                                                r['recipe_name'] == recipe);
-                                        int recipe_id =
-                                            tempRecipeInfo['recipe_id'];
-                                        await createMealPlanLink(
-                                            globals.user['user_id'],
-                                            recipe_id,
-                                            snack_id);
-                                      }
-                                      await refreshMealPlans();
+                                        for (var recipe in snack) {
+                                          var tempRecipeInfo =
+                                              combinedRecipes.firstWhere((r) =>
+                                                  r['recipe_name'] == recipe);
+                                          int recipe_id =
+                                              tempRecipeInfo['recipe_id'];
+                                          await createMealPlanLink(
+                                              globals.user['user_id'],
+                                              recipe_id,
+                                              snack_id);
+                                        }
+                                        await refreshMealPlans();
 
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text("Create Meal Plan"),
-                                  ),
-                                  const SizedBox(
-                                    height: 36,
-                                  ),
-                                ],
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: const Text("Create Meal Plan"),
+                                    ),
+                                    const SizedBox(
+                                      height: 36,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                );
-              },
-              icon: const Icon(Icons.add),
-            )),
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+                icon: const Icon(Icons.add),
+              )),
+        ],
       ),
-      Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: globals.plans == null
-            ? [const CircularProgressIndicator()]
-            : globals.datedPlans.isEmpty
-                ? [const Text("No Meal Plans...")]
-                : [
-                    Expanded(
-                        child: Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 72, 0, 0),
-                      child: ListView.builder(
-                          itemCount: globals.datedPlans.length,
-                          itemBuilder: (context, index) {
-                            // Reverse order for most recent date
-                            var temp = Map.fromEntries(
-                                globals.datedPlans.entries.toList().reversed);
-                            String date = temp.keys.elementAt(index);
-                            List<Map<String, dynamic>> items = temp[date]!;
-
-                            return ExpansionTile(
-                              title: Text(date),
-                              collapsedBackgroundColor:
-                                  const Color.fromARGB(255, 211, 211, 211),
-                              children:
-                                  groupPlansByTime(items).entries.map((time) {
-                                String time_to_make =
-                                    time.key[0].toUpperCase() +
-                                        time.key.substring(1);
-                                List<dynamic> grouped = time.value;
-
+      Expanded(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: globals.plans == null
+              ? [const CircularProgressIndicator()]
+              : globals.datedPlans.isEmpty
+                  ? [const Text("No Meal Plans...")]
+                  : [
+                      Expanded(
+                          child: ListView.builder(
+                              itemCount: globals.datedPlans.length,
+                              itemBuilder: (context, index) {
+                                // Reverse order for most recent date
+                                var temp = Map.fromEntries(
+                                    globals.datedPlans.entries.toList().reversed);
+                                String date = temp.keys.elementAt(index);
+                                List<Map<String, dynamic>> items = temp[date]!;
+                          
                                 return ExpansionTile(
-                                  title: Text(time_to_make),
-                                  children: grouped.map((plan) {
-                                    print(plan['recipe']['ingredients']);
-                                    return Column(
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () {
-                                            Map<String, dynamic>
-                                                formattedIngredients = {};
-                                            formattedIngredients['recipe_id'] =
-                                                plan['recipe']['recipe_id'];
-
-                                            var tempMap = {};
-                                            int index = 0;
-                                            for (var ingredient
-                                                in plan['recipe']
-                                                    ['ingredients']) {
-                                              var tempMapInfo = {};
-
-                                              tempMapInfo['ingredient_name'] =
-                                                  ingredient['ingredient']
-                                                      ['ingredient_name'];
-                                              tempMapInfo['portion'] = ingredient[
-                                                  'ri_ingredient_measurement'];
-
-                                              tempMap[index] = tempMapInfo;
-
-                                              index++;
-                                            }
-
-                                            formattedIngredients[
-                                                'ingredients'] = tempMap;
-
-                                            bool isVegan = false;
-                                            bool isGlutenFree = false;
-
-                                            for (var tag in plan['recipe']
-                                                ['tags']) {
-                                              var name = tag['tag']['tag_name'];
-                                              if (name == 'vegan')
-                                                isVegan = true;
-                                              if (name == 'gluten-free')
-                                                isGlutenFree = true;
-                                            }
-
-                                            PersistentNavBarNavigator
-                                                .pushNewScreenWithRouteSettings(
-                                              context,
-                                              settings: const RouteSettings(),
-                                              screen: RecipePage(
-                                                  recipeInfo: plan['recipe'],
-                                                  ingredients:
-                                                      formattedIngredients,
-                                                  image: plan['recipe']
-                                                      ['recipe_image'],
-                                                  isVegan: isVegan,
-                                                  isGlutenFree: isGlutenFree,
-                                                  authorName: plan['user']
-                                                      ['user_username'],
-                                                  authorBio: plan['user']
-                                                      ['user_bio'],
-                                                  authorPicture: plan['user']
-                                                      ['user_profile_picture'],
-                                                  index: 1),
-                                              withNavBar: true,
-                                              pageTransitionAnimation:
-                                                  PageTransitionAnimation
-                                                      .cupertino,
-                                            );
-                                          },
-                                          child: Align(
-                                            alignment: Alignment.centerLeft,
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      16, 0, 0, 0),
-                                              child: Row(children: [
-                                                Text(
-                                                  plan['recipe']['recipe_name'],
-                                                  style: const TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                                const Spacer(),
-                                                Text(
-                                                  plan['recipe']['cook_time'] +
-                                                      " | ",
-                                                  style: const TextStyle(
-                                                    fontSize: 15,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  plan['recipe']
-                                                      ['recipe_servings'],
-                                                  style: const TextStyle(
-                                                    fontSize: 15,
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 8),
-                                              ]),
-                                            ),
-                                          ),
-                                        ),
-                                        // List ingredients of recipe
-                                        Padding(
-                                          padding: const EdgeInsets.fromLTRB(
-                                              0, 16, 0, 8),
-                                          child: Wrap(
-                                            children: plan['recipe']
-                                                    ['ingredients']
-                                                .asMap()
-                                                .entries
-                                                .map((ingredient) {
-                                                  print(ingredient
-                                                          .value['ingredient']
-                                                      ['ingredient_name']);
-                                                  String portion = ingredient
-                                                          .value[
+                                  title: Text(date),
+                                  collapsedBackgroundColor:
+                                      const Color.fromARGB(255, 211, 211, 211),
+                                  children:
+                                      groupPlansByTime(items).entries.map((time) {
+                                    String time_to_make =
+                                        time.key[0].toUpperCase() +
+                                            time.key.substring(1);
+                                    List<dynamic> grouped = time.value;
+                          
+                                    return ExpansionTile(
+                                      title: Text(time_to_make),
+                                      children: grouped.map((plan) {
+                                        print(plan['recipe']['ingredients']);
+                                        return Column(
+                                          children: [
+                                            GestureDetector(
+                                              onTap: () {
+                                                Map<String, dynamic>
+                                                    formattedIngredients = {};
+                                                formattedIngredients[
+                                                        'recipe_id'] =
+                                                    plan['recipe']['recipe_id'];
+                          
+                                                var tempMap = {};
+                                                int index = 0;
+                                                for (var ingredient
+                                                    in plan['recipe']
+                                                        ['ingredients']) {
+                                                  var tempMapInfo = {};
+                          
+                                                  tempMapInfo['ingredient_name'] =
+                                                      ingredient['ingredient']
+                                                          ['ingredient_name'];
+                                                  tempMapInfo['portion'] = ingredient[
                                                       'ri_ingredient_measurement'];
-                                                  String name = ingredient
-                                                          .value['ingredient']
-                                                      ['ingredient_name'];
-                                                  name = name[0].toUpperCase() +
-                                                      name.substring(1);
-
-                                                  return Align(
-                                                    alignment:
-                                                        Alignment.centerLeft,
-                                                    child: Padding(
-                                                      padding: const EdgeInsets
-                                                          .fromLTRB(8, 0, 4, 4),
-                                                      child: Chip(
-                                                        label: Text(
-                                                            "$portion $name"),
+                          
+                                                  tempMap[index] = tempMapInfo;
+                          
+                                                  index++;
+                                                }
+                          
+                                                formattedIngredients[
+                                                    'ingredients'] = tempMap;
+                          
+                                                bool isVegan = false;
+                                                bool isGlutenFree = false;
+                          
+                                                for (var tag in plan['recipe']
+                                                    ['tags']) {
+                                                  var name =
+                                                      tag['tag']['tag_name'];
+                                                  if (name == 'vegan')
+                                                    isVegan = true;
+                                                  if (name == 'gluten-free')
+                                                    isGlutenFree = true;
+                                                }
+                          
+                                                PersistentNavBarNavigator
+                                                    .pushNewScreenWithRouteSettings(
+                                                  context,
+                                                  settings: const RouteSettings(),
+                                                  screen: RecipePage(
+                                                      recipeInfo: plan['recipe'],
+                                                      ingredients:
+                                                          formattedIngredients,
+                                                      image: plan['recipe']
+                                                          ['recipe_image'],
+                                                      isVegan: isVegan,
+                                                      isGlutenFree: isGlutenFree,
+                                                      authorName: plan['user']
+                                                          ['user_username'],
+                                                      authorBio: plan['user']
+                                                          ['user_bio'],
+                                                      authorPicture: plan['user'][
+                                                          'user_profile_picture'],
+                                                      index: 1),
+                                                  withNavBar: true,
+                                                  pageTransitionAnimation:
+                                                      PageTransitionAnimation
+                                                          .cupertino,
+                                                );
+                                              },
+                                              child: Align(
+                                                alignment: Alignment.centerLeft,
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.fromLTRB(
+                                                          16, 0, 0, 0),
+                                                  child: Row(children: [
+                                                    Text(
+                                                      plan['recipe']
+                                                          ['recipe_name'],
+                                                      style: const TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w500,
                                                       ),
                                                     ),
-                                                  );
-                                                })
-                                                .toList()
-                                                .cast<Widget>(),
-                                          ),
-                                        ),
-                                        Align(
-                                          alignment: Alignment.centerRight,
-                                          child: Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                0, 0, 4, 8),
-                                            child: TextButton(
-                                              onPressed: () async {
-                                                await removeMealPlan(
-                                                    plan['mur_id']);
-
-                                                if (!context.mounted) return;
-
-                                                showDialog(
-                                                    context: context,
-                                                    builder:
-                                                        (BuildContext context) {
-                                                      return Dialog(
-                                                        child: Column(
-                                                          mainAxisSize:
-                                                              MainAxisSize.min,
-                                                          children: [
-                                                            const Padding(
-                                                              padding:
-                                                                  EdgeInsets
-                                                                      .fromLTRB(
-                                                                          0,
-                                                                          16,
-                                                                          0,
-                                                                          8),
-                                                              child: Text(
-                                                                "Recipe has been removed.",
-                                                                style:
-                                                                    TextStyle(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                            Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .fromLTRB(
-                                                                      0,
-                                                                      0,
-                                                                      0,
-                                                                      8),
-                                                              child:
-                                                                  ElevatedButton(
-                                                                onPressed: () {
-                                                                  Navigator.of(
-                                                                          context)
-                                                                      .pop();
-                                                                },
-                                                                child:
-                                                                    const Text(
-                                                                        "OK"),
-                                                              ),
-                                                            )
-                                                          ],
-                                                        ),
-                                                      );
-                                                    });
-                                              },
-                                              style: TextButton.styleFrom(
-                                                backgroundColor:
-                                                    const Color.fromARGB(
-                                                        255, 253, 114, 114),
-                                                shape:
-                                                    const RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius.all(
-                                                                Radius.circular(
-                                                                    8))),
-                                              ),
-                                              child: const Text(
-                                                "Remove Recipe",
-                                                style: TextStyle(
-                                                  color: Colors.black,
+                                                    const Spacer(),
+                                                    Text(
+                                                      plan['recipe']
+                                                              ['cook_time'] +
+                                                          " | ",
+                                                      style: const TextStyle(
+                                                        fontSize: 15,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      plan['recipe']
+                                                          ['recipe_servings'],
+                                                      style: const TextStyle(
+                                                        fontSize: 15,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                  ]),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                        ),
-                                        if (plan != grouped[grouped.length - 1])
-                                          const Divider(
-                                            indent: 8,
-                                            endIndent: 8,
-                                          ),
-                                      ],
+                                            // List ingredients of recipe
+                                            Padding(
+                                              padding: const EdgeInsets.fromLTRB(
+                                                  0, 16, 0, 8),
+                                              child: Wrap(
+                                                children: plan['recipe']
+                                                        ['ingredients']
+                                                    .asMap()
+                                                    .entries
+                                                    .map((ingredient) {
+                                                      print(ingredient
+                                                              .value['ingredient']
+                                                          ['ingredient_name']);
+                                                      String portion = ingredient
+                                                              .value[
+                                                          'ri_ingredient_measurement'];
+                                                      String name = ingredient
+                                                              .value['ingredient']
+                                                          ['ingredient_name'];
+                                                      name =
+                                                          name[0].toUpperCase() +
+                                                              name.substring(1);
+                          
+                                                      return Align(
+                                                        alignment:
+                                                            Alignment.centerLeft,
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .fromLTRB(
+                                                                  8, 0, 4, 4),
+                                                          child: Chip(
+                                                            label: Text(
+                                                                "$portion $name"),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    })
+                                                    .toList()
+                                                    .cast<Widget>(),
+                                              ),
+                                            ),
+                                            Align(
+                                              alignment: Alignment.centerRight,
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.fromLTRB(
+                                                        0, 0, 4, 8),
+                                                child: TextButton(
+                                                  onPressed: () async {
+                                                    await removeMealPlan(
+                                                        plan['mur_id']);
+                          
+                                                    if (!context.mounted) return;
+                          
+                                                    showDialog(
+                                                        context: context,
+                                                        builder: (BuildContext
+                                                            context) {
+                                                          return Dialog(
+                                                            child: Column(
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .min,
+                                                              children: [
+                                                                const Padding(
+                                                                  padding:
+                                                                      EdgeInsets
+                                                                          .fromLTRB(
+                                                                              0,
+                                                                              16,
+                                                                              0,
+                                                                              8),
+                                                                  child: Text(
+                                                                    "Recipe has been removed.",
+                                                                    style:
+                                                                        TextStyle(
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w500,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                Padding(
+                                                                  padding:
+                                                                      const EdgeInsets
+                                                                          .fromLTRB(
+                                                                          0,
+                                                                          0,
+                                                                          0,
+                                                                          8),
+                                                                  child:
+                                                                      ElevatedButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      Navigator.of(
+                                                                              context)
+                                                                          .pop();
+                                                                    },
+                                                                    child:
+                                                                        const Text(
+                                                                            "OK"),
+                                                                  ),
+                                                                )
+                                                              ],
+                                                            ),
+                                                          );
+                                                        });
+                                                  },
+                                                  style: TextButton.styleFrom(
+                                                    backgroundColor:
+                                                        const Color.fromARGB(
+                                                            255, 253, 114, 114),
+                                                    shape:
+                                                        const RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius.all(
+                                                                    Radius
+                                                                        .circular(
+                                                                            8))),
+                                                  ),
+                                                  child: const Text(
+                                                    "Remove Recipe",
+                                                    style: TextStyle(
+                                                      color: Colors.black,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            if (plan !=
+                                                grouped[grouped.length - 1])
+                                              const Divider(
+                                                indent: 8,
+                                                endIndent: 8,
+                                              ),
+                                          ],
+                                        );
+                                      }).toList(),
                                     );
                                   }).toList(),
                                 );
-                              }).toList(),
-                            );
-                          }),
-                    ))
-                  ],
+                              }))
+                    ],
+        ),
       )
     ]);
   }
