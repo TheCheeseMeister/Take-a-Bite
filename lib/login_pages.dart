@@ -626,7 +626,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
-                Padding(
+                /*Padding(
                   padding: const EdgeInsets.fromLTRB(0, 0, 150, 0),
                   child: TextButton(
                     onPressed: () =>
@@ -645,7 +645,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   ),
-                ),
+                ),*/
               ],
             ),
           ]),

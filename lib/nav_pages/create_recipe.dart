@@ -236,11 +236,22 @@ class _CreateRecipeState extends State<CreateRecipe> {
                   selectedImage != null
                       ? Image.file(selectedImage!)
                       : Text("No Image selected yet"),
-                  TextButton(
-                    onPressed: () {
-                      imageFromGallery();
-                    },
-                    child: Text("Select an image"),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          imageFromGallery();
+                        },
+                        child: Text("Select an image"),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          setState(() {selectedImage = null;});
+                        },
+                        child: Text("Clear image"),
+                      ),
+                    ],
                   ),
                   // Title of Recipe
                   Padding(
