@@ -104,6 +104,7 @@ class RecipeController extends Controller
 		'created_at' => $recipe->created_at,
 		'updated_at' => $recipe->updated_at,
 		'recipe_image' => $recipe->recipe_image,
+		'is_public' => $recipe->is_public,
 		'ingredients' => $recipe->ingredients->map(function ($ri) {
 		    return [
 			'ingredient_id' => $ri->ingredient->ingredient_id ?? 'Unknown',

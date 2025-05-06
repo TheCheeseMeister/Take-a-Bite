@@ -221,8 +221,11 @@ class _SearchState extends State<Search> {
 
     print(response.statusCode);
 
+    // remove private recipes
+    List<dynamic> tempData = data.where((recipe) => recipe['is_public'] == 0).toList();
+    
     setState(() {
-      newRecipeList = data;
+      newRecipeList = tempData;
     });
   }
 
