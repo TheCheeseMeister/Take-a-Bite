@@ -30,7 +30,85 @@ class Settings extends StatelessWidget {
                       width: 250, // Set a fixed width for the button
                       child: OutlinedButton(
                         onPressed: () {
-                          // Add functionality for "Change Username or Password"
+                          // Open a menu with buttons labeled 'Change Username' and 'Change Password'
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: const Text("Change Username or Password"),
+                                content: const Text("Choose an option:"),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(); // Close the current dialog
+                                      // Open a dialog to change the username
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            title: const Text("Change Username"),
+                                            content: TextField(
+                                              decoration: const InputDecoration(
+                                                labelText: "Enter new username",
+                                              ),
+                                              onSubmitted: (value) {
+                                                // Handle username change logic here
+                                                print("New Username: $value");
+                                                Navigator.of(context).pop(); // Close the dialog
+                                              },
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop(); // Close the dialog
+                                                },
+                                                child: const Text("Cancel"),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
+                                    child: const Text("Change Username"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(); // Close the current dialog
+                                      // Open a dialog to change the password
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            title: const Text("Change Password"),
+                                            content: TextField(
+                                              obscureText: true,
+                                              decoration: const InputDecoration(
+                                                labelText: "Enter new password",
+                                              ),
+                                              onSubmitted: (value) {
+                                                // Handle password change logic here
+                                                print("New Password: $value");
+                                                Navigator.of(context).pop(); // Close the dialog
+                                              },
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop(); // Close the dialog
+                                                },
+                                                child: const Text("Cancel"),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
+                                    child: const Text("Change Password"),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
                         },
                         child: const Text("Change Username or Password"),
                       ),
@@ -40,7 +118,24 @@ class Settings extends StatelessWidget {
                       width: 250, // Set a fixed width for the button
                       child: OutlinedButton(
                         onPressed: () {
-                          // Add functionality for "App Theme"
+                          // Open a 'select theme' menu
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: const Text("Select Theme"),
+                                content: const Text("Choose a theme for the app."),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(); // Close the dialog
+                                    },
+                                    child: const Text("OK"),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
                         },
                         child: const Text("App Theme"),
                       ),
@@ -50,7 +145,8 @@ class Settings extends StatelessWidget {
                       width: 250, // Set a fixed width for the button
                       child: OutlinedButton(
                         onPressed: () {
-                          // Add functionality for "Log Out"
+                          // Log out the user and navigate to the login page
+                          Navigator.of(context).pushReplacementNamed('/login_pages.dart');
                         },
                         child: const Text("Log Out"),
                       ),
