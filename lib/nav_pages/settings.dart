@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:take_a_bite/login_pages.dart';
 
 //build three buttons labeled "change username or password", "app theme", and "log out"
 class Settings extends StatelessWidget {
@@ -51,6 +52,14 @@ class Settings extends StatelessWidget {
                       child: OutlinedButton(
                         onPressed: () {
                           // Add functionality for "Log Out"
+                          Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                              builder: (BuildContext context) {
+                                return const CreateAccount();
+                              }
+                            ),
+                            (_) => false,
+                          );
                         },
                         child: const Text("Log Out"),
                       ),
